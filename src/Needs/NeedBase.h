@@ -139,29 +139,18 @@ public:
 		int ticks = 0;
 
 		auto currentTimeMinutes = RE::Calendar::GetSingleton()->GetCurrentGameTime() * 1440;
-		logger::info("Current time: " + std::to_string(currentTimeMinutes));
-
-		if (!LastUpdateTimeStamp) {
-			logger::info("Last update NULL");
-		}
 
 		auto lastTimeMinutes = LastUpdateTimeStamp->value;
 		if (lastTimeMinutes <= 0) {
-			//First update if timestamp not set. Return 0 delta
 			LastUpdateTimeStamp->value = currentTimeMinutes;
 			return ticks;
 		}
 
-		logger::info("Last time: " + std::to_string(LastUpdateTimeStamp->value));
-
-
-		ticks = int((currentTimeMinutes - lastTimeMinutes)) * int((1.0f / NeedRate->value));
-
-		logger::info("Current ticks: " + ticks);
+		ticks = int((currentTimeMinutes - lastTimeMinutes));
 
 		//If at least one tick has occured then set the timeStamp. Otherwise, wait for a tick
 		if (ticks > 0) {
-			logger::info("Incrementing need by ticks: " + ticks);
+			logger::info("Incrementing need by ticks: " + std::to_string(ticks));
 			LastUpdateTimeStamp->value = currentTimeMinutes;
 		}
 

@@ -9,6 +9,6 @@
     "rsm-binary-io",
     "spdlog",
 	  "simpleini",
-	  "commonlibsse-ng-flatrim"
+	  "commonlibsse-ng"
   ]
 }
