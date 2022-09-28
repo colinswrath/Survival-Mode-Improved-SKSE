@@ -10,6 +10,9 @@ std::int32_t SurvivalMode::OnUpdate(std::int64_t a1)
 			lastTime += g_deltaTime;
 			if (lastTime >= 1.0f) {
 				logger::info("Update at: " + std::to_string(RE::Calendar::GetSingleton()->GetCurrentGameTime() * 86400) + " game time in seconds");
+
+			    NeedHunger::GetSingleton()->OnUpdateNeed();
+				
 				lastTime = 0;
 			}
 		}

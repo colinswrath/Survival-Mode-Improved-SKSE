@@ -33,7 +33,17 @@ public:
 	/// </summary>
 	void IncrementNeed()
 	{
+		int ticks = GetGameTimeTicks();
 
+		float incAmount = GetNeedIncrementAmount(ticks);
+
+		float newNeedLevel = CurrentNeedLevel->value + incAmount;
+
+		if (newNeedLevel > NeedStage5->value) {
+			newNeedLevel = NeedStage5->value;
+		}
+
+		CurrentNeedLevel->value = newNeedLevel;
 	}
 
 	/// <summary>
@@ -62,6 +72,15 @@ public:
 		if (lastStage != CurrentNeedStage->value) {
 			ApplyNeedStageEffects();
 		}
+	}
+
+	float GetNeedIncrementAmount(int ticks)
+	{
+		float amount = 0;
+
+		amount = NeedRate->value * float(ticks);
+
+		return amount;
 	}
 
 	//TODO-Display notification
@@ -103,21 +122,25 @@ public:
 	}
 
 	/// <summary>
-	/// Get delta between time stamps in game seconds
+	/// Get delta between time stamps in game seconds.
 	/// </summary>
-	/// <returns></returns>
-	float GetGameTimeDelta()
+	/// <returns>Number of ticks that have passed since last update</returns>
+	int GetGameTimeTicks()
 	{
-		float delta = 0;
+		int ticks = 0;
 
 		auto currentTimeSeconds = RE::Calendar::GetSingleton()->GetCurrentGameTime() * 86400;
-
-		if (!(LastUpdateTimeStamp->value > 0)) {
+		auto lastTimeSeconds = LastUpdateTimeStamp->value;
+		if (lastTimeSeconds <= 0) {
 			//First update if timestamp not set. Return 0 delta
-			return delta;
+			return ticks;
 		}
 
-		
+		ticks = int((currentTimeSeconds - lastTimeSeconds)) * int((1.0f / NeedRate->value));
+
+		logger::debug("Incrementing need by ticks: " + ticks);
+
+		return ticks;
 	}
 
 	//Apply Effect, Apply SFX, Apply Rumble
