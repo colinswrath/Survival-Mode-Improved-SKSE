@@ -1,0 +1,14 @@
+{
+  "name": "survivalmodeimproved",
+  "version-string": "1.0.0",
+  "description": "",
+  "homepage": "",
+  "license": "MIT",
+  "dependencies": [
+    "boost-stl-interfaces",
+    "rsm-binary-io",
+    "spdlog",
+	  "simpleini",
+	  "commonlibsse-ng-flatrim"
+  ]
+}
