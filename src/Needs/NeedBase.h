@@ -22,18 +22,25 @@ public:
 	RE::SpellItem* NeedSpell4;
 	RE::SpellItem* NeedSpell5;
 
+	/// <summary>
+	/// Update function
+	/// </summary>
 	void OnUpdateNeed()
 	{
-		IncrementNeed();
-		SetNeedStage();
+		int ticks = GetGameTimeTicks();
+
+		if (ticks > 0) {
+			IncrementNeed(ticks);
+			SetNeedStage();
+		}
 	}
 
 	/// <summary>
 	/// Increment the need value based on the delta and need rate
 	/// </summary>
-	void IncrementNeed()
+	void IncrementNeed(int ticks)
 	{
-		int ticks = GetGameTimeTicks();
+		
 
 		float incAmount = GetNeedIncrementAmount(ticks);
 
@@ -122,23 +129,30 @@ public:
 	}
 
 	/// <summary>
-	/// Get delta between time stamps in game seconds.
+	/// Get delta between time stamps in game seconds. For now, 1 tick = 1 in game minute
 	/// </summary>
 	/// <returns>Number of ticks that have passed since last update</returns>
 	int GetGameTimeTicks()
 	{
 		int ticks = 0;
 
-		auto currentTimeSeconds = RE::Calendar::GetSingleton()->GetCurrentGameTime() * 86400;
-		auto lastTimeSeconds = LastUpdateTimeStamp->value;
-		if (lastTimeSeconds <= 0) {
+		auto currentTimeMinutes = RE::Calendar::GetSingleton()->GetCurrentGameTime() * 1440;
+
+		auto lastTimeMinutes = LastUpdateTimeStamp->value;
+		if (lastTimeMinutes <= 0) {
 			//First update if timestamp not set. Return 0 delta
+			LastUpdateTimeStamp->value = currentTimeMinutes;
 			return ticks;
 		}
 
-		ticks = int((currentTimeSeconds - lastTimeSeconds)) * int((1.0f / NeedRate->value));
+		ticks = int((currentTimeMinutes - lastTimeMinutes)) * int((1.0f / NeedRate->value));
 
 		logger::debug("Incrementing need by ticks: " + ticks);
+
+		//If at least one tick has occured then set the timeStamp. Otherwise, wait for a tick
+		if (ticks > 0) {
+			LastUpdateTimeStamp->value = currentTimeMinutes;
+		}
 
 		return ticks;
 	}
