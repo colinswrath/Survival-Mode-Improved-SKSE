@@ -56,7 +56,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface * 
 void InitListener(SKSE::MessagingInterface::Message* a_msg)
 {
 	switch (a_msg->type) {
-	case SKSE::MessagingInterface::kNewGame:
+	case SKSE::MessagingInterface::kNewGame:			//TODO - Might not be needed
 		FormLoader::GetSingleton()->LoadAllForms();
 		break;
 	case SKSE::MessagingInterface::kDataLoaded:
@@ -86,6 +86,11 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	SKSE::Init(a_skse);
 	SKSE::AllocTrampoline(14);
 	Hooks::Install();
+
+	auto messaging = SKSE::GetMessagingInterface();
+	if (!messaging->RegisterListener(InitListener)) {
+		return false;
+	}
 	
 	return true;
 }
