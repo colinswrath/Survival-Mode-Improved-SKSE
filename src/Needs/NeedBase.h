@@ -5,16 +5,16 @@ class NeedBase
 public:
 	RE::TESGlobal* NeedRate;
 	RE::TESGlobal* CurrentNeedStage;
-	RE::TESGlobal* CurrentNeedLevel;
+	RE::TESGlobal* CurrentNeedValue;
 
 	RE::TESGlobal* LastUpdateTimeStamp;
 
-	RE::TESGlobal* NeedStage0;
 	RE::TESGlobal* NeedStage1;
 	RE::TESGlobal* NeedStage2;
 	RE::TESGlobal* NeedStage3;
 	RE::TESGlobal* NeedStage4;
 	RE::TESGlobal* NeedStage5;
+	RE::TESGlobal* NeedMaxValue;
 
 	RE::SpellItem* NeedSpell0;
 	RE::SpellItem* NeedSpell1;
@@ -44,21 +44,22 @@ public:
 
 		float incAmount = GetNeedIncrementAmount(ticks);
 
-		float newNeedLevel = CurrentNeedLevel->value + incAmount;
+		float newNeedLevel = CurrentNeedValue->value + incAmount;
 
-		if (newNeedLevel > NeedStage5->value) {
-			newNeedLevel = NeedStage5->value;
+		if (newNeedLevel > NeedMaxValue->value) {
+			newNeedLevel = NeedMaxValue->value;
 		}
 
-		CurrentNeedLevel->value = newNeedLevel;
+		CurrentNeedValue->value = newNeedLevel;
 	}
 
 	/// <summary>
-	/// Determine the current need stage
+	/// Determine the current need stage.
+	/// If we are in a new stage then update the effects 
 	/// </summary>
 	void SetNeedStage()
 	{
-		float currentNeedValue = CurrentNeedLevel->value;
+		float currentNeedValue = CurrentNeedValue->value;
 
 		float lastStage = CurrentNeedStage->value;
 
@@ -157,6 +158,6 @@ public:
 		return ticks;
 	}
 
-	//Apply Effect, Apply SFX, Apply Rumble
+	//TODO-Apply Effect, Apply SFX, Apply Rumble
 	
 };
