@@ -24,6 +24,9 @@ public:
 
 	void LoadHungerForms()
 	{
+		if (!RE::TESDataHandler::GetSingleton()->LookupLoadedLightModByName("ccQDRSSE001-SurvivalMode.esl"))
+			return;
+
 		auto hungerSystem = NeedHunger::GetSingleton();
 
 		hungerSystem->NeedSpell0 = RE::TESForm::LookupByEditorID("Survival_HungerStage0")->As<RE::SpellItem>();
@@ -46,6 +49,8 @@ public:
 		hungerSystem->CurrentNeedValue = RE::TESForm::LookupByEditorID("Survival_HungerNeedValue")->As<RE::TESGlobal>();
 
 		hungerSystem->LastUpdateTimeStamp = RE::TESForm::LookupByEditorID("SMI_HungerLastUpdateTimeStamp")->As<RE::TESGlobal>();
+
+		logger::info("All forms are loaded.");
 	}
 
 	void LoadFatigueForms()
