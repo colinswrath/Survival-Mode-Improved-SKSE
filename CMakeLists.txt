@@ -96,6 +96,7 @@ set(SOURCES
 	src/SurvivalMode.h
 	src/Needs/NeedBase.h
 	src/Needs/NeedHunger.h
+	src/Settings/FormLoader.h
 )
 
 source_group(

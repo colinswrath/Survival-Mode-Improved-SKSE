@@ -9,6 +9,7 @@ public:
 
 	RE::TESGlobal* LastUpdateTimeStamp;
 
+	RE::TESGlobal* NeedStage0;
 	RE::TESGlobal* NeedStage1;
 	RE::TESGlobal* NeedStage2;
 	RE::TESGlobal* NeedStage3;
@@ -32,15 +33,14 @@ public:
 		if (ticks > 0) {
 			IncrementNeed(ticks);
 			SetNeedStage();
-		}
+		}	
 	}
 
 	/// <summary>
 	/// Increment the need value based on the delta and need rate
 	/// </summary>
 	void IncrementNeed(int ticks)
-	{
-		
+	{	
 
 		float incAmount = GetNeedIncrementAmount(ticks);
 
@@ -147,7 +147,7 @@ public:
 
 		ticks = int((currentTimeMinutes - lastTimeMinutes)) * int((1.0f / NeedRate->value));
 
-		logger::debug("Incrementing need by ticks: " + ticks);
+		logger::info("Incrementing need by ticks: " + ticks);
 
 		//If at least one tick has occured then set the timeStamp. Otherwise, wait for a tick
 		if (ticks > 0) {

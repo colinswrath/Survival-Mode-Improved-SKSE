@@ -1,4 +1,5 @@
 #include "Hooks.h"
+#include "Settings/FormLoader.h"
 
 void InitLogger()
 {
@@ -52,6 +53,17 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface * 
 	return true;
 }
 
+void InitListener(SKSE::MessagingInterface::Message* a_msg)
+{
+	switch (a_msg->type) {
+	case SKSE::MessagingInterface::kNewGame:
+		FormLoader::GetSingleton()->LoadAllForms();
+		break;
+	case SKSE::MessagingInterface::kDataLoaded:
+		FormLoader::GetSingleton()->LoadAllForms();
+		break;
+	}
+}
 
 extern "C" DLLEXPORT constexpr auto SKSEPlugin_Version =
 []() {
@@ -72,7 +84,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	logger::info("loading SMI");
 
 	SKSE::Init(a_skse);
-	SKSE::AllocTrampoline(64);
+	SKSE::AllocTrampoline(14);
 	Hooks::Install();
 	
 	return true;
