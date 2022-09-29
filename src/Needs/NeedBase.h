@@ -54,6 +54,17 @@ public:
 		Updating = false;
 	}
 
+	void InitializeNeed()
+	{
+		SetLastTimeStamp();
+	}
+
+	void StopNeed()
+	{
+		RemoveNeedEffects();
+		CurrentNeedStage->value = -1;
+	}
+
 	/// <summary>
 	/// Increment the need value based on the delta and need rate
 	/// </summary>
@@ -170,10 +181,15 @@ public:
 		//If at least one tick has occured then set the timeStamp. Otherwise, wait for a tick
 		if (ticks > 0) {
 			logger::info("Incrementing need by ticks: " + std::to_string(ticks));
-			LastUpdateTimeStamp->value = currentTimeMinutes;
+			SetLastTimeStamp(currentTimeMinutes);
 		}
 
 		return ticks;
+	}
+
+	void SetLastTimeStamp(float timeToSet = RE::Calendar::GetSingleton()->GetCurrentGameTime() * 1440) 
+	{
+		LastUpdateTimeStamp->value = timeToSet;
 	}
 
 	void NotifyAddEffect(RE::BGSMessage* increasingMsg, RE::BGSMessage* decreasingMsg, RE::SpellItem* spell, bool increasing=true)

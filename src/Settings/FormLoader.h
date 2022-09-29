@@ -77,7 +77,9 @@ public:
 
 	void LoadMiscForms()
 	{
-
+		auto playerStatus = PlayerStatus::GetSingleton();
+		playerStatus->Survival_ModeToggle = RE::TESForm::LookupByEditorID("Survival_ModeToggle")->As<RE::TESGlobal>();
+		playerStatus->Survival_ModeEnabled = RE::TESForm::LookupByEditorID("Survival_ModeEnabled")->As<RE::TESGlobal>();
 		 //= RE::TESForm::LookupByEditorID("Survival_OblivionAreas")->As<RE::BGSListForm>();
 
 	}
