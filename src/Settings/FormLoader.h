@@ -60,6 +60,7 @@ public:
 		hungerSystem->CurrentNeedValue = RE::TESForm::LookupByEditorID("Survival_HungerNeedValue")->As<RE::TESGlobal>();
 
 		hungerSystem->LastUpdateTimeStamp = RE::TESForm::LookupByEditorID("SMI_HungerLastUpdateTimeStamp")->As<RE::TESGlobal>();
+		hungerSystem->NeedSleepRateMult = RE::TESForm::LookupByEditorID("Survival_NeedSleepReducedMetabolismMult")->As<RE::TESGlobal>();
 
 		logger::info("All forms are loaded.");
 	}
@@ -77,7 +78,7 @@ public:
 	void LoadMiscForms()
 	{
 
-		 = RE::TESForm::LookupByEditorID("Survival_OblivionAreas")->As<RE::BGSListForm>();
+		 //= RE::TESForm::LookupByEditorID("Survival_OblivionAreas")->As<RE::BGSListForm>();
 
 	}
 };

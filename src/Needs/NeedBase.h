@@ -6,6 +6,7 @@ public:
 	RE::TESGlobal* NeedRate;
 	RE::TESGlobal* CurrentNeedStage;
 	RE::TESGlobal* CurrentNeedValue;
+	RE::TESGlobal* NeedSleepRateMult;
 
 	RE::TESGlobal* LastUpdateTimeStamp;
 
@@ -34,17 +35,23 @@ public:
 	RE::BGSMessage* NeedMessage4Decreasing;
 	RE::BGSMessage* NeedMessage5;
 
+	bool WasSleeping;
+	bool Updating;
+
 	/// <summary>
 	/// Update function
 	/// </summary>
 	void OnUpdateNeed()
 	{
+		Updating = true;
 		int ticks = GetGameTimeTicks();
 
 		if (ticks > 0) {
 			IncrementNeed(ticks);
 			SetNeedStage(true);
 		}	
+
+		Updating = false;
 	}
 
 	/// <summary>
@@ -98,6 +105,11 @@ public:
 
 		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
 		amount = (NeedRate->value/60.0f) * float(ticks);
+		
+		if (WasSleeping) {
+			amount = amount * NeedSleepRateMult->value;
+			WasSleeping = false;
+		} 
 
 		return amount;
 	}
@@ -105,7 +117,6 @@ public:
 	void ApplyNeedStageEffects(bool increasing)
 	{
 		RemoveNeedEffects();
-		auto player = RE::PlayerCharacter::GetSingleton();
 		float stage = CurrentNeedStage->value;
 		
 		if (stage == 0) {
@@ -167,7 +178,7 @@ public:
 
 	void NotifyAddEffect(RE::BGSMessage* increasingMsg, RE::BGSMessage* decreasingMsg, RE::SpellItem* spell, bool increasing=true)
 	{
-		RE::PlayerCharacter::GetSingleton()->AddSpell(NeedSpell1);
+		RE::PlayerCharacter::GetSingleton()->AddSpell(spell);
 		if (increasing)
 			ShowNotification(increasingMsg);
 		else
@@ -181,6 +192,6 @@ public:
 		RE::DebugNotification(messageDesc.c_str());
 	}
 
-	//TODO-Apply Effect, Apply SFX, Apply Rumble
+	//TODO-Apply SFX, Apply Rumble
 	
 };

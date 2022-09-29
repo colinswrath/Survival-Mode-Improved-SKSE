@@ -1,4 +1,5 @@
 #include "Hooks.h"
+#include "Events.h"
 #include "Settings/FormLoader.h"
 
 void InitLogger()
