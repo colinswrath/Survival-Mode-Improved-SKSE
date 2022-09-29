@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Needs/NeedHunger.h"
+#include "PlayerStatus.h"
 
 class FormLoader
 {
@@ -43,6 +44,16 @@ public:
 		hungerSystem->NeedStage5 = RE::TESForm::LookupByEditorID("Survival_HungerStage5Value")->As<RE::TESGlobal>();
 		hungerSystem->NeedMaxValue = RE::TESForm::LookupByEditorID("Survival_HungerNeedMaxValue")->As<RE::TESGlobal>();
 
+		hungerSystem->NeedMessage0 = RE::TESForm::LookupByEditorID("Survival_Hunger0Message")->As<RE::BGSMessage>();
+		hungerSystem->NeedMessage1 = RE::TESForm::LookupByEditorID("Survival_Hunger1Message")->As<RE::BGSMessage>();
+		hungerSystem->NeedMessage1Decreasing = RE::TESForm::LookupByEditorID("Survival_Hunger1MessageDecreasing")->As<RE::BGSMessage>();
+		hungerSystem->NeedMessage2 = RE::TESForm::LookupByEditorID("Survival_Hunger2Message")->As<RE::BGSMessage>();
+		hungerSystem->NeedMessage2Decreasing = RE::TESForm::LookupByEditorID("Survival_Hunger2MessageDecreasing")->As<RE::BGSMessage>();
+		hungerSystem->NeedMessage3 = RE::TESForm::LookupByEditorID("Survival_Hunger3Message")->As<RE::BGSMessage>();
+		hungerSystem->NeedMessage3Decreasing = RE::TESForm::LookupByEditorID("Survival_Hunger3MessageDecreasing")->As<RE::BGSMessage>();
+		hungerSystem->NeedMessage4 = RE::TESForm::LookupByEditorID("Survival_Hunger4Message")->As<RE::BGSMessage>();
+		hungerSystem->NeedMessage4Decreasing = RE::TESForm::LookupByEditorID("Survival_Hunger4MessageDecreasing")->As<RE::BGSMessage>();
+		hungerSystem->NeedMessage5 = RE::TESForm::LookupByEditorID("Survival_Hunger5Message")->As<RE::BGSMessage>();
 
 		hungerSystem->NeedRate = RE::TESForm::LookupByEditorID("Survival_HungerNeedRate")->As<RE::TESGlobal>();		//TODO- Account for esp balance per /hr instead of /min
 		hungerSystem->CurrentNeedStage = RE::TESForm::LookupByEditorID("SMI_CurrentHungerStage")->As<RE::TESGlobal>();
@@ -65,6 +76,8 @@ public:
 
 	void LoadMiscForms()
 	{
+
+		 = RE::TESForm::LookupByEditorID("Survival_OblivionAreas")->As<RE::BGSListForm>();
 
 	}
 };

@@ -23,18 +23,28 @@ public:
 	RE::SpellItem* NeedSpell4;
 	RE::SpellItem* NeedSpell5;
 
+	RE::BGSMessage* NeedMessage0;
+	RE::BGSMessage* NeedMessage1;
+	RE::BGSMessage* NeedMessage1Decreasing;
+	RE::BGSMessage* NeedMessage2;
+	RE::BGSMessage* NeedMessage2Decreasing;
+	RE::BGSMessage* NeedMessage3;
+	RE::BGSMessage* NeedMessage3Decreasing;
+	RE::BGSMessage* NeedMessage4;
+	RE::BGSMessage* NeedMessage4Decreasing;
+	RE::BGSMessage* NeedMessage5;
+
 	/// <summary>
 	/// Update function
 	/// </summary>
 	void OnUpdateNeed()
 	{
-		//int ticks = GetGameTimeTicks();
-		GetGameTimeTicks();
+		int ticks = GetGameTimeTicks();
 
-		//if (ticks > 0) {
-		//	IncrementNeed(ticks);
-		//	SetNeedStage();
-		//}	
+		if (ticks > 0) {
+			IncrementNeed(ticks);
+			SetNeedStage(true);
+		}	
 	}
 
 	/// <summary>
@@ -42,23 +52,22 @@ public:
 	/// </summary>
 	void IncrementNeed(int ticks)
 	{	
-
 		float incAmount = GetNeedIncrementAmount(ticks);
 
 		float newNeedLevel = CurrentNeedValue->value + incAmount;
 
-		if (newNeedLevel > NeedMaxValue->value) {
+		if (newNeedLevel > NeedMaxValue->value) 
 			newNeedLevel = NeedMaxValue->value;
-		}
+		else
+			CurrentNeedValue->value = newNeedLevel;
 
-		CurrentNeedValue->value = newNeedLevel;
 	}
 
 	/// <summary>
 	/// Determine the current need stage.
 	/// If we are in a new stage then update the effects 
 	/// </summary>
-	void SetNeedStage()
+	void SetNeedStage(bool increasing)
 	{
 		float currentNeedValue = CurrentNeedValue->value;
 
@@ -79,7 +88,7 @@ public:
 		}
 
 		if (lastStage != CurrentNeedStage->value) {
-			ApplyNeedStageEffects();
+			ApplyNeedStageEffects(increasing);
 		}
 	}
 
@@ -87,30 +96,30 @@ public:
 	{
 		float amount = 0;
 
-		amount = NeedRate->value * float(ticks);
+		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
+		amount = (NeedRate->value/60.0f) * float(ticks);
 
 		return amount;
 	}
 
-	//TODO-Display notification
-	void ApplyNeedStageEffects()
+	void ApplyNeedStageEffects(bool increasing)
 	{
 		RemoveNeedEffects();
 		auto player = RE::PlayerCharacter::GetSingleton();
 		float stage = CurrentNeedStage->value;
 		
 		if (stage == 0) {
-			player->AddSpell(NeedSpell0);
+			NotifyAddEffect(NeedMessage0,NeedMessage0,NeedSpell0);
 		} else if (stage == 1) {
-			player->AddSpell(NeedSpell1);		
+			NotifyAddEffect(NeedMessage1,NeedMessage1Decreasing,NeedSpell1,increasing);
 		} else if (stage == 2) {
-			player->AddSpell(NeedSpell2);
+			NotifyAddEffect(NeedMessage2, NeedMessage2Decreasing, NeedSpell2, increasing);
 		} else if (stage == 3) {
-			player->AddSpell(NeedSpell3);
+			NotifyAddEffect(NeedMessage3, NeedMessage3Decreasing, NeedSpell3, increasing);
 		} else if (stage == 4) {
-			player->AddSpell(NeedSpell4);
+			NotifyAddEffect(NeedMessage4, NeedMessage4Decreasing, NeedSpell4, increasing);
 		} else if (stage == 5) {
-			player->AddSpell(NeedSpell5);
+			NotifyAddEffect(NeedMessage5, NeedMessage5, NeedSpell5);
 		}
 
 	}
@@ -127,7 +136,6 @@ public:
 		player->RemoveSpell(NeedSpell3);
 		player->RemoveSpell(NeedSpell4);
 		player->RemoveSpell(NeedSpell5);
-
 	}
 
 	/// <summary>
@@ -155,6 +163,22 @@ public:
 		}
 
 		return ticks;
+	}
+
+	void NotifyAddEffect(RE::BGSMessage* increasingMsg, RE::BGSMessage* decreasingMsg, RE::SpellItem* spell, bool increasing=true)
+	{
+		RE::PlayerCharacter::GetSingleton()->AddSpell(NeedSpell1);
+		if (increasing)
+			ShowNotification(increasingMsg);
+		else
+			ShowNotification(decreasingMsg);
+	}
+
+	void ShowNotification(RE::BGSMessage* msg)
+	{
+		RE::BSString messageDesc;
+		msg->GetDescription(messageDesc, msg);
+		RE::DebugNotification(messageDesc.c_str());
 	}
 
 	//TODO-Apply Effect, Apply SFX, Apply Rumble
