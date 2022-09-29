@@ -7,6 +7,8 @@ public:
 
 	RE::TESGlobal* Survival_ModeToggle;
 	RE::TESGlobal* Survival_ModeEnabled;
+	RE::TESGlobal* Survival_ModeEnabledShared;
+	RE::TESGlobal* Survival_ModeCanBeEnabled;
 
 	RE::BGSListForm* Survival_OblivionCells;
 	RE::BGSListForm* Survival_OblivionLocations;

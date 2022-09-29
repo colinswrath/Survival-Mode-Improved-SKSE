@@ -25,6 +25,7 @@ std::int32_t SurvivalMode::OnUpdate(std::int64_t a1)
 void SurvivalMode::SurvivalModeLoopUpdate()
 {
 	auto playerStatus = PlayerStatus::GetSingleton();
+	PlayerStatus::GetSingleton()->Survival_ModeCanBeEnabled->value = 1.0f;
 
 	if (playerStatus->IsSurvivalEnabled() && !playerStatus->SurvivalToggle()) {
 		//If SM is on but should be off
@@ -47,6 +48,7 @@ void SurvivalMode::InitializeAllNeeds()
 	//Fatigue
 	//Cold
 	PlayerStatus::GetSingleton()->Survival_ModeEnabled->value = 1.0f;
+	PlayerStatus::GetSingleton()->Survival_ModeEnabledShared->value = 1.0f;
 }
 
 /// <summary>
@@ -58,6 +60,7 @@ void SurvivalMode::StopAllNeeds()
 	//Fatigue
 	//Cold
 	PlayerStatus::GetSingleton()->Survival_ModeEnabled->value = 0;
+	PlayerStatus::GetSingleton()->Survival_ModeEnabledShared->value = 0;
 }
 
 /// <summary>

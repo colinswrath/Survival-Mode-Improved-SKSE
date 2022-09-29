@@ -61,6 +61,7 @@ public:
 
 		hungerSystem->LastUpdateTimeStamp = RE::TESForm::LookupByEditorID("SMI_HungerLastUpdateTimeStamp")->As<RE::TESGlobal>();
 		hungerSystem->NeedSleepRateMult = RE::TESForm::LookupByEditorID("Survival_NeedSleepReducedMetabolismMult")->As<RE::TESGlobal>();
+		hungerSystem->NeedAttributePenaltyPercent = RE::TESForm::LookupByEditorID("Survival_HungerAttributePenaltyPercent")->As<RE::TESGlobal>();
 
 		logger::info("All forms are loaded.");
 	}
@@ -80,6 +81,9 @@ public:
 		auto playerStatus = PlayerStatus::GetSingleton();
 		playerStatus->Survival_ModeToggle = RE::TESForm::LookupByEditorID("Survival_ModeToggle")->As<RE::TESGlobal>();
 		playerStatus->Survival_ModeEnabled = RE::TESForm::LookupByEditorID("Survival_ModeEnabled")->As<RE::TESGlobal>();
+		playerStatus->Survival_ModeEnabledShared = RE::TESForm::LookupByEditorID("Survival_ModeEnabledShared")->As<RE::TESGlobal>();
+		playerStatus->Survival_ModeCanBeEnabled = RE::TESForm::LookupByEditorID("Survival_ModeCanBeEnabled")->As<RE::TESGlobal>();
+		
 		 //= RE::TESForm::LookupByEditorID("Survival_OblivionAreas")->As<RE::BGSListForm>();
 
 	}

@@ -10,6 +10,8 @@ public:
 
 	RE::TESGlobal* LastUpdateTimeStamp;
 
+	RE::TESGlobal* NeedAttributePenaltyPercent;
+
 	RE::TESGlobal* NeedStage1;
 	RE::TESGlobal* NeedStage2;
 	RE::TESGlobal* NeedStage3;
@@ -43,9 +45,9 @@ public:
 	/// </summary>
 	void OnUpdateNeed()
 	{
-		Updating = true;
 		int ticks = GetGameTimeTicks();
 
+		Updating = true;
 		if (ticks > 0) {
 			IncrementNeed(ticks);
 			SetNeedStage(true);
