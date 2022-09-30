@@ -1,5 +1,7 @@
 #pragma once
 
+#include "PlayerStatus.h"
+
 class NeedBase
 {
 public:
@@ -43,25 +45,31 @@ public:
 	/// <summary>
 	/// Update function
 	/// </summary>
-	void OnUpdateNeed()
+	void OnUpdatePass()
 	{
-		int ticks = GetGameTimeTicks();
-
-		Updating = true;
-		if (ticks > 0) {
-			IncrementNeed(ticks);
-			SetNeedStage(true);
-		}	
-
-		Updating = false;
+		auto status = PlayerStatus::GetSingleton();
+		//TODO- Dont update if you are:
+		//InOblivion
+		//InCombat
+		//InDialogue (maybe)
+		//InJail
+		//BeastForm, WW or VL
+		if (!status->PlayerIsInCombat()) {
+			logger::info("Updating need");
+			UpdateNeed();
+		} else {
+			SetLastTimeStamp();
+		}
 	}
 
-	void InitializeNeed()
+	virtual void UpdateNeed(){};
+
+	virtual void InitializeNeed()
 	{
 		SetLastTimeStamp();
 	}
 
-	void StopNeed()
+	virtual void StopNeed()
 	{
 		RemoveNeedEffects();
 		CurrentNeedStage->value = -1;
@@ -70,7 +78,7 @@ public:
 	/// <summary>
 	/// Increment the need value based on the delta and need rate
 	/// </summary>
-	void IncrementNeed(int ticks)
+	virtual void IncrementNeed(int ticks)
 	{	
 		float incAmount = GetNeedIncrementAmount(ticks);
 
@@ -87,7 +95,7 @@ public:
 	/// Determine the current need stage.
 	/// If we are in a new stage then update the effects 
 	/// </summary>
-	void SetNeedStage(bool increasing)
+	virtual void SetNeedStage(bool increasing)
 	{
 		float currentNeedValue = CurrentNeedValue->value;
 
@@ -112,12 +120,12 @@ public:
 		}
 	}
 
-	float GetNeedIncrementAmount(int ticks)
+	virtual float GetNeedIncrementAmount(int ticks)
 	{
 		float amount = 0;
 
 		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
-		amount = (NeedRate->value/60.0f) * float(ticks);
+		amount = (NeedRate->value/60.0f) * float(ticks);	//TODO-Abstract 60 to sub classes
 		
 		if (WasSleeping) {
 			amount = amount * NeedSleepRateMult->value;
@@ -127,7 +135,7 @@ public:
 		return amount;
 	}
 
-	void ApplyNeedStageEffects(bool increasing)
+	virtual void ApplyNeedStageEffects(bool increasing)
 	{
 		RemoveNeedEffects();
 		float stage = CurrentNeedStage->value;
@@ -145,13 +153,12 @@ public:
 		} else if (stage == 5) {
 			NotifyAddEffect(NeedMessage5, NeedMessage5, NeedSpell5);
 		}
-
 	}
 
 	/// <summary>
 	/// Remove all need effects
 	/// </summary>
-	void RemoveNeedEffects()
+	virtual void RemoveNeedEffects()
 	{
 		auto player = RE::PlayerCharacter::GetSingleton();
 		player->RemoveSpell(NeedSpell0);
@@ -170,7 +177,7 @@ public:
 	{
 		int ticks = 0;
 
-		auto currentTimeMinutes = RE::Calendar::GetSingleton()->GetCurrentGameTime() * 1440;
+		auto currentTimeMinutes = GetCurrentGameTimeInMinutes();
 
 		auto lastTimeMinutes = LastUpdateTimeStamp->value;
 		if (lastTimeMinutes <= 0) {
@@ -180,18 +187,15 @@ public:
 
 		ticks = int((currentTimeMinutes - lastTimeMinutes));
 
-		//If at least one tick has occured then set the timeStamp. Otherwise, wait for a tick
-		if (ticks > 0) {
-			logger::info("Incrementing need by ticks: " + std::to_string(ticks));
-			SetLastTimeStamp(currentTimeMinutes);
-		}
-
 		return ticks;
 	}
 
 	void SetLastTimeStamp(float timeToSet = RE::Calendar::GetSingleton()->GetCurrentGameTime() * 1440) 
 	{
+		logger::info("setting timestamp");
+
 		LastUpdateTimeStamp->value = timeToSet;
+		logger::info("set timestamp");
 	}
 
 	void NotifyAddEffect(RE::BGSMessage* increasingMsg, RE::BGSMessage* decreasingMsg, RE::SpellItem* spell, bool increasing=true)
@@ -208,6 +212,11 @@ public:
 		RE::BSString messageDesc;
 		msg->GetDescription(messageDesc, msg);
 		RE::DebugNotification(messageDesc.c_str());
+	}
+
+	float GetCurrentGameTimeInMinutes()
+	{
+		return RE::Calendar::GetSingleton()->GetCurrentGameTime() * 1440;
 	}
 
 	//TODO-Apply SFX, Apply Rumble

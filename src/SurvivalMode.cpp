@@ -1,6 +1,7 @@
 #include "SurvivalMode.h"
 #include "Hooks.h"
 #include "Needs/NeedHunger.h"
+#include "Needs/NeedExhaustion.h"
 #include "PlayerStatus.h"
 
 std::int32_t SurvivalMode::OnUpdate(std::int64_t a1)
@@ -25,7 +26,11 @@ std::int32_t SurvivalMode::OnUpdate(std::int64_t a1)
 void SurvivalMode::SurvivalModeLoopUpdate()
 {
 	auto playerStatus = PlayerStatus::GetSingleton();
-	PlayerStatus::GetSingleton()->Survival_ModeCanBeEnabled->value = 1.0f;
+	playerStatus->Survival_ModeCanBeEnabled->value = 1.0f;
+	
+	if (playerStatus->PlayerIsInOblivion()) {
+		ShowNotification(playerStatus->Survival_OblivionAreaMessage);
+	}
 
 	if (playerStatus->IsSurvivalEnabled() && !playerStatus->SurvivalToggle()) {
 		//If SM is on but should be off
@@ -37,6 +42,7 @@ void SurvivalMode::SurvivalModeLoopUpdate()
 	} else if (playerStatus->IsSurvivalEnabled()) {
 		SendAllNeedsUpdate();
 	}
+
 }
 
 /// <summary>
@@ -44,9 +50,11 @@ void SurvivalMode::SurvivalModeLoopUpdate()
 /// </summary>
 void SurvivalMode::InitializeAllNeeds()
 {
+	logger::info("Initializing needs");
 	NeedHunger::GetSingleton()->InitializeNeed();
-	//Fatigue
+	NeedExhaustion::GetSingleton()->InitializeNeed();
 	//Cold
+
 	PlayerStatus::GetSingleton()->Survival_ModeEnabled->value = 1.0f;
 	PlayerStatus::GetSingleton()->Survival_ModeEnabledShared->value = 1.0f;
 }
@@ -57,8 +65,9 @@ void SurvivalMode::InitializeAllNeeds()
 void SurvivalMode::StopAllNeeds()
 {
 	NeedHunger::GetSingleton()->StopNeed();
-	//Fatigue
+	NeedExhaustion::GetSingleton()->StopNeed();
 	//Cold
+
 	PlayerStatus::GetSingleton()->Survival_ModeEnabled->value = 0;
 	PlayerStatus::GetSingleton()->Survival_ModeEnabledShared->value = 0;
 }
@@ -68,9 +77,16 @@ void SurvivalMode::StopAllNeeds()
 /// </summary>
 void SurvivalMode::SendAllNeedsUpdate()
 {
-	NeedHunger::GetSingleton()->OnUpdateNeed();
-	//Fatigue
+	NeedHunger::GetSingleton()->OnUpdatePass();
+	NeedExhaustion::GetSingleton()->OnUpdatePass();
 	//Cold
+}
+
+void SurvivalMode::ShowNotification(RE::BGSMessage* msg)
+{
+	RE::BSString messageDesc;
+	msg->GetDescription(messageDesc, msg);
+	RE::DebugNotification(messageDesc.c_str());
 }
 
 bool SurvivalMode::InstallUpdateHook()

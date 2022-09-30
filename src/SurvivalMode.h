@@ -13,5 +13,5 @@ public:
 	inline static void SendAllNeedsUpdate();
 	inline static void InitializeAllNeeds();
 	inline static void StopAllNeeds();
-	
+	inline static void ShowNotification(RE::BGSMessage* msg);
 };

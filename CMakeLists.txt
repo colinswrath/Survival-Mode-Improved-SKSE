@@ -97,6 +97,7 @@ set(SOURCES
 	src/SurvivalMode.h
 	src/Needs/NeedBase.h
 	src/Needs/NeedHunger.h
+	src/Needs/NeedExhaustion.h
 	src/Settings/FormLoader.h
 )
 
