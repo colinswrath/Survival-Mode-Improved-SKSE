@@ -11,26 +11,37 @@ public:
 	RE::BGSMessage* WellRestedMessage;
 	RE::BGSMessage* RestedMessage;
 
+	RE::TESQuest* PlayerSleepQuest;
+
 	static NeedExhaustion* GetSingleton()
 	{
 		static NeedExhaustion fatigueSystem;
 		return &fatigueSystem;
 	}
 
+	void InitializeNeed() override
+	{
+		NeedBase::InitializeNeed();
+		PlayerSleepQuest->Stop();
+	}
+
+	void StopNeed() override
+	{
+		NeedBase::StopNeed();
+		PlayerSleepQuest->Start();
+	}
+
 	void UpdateNeed() override
 	{
-		logger::info("Updating exhaustion");
 		int ticks = GetGameTimeTicks();
-
-		if (!WasSleeping) {
-			WasSleeping = false;
+		if (ticks > 0) {
 			Updating = true;
-
-			if (ticks > 0) {
+			if (!WasSleeping) {
 				IncrementNeed(ticks);
 				SetNeedStage(true);
-				SetLastTimeStamp(GetCurrentGameTimeInMinutes());
 			}
+
+			SetLastTimeStamp(GetCurrentGameTimeInMinutes());
 
 			Updating = false;
 		}

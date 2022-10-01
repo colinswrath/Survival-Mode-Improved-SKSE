@@ -14,11 +14,10 @@ public:
 
 	void UpdateNeed() override
 	{
-		logger::info("Updating need hunger");
 		int ticks = GetGameTimeTicks();
 
-		Updating = true;
 		if (ticks > 0) {
+			Updating = true;
 			IncrementNeed(ticks);
 			SetNeedStage(true);
 			SetLastTimeStamp(GetCurrentGameTimeInMinutes());

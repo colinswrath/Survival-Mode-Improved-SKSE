@@ -113,6 +113,8 @@ public:
 		fatigueSystem->NeedSleepRateMult = RE::TESForm::LookupByEditorID("Survival_NeedSleepReducedMetabolismMult")->As<RE::TESGlobal>();
 		fatigueSystem->NeedAttributePenaltyPercent = RE::TESForm::LookupByEditorID("Survival_ExhaustionAttributePenaltyPercent")->As<RE::TESGlobal>();
 
+		fatigueSystem->PlayerSleepQuest = RE::TESForm::LookupByEditorID("PlayerSleepQuest")->As<RE::TESQuest>();
+
 		//VampireBloodMessage
 	}
 

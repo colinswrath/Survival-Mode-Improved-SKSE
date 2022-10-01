@@ -45,11 +45,11 @@ public:
 	bool PlayerIsInOblivion()
 	{
 		auto player = RE::PlayerCharacter::GetSingleton();
-		//auto da16Stage = DA16->GetCurrentStageID();
+		auto da16Stage = DA16->GetCurrentStageID();
 		if (Survival_OblivionLocations->HasForm(player->GetCurrentLocation()) || 
 			Survival_OblivionAreas->HasForm(player->GetWorldspace()) || 
-			Survival_OblivionCells->HasForm(player->GetParentCell()))// ||
-			//(da16Stage >= 145 && da16Stage < 160))
+			Survival_OblivionCells->HasForm(player->GetParentCell()) || 
+			(da16Stage >= 145 && da16Stage < 160))
 		{
 			return true;
 		}

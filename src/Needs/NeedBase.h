@@ -192,10 +192,7 @@ public:
 
 	void SetLastTimeStamp(float timeToSet = RE::Calendar::GetSingleton()->GetCurrentGameTime() * 1440) 
 	{
-		logger::info("setting timestamp");
-
 		LastUpdateTimeStamp->value = timeToSet;
-		logger::info("set timestamp");
 	}
 
 	void NotifyAddEffect(RE::BGSMessage* increasingMsg, RE::BGSMessage* decreasingMsg, RE::SpellItem* spell, bool increasing=true)
