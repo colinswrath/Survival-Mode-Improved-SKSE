@@ -56,7 +56,6 @@ public:
 		//InJail
 		//BeastForm, WW or VL
 		if (!status->PlayerIsInCombat()) {
-			logger::info("Updating need");
 			UpdateNeed();
 		} else {
 			SetLastTimeStamp();

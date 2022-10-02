@@ -68,6 +68,8 @@ void SurvivalMode::InitializeAllNeeds()
 /// </summary>
 void SurvivalMode::StopAllNeeds()
 {
+	logger::info("Stopping needs");
+
 	NeedHunger::GetSingleton()->StopNeed();
 	NeedExhaustion::GetSingleton()->StopNeed();
 	//Cold

@@ -29,7 +29,6 @@ namespace Events
 
 		logger::info("Hours slept "+std::to_string(Hours));
 
-		auto hunger = NeedHunger::GetSingleton();
 		auto exhaustion = NeedExhaustion::GetSingleton();
 
 		if (!exhaustion->CurrentlyStopped) {

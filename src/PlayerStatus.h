@@ -62,6 +62,6 @@ public:
 		//TODO-Check werewolf as well
 
 		auto player = RE::PlayerCharacter::GetSingleton();
-		return IsVampireConditions->IsTrue(player, nullptr);
+		return !IsVampireConditions->IsTrue(player, nullptr);
 	}
 };
