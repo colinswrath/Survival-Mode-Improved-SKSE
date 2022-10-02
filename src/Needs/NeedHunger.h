@@ -19,7 +19,6 @@ public:
 		if (ticks > 0) {
 			Updating = true;
 			IncrementNeed(ticks);
-			SetNeedStage(true);
 			SetLastTimeStamp(GetCurrentGameTimeInMinutes());
 		}
 

@@ -30,18 +30,22 @@ void SurvivalMode::SurvivalModeLoopUpdate()
 	
 	if (playerStatus->PlayerIsInOblivion()) {
 		ShowNotification(playerStatus->Survival_OblivionAreaMessage);
+		StopAllNeeds();
+	} else {
+
+		if (playerStatus->IsSurvivalEnabled() && !playerStatus->SurvivalToggle()) {
+			//If SM is on but should be off
+			StopAllNeeds();
+		} else if (!playerStatus->IsSurvivalEnabled() && playerStatus->SurvivalToggle()) {
+			//If SM is off but should be on
+			InitializeAllNeeds();
+			SendAllNeedsUpdate();
+		} else if (playerStatus->IsSurvivalEnabled()) {
+			SendAllNeedsUpdate();
+		}
+
 	}
 
-	if (playerStatus->IsSurvivalEnabled() && !playerStatus->SurvivalToggle()) {
-		//If SM is on but should be off
-		StopAllNeeds();
-	} else if (!playerStatus->IsSurvivalEnabled() && playerStatus->SurvivalToggle()) {
-		//If SM is off but should be on
-		InitializeAllNeeds();
-		SendAllNeedsUpdate();
-	} else if (playerStatus->IsSurvivalEnabled()) {
-		SendAllNeedsUpdate();
-	}
 
 }
 

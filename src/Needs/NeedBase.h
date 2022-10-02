@@ -41,6 +41,7 @@ public:
 
 	bool WasSleeping;
 	bool Updating;
+	bool CurrentlyStopped=false;
 
 	/// <summary>
 	/// Update function
@@ -67,10 +68,12 @@ public:
 	virtual void InitializeNeed()
 	{
 		SetLastTimeStamp();
+		CurrentlyStopped = false;
 	}
 
 	virtual void StopNeed()
 	{
+		CurrentlyStopped = true;
 		RemoveNeedEffects();
 		CurrentNeedStage->value = -1;
 	}
@@ -84,11 +87,24 @@ public:
 
 		float newNeedLevel = CurrentNeedValue->value + incAmount;
 
-		if (newNeedLevel > NeedMaxValue->value) 
+		if (newNeedLevel > NeedMaxValue->value) {
 			newNeedLevel = NeedMaxValue->value;
-		else
-			CurrentNeedValue->value = newNeedLevel;
+		}
+		
+		CurrentNeedValue->value = newNeedLevel;
+		SetNeedStage(true);
+	}
 
+	virtual void DecrementNeed(float amount, float minValue = 0)
+	{
+		float newNeedLevel = CurrentNeedValue->value - amount;
+
+		if (newNeedLevel < minValue) {
+			newNeedLevel = minValue;
+		}
+
+		CurrentNeedValue->value = newNeedLevel;
+		SetNeedStage(false);
 	}
 
 	/// <summary>

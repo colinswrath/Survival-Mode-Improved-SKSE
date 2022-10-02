@@ -13,6 +13,8 @@ public:
 
 	RE::TESQuest* PlayerSleepQuest;
 
+	RE::TESGlobal* Survival_ExhaustionRestorePerHour;
+
 	static NeedExhaustion* GetSingleton()
 	{
 		static NeedExhaustion fatigueSystem;
@@ -31,20 +33,26 @@ public:
 		PlayerSleepQuest->Start();
 	}
 
+
 	void UpdateNeed() override
 	{
 		int ticks = GetGameTimeTicks();
 		if (ticks > 0) {
+
 			Updating = true;
 			if (!WasSleeping) {
 				IncrementNeed(ticks);
-				SetNeedStage(true);
 			}
 
 			SetLastTimeStamp(GetCurrentGameTimeInMinutes());
-
-			Updating = false;
 		}
+		Updating = false;
+	}
+	
+	void DecreaseExhaustion(float hoursPassed)
+	{
+		DecrementNeed(hoursPassed * Survival_ExhaustionRestorePerHour->value);
+		WasSleeping = false;
 	}
 
 	void ApplyNeedStageEffects(bool increasing) override
