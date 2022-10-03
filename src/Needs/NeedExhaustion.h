@@ -12,8 +12,16 @@ public:
 	RE::BGSMessage* RestedMessage;
 
 	RE::TESQuest* PlayerSleepQuest;
-
+	
 	RE::TESGlobal* Survival_ExhaustionRestorePerHour;
+
+	RE::BGSListForm* Survival_ExhaustionResistRacesMajor;
+	RE::BGSListForm* Survival_ExhaustionResistRacesMinor;
+
+	RE::TESSound* Survival_ExhaustedA;
+	RE::TESSound* Survival_ExhaustedB;
+	RE::TESSound* Survival_ExhaustedAFemale;
+	RE::TESSound* Survival_ExhaustedBFemale;
 
 	static NeedExhaustion* GetSingleton()
 	{
@@ -32,7 +40,6 @@ public:
 		NeedBase::StopNeed();
 		PlayerSleepQuest->Start();
 	}
-
 
 	void UpdateNeed() override
 	{

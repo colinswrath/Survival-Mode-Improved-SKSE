@@ -48,9 +48,9 @@ public:
 	/// </summary>
 	void OnUpdatePass()
 	{
+		
 		auto status = PlayerStatus::GetSingleton();
 		//TODO- Dont update if you are:
-		//InOblivion
 		//InCombat
 		//InDialogue (maybe)
 		//InJail
@@ -150,25 +150,7 @@ public:
 		return amount;
 	}
 
-	virtual void ApplyNeedStageEffects(bool increasing)
-	{
-		RemoveNeedEffects();
-		float stage = CurrentNeedStage->value;
-		
-		if (stage == 0) {
-			NotifyAddEffect(NeedMessage0,NeedMessage0,NeedSpell0);
-		} else if (stage == 1) {
-			NotifyAddEffect(NeedMessage1,NeedMessage1Decreasing,NeedSpell1,increasing);
-		} else if (stage == 2) {
-			NotifyAddEffect(NeedMessage2, NeedMessage2Decreasing, NeedSpell2, increasing);
-		} else if (stage == 3) {
-			NotifyAddEffect(NeedMessage3, NeedMessage3Decreasing, NeedSpell3, increasing);
-		} else if (stage == 4) {
-			NotifyAddEffect(NeedMessage4, NeedMessage4Decreasing, NeedSpell4, increasing);
-		} else if (stage == 5) {
-			NotifyAddEffect(NeedMessage5, NeedMessage5, NeedSpell5);
-		}
-	}
+	virtual void ApplyNeedStageEffects(bool increasing [[maybe_unused]]) {}
 
 	/// <summary>
 	/// Remove all need effects
@@ -217,6 +199,15 @@ public:
 			ShowNotification(increasingMsg);
 		else
 			ShowNotification(decreasingMsg);
+	}
+
+	virtual void PlaySFX(RE::TESSound* maleSound, RE::TESSound* femaleSound)
+	{	
+		if (RE::PlayerCharacter::GetSingleton()->GetActorBase()->GetSex() == RE::SEX::kFemale) {
+			RE::PlaySound(femaleSound->GetFormEditorID());
+		} else {
+			RE::PlaySound(maleSound->GetFormEditorID());
+		}
 	}
 
 	void ShowNotification(RE::BGSMessage* msg)

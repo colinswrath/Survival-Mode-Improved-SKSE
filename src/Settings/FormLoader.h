@@ -67,6 +67,11 @@ public:
 		hungerSystem->NeedSleepRateMult = RE::TESForm::LookupByEditorID("Survival_NeedSleepReducedMetabolismMult")->As<RE::TESGlobal>();
 		hungerSystem->NeedAttributePenaltyPercent = RE::TESForm::LookupByEditorID("Survival_HungerAttributePenaltyPercent")->As<RE::TESGlobal>();
 
+		hungerSystem->Survival_HungerASM = RE::TESForm::LookupByEditorID("Survival_HungerASM")->As<RE::TESSound>();
+		hungerSystem->Survival_HungerBSM = RE::TESForm::LookupByEditorID("Survival_HungerBSM")->As<RE::TESSound>();
+		hungerSystem->Survival_HungerCSM = RE::TESForm::LookupByEditorID("Survival_HungerCSM")->As<RE::TESSound>();
+		hungerSystem->Survival_HungerDSM = RE::TESForm::LookupByEditorID("Survival_HungerDSM")->As<RE::TESSound>();
+		
 	}
 
 	void LoadFatigueForms()
@@ -115,6 +120,9 @@ public:
 
 		fatigueSystem->PlayerSleepQuest = RE::TESForm::LookupByEditorID("PlayerSleepQuest")->As<RE::TESQuest>();
 		fatigueSystem->Survival_ExhaustionRestorePerHour = RE::TESForm::LookupByEditorID("Survival_ExhaustionRestorePerHour")->As<RE::TESGlobal>();
+		fatigueSystem->Survival_ExhaustionResistRacesMajor = RE::TESForm::LookupByEditorID("Survival_ExhaustionResistRacesMajor")->As<RE::BGSListForm>();
+		fatigueSystem->Survival_ExhaustionResistRacesMinor = RE::TESForm::LookupByEditorID("Survival_ExhaustionResistRacesMinor")->As<RE::BGSListForm>();
+
 		//VampireBloodMessage
 	}
 

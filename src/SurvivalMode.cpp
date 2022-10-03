@@ -45,8 +45,6 @@ void SurvivalMode::SurvivalModeLoopUpdate()
 		}
 
 	}
-
-
 }
 
 /// <summary>
