@@ -25,14 +25,14 @@ namespace Events
 
 	static void ProcessSleepStopEvent()
 	{
-		Hours = RE::Calendar::GetSingleton()->GetHoursPassed() - Hours;
-
-		logger::info("Hours slept "+std::to_string(Hours));
-
 		auto exhaustion = NeedExhaustion::GetSingleton();
-
 		if (!exhaustion->CurrentlyStopped) {
-			NeedExhaustion::GetSingleton()->DecreaseExhaustion(Hours);
+			exhaustion->SetLastTimeStamp();
+			Hours = RE::Calendar::GetSingleton()->GetHoursPassed() - Hours;
+
+			logger::info("Hours slept "+std::to_string(Hours));
+
+			exhaustion->DecreaseExhaustion(Hours);
 		}
 	}
 	
@@ -40,15 +40,18 @@ namespace Events
 	static void ProcessHungerOnEquipEvent(RE::AlchemyItem* food)
 	{
 		auto hunger = NeedHunger::GetSingleton();
-		for (auto effect : food->effects) {
-			if (hunger->Survival_FoodRestoreHungerVerySmall == effect->baseEffect) {
-				hunger->DecrementNeed(hunger->Survival_HungerRestoreVerySmallAmount->value);
-			} else if (hunger->Survival_FoodRestoreHungerSmall == effect->baseEffect) {
-				hunger->DecrementNeed(hunger->Survival_HungerRestoreSmallAmount->value);
-			} else if (hunger->Survival_FoodRestoreHungerMedium == effect->baseEffect) {
-				hunger->DecrementNeed(hunger->Survival_HungerRestoreMediumAmount->value);
-			} else if (hunger->Survival_FoodRestoreHungerLarge == effect->baseEffect) {
-				hunger->DecrementNeed(hunger->Survival_HungerRestoreLargeAmount->value);		
+
+		if (!hunger->CurrentlyStopped) {
+			for (auto effect : food->effects) {
+				if (hunger->Survival_FoodRestoreHungerVerySmall == effect->baseEffect) {
+					hunger->DecrementNeed(hunger->Survival_HungerRestoreVerySmallAmount->value);
+				} else if (hunger->Survival_FoodRestoreHungerSmall == effect->baseEffect) {
+					hunger->DecrementNeed(hunger->Survival_HungerRestoreSmallAmount->value);
+				} else if (hunger->Survival_FoodRestoreHungerMedium == effect->baseEffect) {
+					hunger->DecrementNeed(hunger->Survival_HungerRestoreMediumAmount->value);
+				} else if (hunger->Survival_FoodRestoreHungerLarge == effect->baseEffect) {
+					hunger->DecrementNeed(hunger->Survival_HungerRestoreLargeAmount->value);		
+				}
 			}
 		}
 	}
