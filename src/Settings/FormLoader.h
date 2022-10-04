@@ -67,10 +67,20 @@ public:
 		hungerSystem->NeedSleepRateMult = RE::TESForm::LookupByEditorID("Survival_NeedSleepReducedMetabolismMult")->As<RE::TESGlobal>();
 		hungerSystem->NeedAttributePenaltyPercent = RE::TESForm::LookupByEditorID("Survival_HungerAttributePenaltyPercent")->As<RE::TESGlobal>();
 
-		hungerSystem->Survival_HungerASM = RE::TESForm::LookupByEditorID("Survival_HungerASM")->As<RE::TESSound>();
-		hungerSystem->Survival_HungerBSM = RE::TESForm::LookupByEditorID("Survival_HungerBSM")->As<RE::TESSound>();
-		hungerSystem->Survival_HungerCSM = RE::TESForm::LookupByEditorID("Survival_HungerCSM")->As<RE::TESSound>();
-		hungerSystem->Survival_HungerDSM = RE::TESForm::LookupByEditorID("Survival_HungerDSM")->As<RE::TESSound>();
+		hungerSystem->Survival_FoodRestoreHungerVerySmall = RE::TESForm::LookupByEditorID("Survival_FoodRestoreHungerVerySmall")->As<RE::EffectSetting>();
+		hungerSystem->Survival_FoodRestoreHungerSmall = RE::TESForm::LookupByEditorID("Survival_FoodRestoreHungerSmall")->As<RE::EffectSetting>();
+		hungerSystem->Survival_FoodRestoreHungerMedium = RE::TESForm::LookupByEditorID("Survival_FoodRestoreHungerMedium")->As<RE::EffectSetting>();
+		hungerSystem->Survival_FoodRestoreHungerLarge = RE::TESForm::LookupByEditorID("Survival_FoodRestoreHungerLarge")->As<RE::EffectSetting>();
+
+		hungerSystem->Survival_HungerRestoreLargeAmount = RE::TESForm::LookupByEditorID("Survival_HungerRestoreLargeAmount")->As<RE::TESGlobal>();
+		hungerSystem->Survival_HungerRestoreMediumAmount = RE::TESForm::LookupByEditorID("Survival_HungerRestoreMediumAmount")->As<RE::TESGlobal>();
+		hungerSystem->Survival_HungerRestoreSmallAmount = RE::TESForm::LookupByEditorID("Survival_HungerRestoreSmallAmount")->As<RE::TESGlobal>();
+		hungerSystem->Survival_HungerRestoreVerySmallAmount = RE::TESForm::LookupByEditorID("Survival_HungerRestoreVerySmallAmount")->As<RE::TESGlobal>();
+
+		if (!hungerSystem->Survival_FoodRestoreHungerVerySmall) {
+			logger::error("Failed to load survival effects");
+		}
+		
 		
 	}
 

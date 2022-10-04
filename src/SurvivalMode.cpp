@@ -43,7 +43,6 @@ void SurvivalMode::SurvivalModeLoopUpdate()
 		} else if (playerStatus->IsSurvivalEnabled()) {
 			SendAllNeedsUpdate();
 		}
-
 	}
 }
 

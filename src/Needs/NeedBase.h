@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PlayerStatus.h"
+#include <mutex>
 
 class NeedBase
 {
@@ -43,6 +44,8 @@ public:
 	bool Updating;
 	bool CurrentlyStopped=false;
 
+	std::mutex update_mutex;
+
 	/// <summary>
 	/// Update function
 	/// </summary>
@@ -50,7 +53,7 @@ public:
 	{
 		
 		auto status = PlayerStatus::GetSingleton();
-		//TODO- Dont update if you are:
+		//TODO- Pause needs if you are:
 		//InCombat
 		//InDialogue (maybe)
 		//InJail
@@ -82,6 +85,7 @@ public:
 	/// </summary>
 	virtual void IncrementNeed(int ticks)
 	{	
+		const std::lock_guard<std::mutex> lock(update_mutex);
 		float incAmount = GetNeedIncrementAmount(ticks);
 
 		float newNeedLevel = CurrentNeedValue->value + incAmount;
@@ -96,6 +100,7 @@ public:
 
 	virtual void DecrementNeed(float amount, float minValue = 0)
 	{
+		const std::lock_guard<std::mutex> lock(update_mutex);
 		float newNeedLevel = CurrentNeedValue->value - amount;
 
 		if (newNeedLevel < minValue) {
@@ -201,12 +206,12 @@ public:
 			ShowNotification(decreasingMsg);
 	}
 
-	virtual void PlaySFX(RE::TESSound* maleSound, RE::TESSound* femaleSound)
+	virtual void PlaySFX(const char * maleSound, const char * femaleSound)
 	{	
 		if (RE::PlayerCharacter::GetSingleton()->GetActorBase()->GetSex() == RE::SEX::kFemale) {
-			RE::PlaySound(femaleSound->GetFormEditorID());
+			RE::PlaySound(femaleSound);
 		} else {
-			RE::PlaySound(maleSound->GetFormEditorID());
+			RE::PlaySound(maleSound);
 		}
 	}
 

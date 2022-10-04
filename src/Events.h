@@ -34,7 +34,23 @@ namespace Events
 		if (!exhaustion->CurrentlyStopped) {
 			NeedExhaustion::GetSingleton()->DecreaseExhaustion(Hours);
 		}
-
+	}
+	
+	//TODO-Add actual decrementing of needs
+	static void ProcessHungerOnEquipEvent(RE::AlchemyItem* food)
+	{
+		auto hunger = NeedHunger::GetSingleton();
+		for (auto effect : food->effects) {
+			if (hunger->Survival_FoodRestoreHungerVerySmall == effect->baseEffect) {
+				hunger->DecrementNeed(hunger->Survival_HungerRestoreVerySmallAmount->value);
+			} else if (hunger->Survival_FoodRestoreHungerSmall == effect->baseEffect) {
+				hunger->DecrementNeed(hunger->Survival_HungerRestoreSmallAmount->value);
+			} else if (hunger->Survival_FoodRestoreHungerMedium == effect->baseEffect) {
+				hunger->DecrementNeed(hunger->Survival_HungerRestoreMediumAmount->value);
+			} else if (hunger->Survival_FoodRestoreHungerLarge == effect->baseEffect) {
+				hunger->DecrementNeed(hunger->Survival_HungerRestoreLargeAmount->value);		
+			}
+		}
 	}
 
 	class OnSleepStartEventHandler : public RE::BSTEventSink<RE::TESSleepStartEvent>
@@ -65,7 +81,6 @@ namespace Events
 
 	private:
 		OnSleepStartEventHandler() = default;
-		
 	};
 
 	class OnSleepStopEventHandler : public RE::BSTEventSink<RE::TESSleepStopEvent>
@@ -98,9 +113,44 @@ namespace Events
 		OnSleepStopEventHandler() = default;
 	};
 
+	class OnEquipEventHandler : public RE::BSTEventSink<RE::TESEquipEvent>
+	{
+	public:
+		static OnEquipEventHandler* GetSingleton()
+		{
+			static OnEquipEventHandler singleton;
+			return std::addressof(singleton);
+		}
+
+		RE::BSEventNotifyControl ProcessEvent(const RE::TESEquipEvent* a_event,[[maybe_unused]] RE::BSTEventSource<RE::TESEquipEvent>* a_eventSource) override
+		{
+			if (!a_event || !a_event->actor || !a_event->actor->IsPlayerRef()) {
+				return RE::BSEventNotifyControl::kContinue;
+			}
+
+			auto alchemyItem = RE::TESForm::LookupByID<RE::AlchemyItem>(a_event->baseObject);
+
+			if (alchemyItem && alchemyItem->IsFood()) {
+				ProcessHungerOnEquipEvent(alchemyItem);
+			}
+
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		static void Register()
+		{
+			RE::ScriptEventSourceHolder* eventHolder = RE::ScriptEventSourceHolder::GetSingleton();
+			eventHolder->AddEventSink(OnEquipEventHandler::GetSingleton());
+		}
+
+	private:
+		OnEquipEventHandler() = default;
+	};
+
 	inline static void Register()
 	{
 		OnSleepStartEventHandler::Register();
 		OnSleepStopEventHandler::Register();
+		OnEquipEventHandler::Register();
 	}
 }

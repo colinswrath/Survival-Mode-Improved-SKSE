@@ -18,10 +18,10 @@ public:
 	RE::BGSListForm* Survival_ExhaustionResistRacesMajor;
 	RE::BGSListForm* Survival_ExhaustionResistRacesMinor;
 
-	RE::TESSound* Survival_ExhaustedA;
-	RE::TESSound* Survival_ExhaustedB;
-	RE::TESSound* Survival_ExhaustedAFemale;
-	RE::TESSound* Survival_ExhaustedBFemale;
+	const char* Survival_ExhaustedASD = "Survival_ExhaustedASD";
+	const char* Survival_ExhaustedBSD = "Survival_ExhaustedBSD";
+	const char* Survival_ExhaustedAFemaleSD = "Survival_ExhaustedAFemaleSD";
+	const char* Survival_ExhaustedBFemaleSD = "Survival_ExhaustedBFemaleSD";
 
 	static NeedExhaustion* GetSingleton()
 	{
@@ -73,17 +73,20 @@ public:
 			} else {
 				NotifyAddEffect(RestedMessage, RestedMessage, Rested);	
 			}
-
 		} else if (stage == 1) {
 			NotifyAddEffect(NeedMessage1, NeedMessage1Decreasing, NeedSpell1, increasing);
 		} else if (stage == 2) {
 			NotifyAddEffect(NeedMessage2, NeedMessage2Decreasing, NeedSpell2, increasing);
+			PlaySFX(Survival_ExhaustedASD, Survival_ExhaustedAFemaleSD);
 		} else if (stage == 3) {
 			NotifyAddEffect(NeedMessage3, NeedMessage3Decreasing, NeedSpell3, increasing);
+			PlaySFX(Survival_ExhaustedASD, Survival_ExhaustedAFemaleSD);
 		} else if (stage == 4) {
 			NotifyAddEffect(NeedMessage4, NeedMessage4Decreasing, NeedSpell4, increasing);
+			PlaySFX(Survival_ExhaustedBSD, Survival_ExhaustedBFemaleSD);
 		} else if (stage == 5) {
 			NotifyAddEffect(NeedMessage5, NeedMessage5, NeedSpell5);
+			PlaySFX(Survival_ExhaustedBSD, Survival_ExhaustedBFemaleSD);
 		}
 	}
 

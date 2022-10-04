@@ -29,7 +29,6 @@ public:
 	bool IsSurvivalEnabled()
 	{
 		return (bool)PlayerStatus::GetSingleton()->Survival_ModeEnabled->value;
-		
 	}
 
 	bool SurvivalToggle()
