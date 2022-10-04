@@ -157,7 +157,7 @@ namespace Events
 			return std::addressof(singleton);
 		}
 
-		RE::BSEventNotifyControl ProcessEvent(const RE::TESHitEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESHitEvent>* a_eventSource) override
+		RE::BSEventNotifyControl ProcessEvent([[maybe_unused]] const RE::TESHitEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESHitEvent>* a_eventSource) override
 		{
 			return RE::BSEventNotifyControl::kContinue;
 		}
