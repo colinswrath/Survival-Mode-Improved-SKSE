@@ -43,7 +43,6 @@ public:
 	bool WasSleeping;
 	bool Updating;
 	bool CurrentlyStopped=false;
-	float needRateDivisor;
 
 	std::mutex update_mutex;
 
@@ -65,6 +64,8 @@ public:
 			SetLastTimeStamp();
 		}
 	}
+
+	virtual float GetNeedDivisor(){};
 
 	virtual void UpdateNeed(){};
 
@@ -146,7 +147,7 @@ public:
 		float amount = 0;
 
 		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
-		amount = (NeedRate->value/needRateDivisor) * float(ticks);	
+		amount = (NeedRate->value/GetNeedDivisor()) * float(ticks);	
 
 
 		

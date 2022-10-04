@@ -21,8 +21,13 @@ public:
 	RE::TESGlobal* Survival_HungerRestoreSmallAmount;
 	RE::TESGlobal* Survival_HungerRestoreVerySmallAmount;
 
-	//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
-	float needRateDivisor = 60;
+	
+	float GetNeedDivisor() override
+	{
+		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
+		float hungerDivisor = 60;
+		return hungerDivisor;
+	}
 
 	static NeedHunger* GetSingleton()
 	{
