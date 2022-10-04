@@ -30,8 +30,6 @@ namespace Events
 			exhaustion->SetLastTimeStamp();
 			Hours = RE::Calendar::GetSingleton()->GetHoursPassed() - Hours;
 
-			logger::info("Hours slept "+std::to_string(Hours));
-
 			exhaustion->DecreaseExhaustion(Hours);
 		}
 	}

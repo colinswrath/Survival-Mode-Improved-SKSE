@@ -12,7 +12,7 @@ void InitLogger()
 		return;
 	}
 
-	*path /= fmt::format("{}.log"sv, Version::PROJECT);
+	*path /= std::format("{}.log"sv, Version::PROJECT);
 	auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
 #endif
 
@@ -41,7 +41,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface * 
 	a_info->version = Version::MAJOR;
 
 	if (a_skse->IsEditor()) {
-		logger::critical("Loaded in editor, marking as incompatible"sv);
+		logger::critical(FMT_STRING("Loaded in editor, marking as incompatible"));
 		return false;
 	}
 

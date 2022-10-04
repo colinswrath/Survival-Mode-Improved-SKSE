@@ -7,7 +7,6 @@
   "dependencies": [
     "boost-stl-interfaces",
     "rsm-binary-io",
-    "spdlog",
 	  "simpleini",
 	  "commonlibsse-ng"
   ]
