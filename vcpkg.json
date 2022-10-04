@@ -5,8 +5,6 @@
   "homepage": "",
   "license": "MIT",
   "dependencies": [
-    "boost-stl-interfaces",
-    "rsm-binary-io",
 	  "simpleini",
 	  "commonlibsse-ng"
   ]

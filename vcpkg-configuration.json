@@ -6,6 +6,7 @@
       "baseline": "3878737d2cbe7bfc31016d95b54660f87378640c",
       "packages": [
         "commonlibsse-ng",
+		"skse",
         "commonlibsse-ng-flatrim"
       ]
     }

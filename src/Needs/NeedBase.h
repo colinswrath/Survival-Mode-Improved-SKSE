@@ -206,7 +206,7 @@ public:
 			ShowNotification(decreasingMsg);
 	}
 
-	virtual void PlaySFX(const char * maleSound, const char * femaleSound)
+	virtual void PlaySFX(const char* maleSound, const char* femaleSound)
 	{	
 		if (RE::PlayerCharacter::GetSingleton()->GetActorBase()->GetSex() == RE::SEX::kFemale) {
 			RE::PlaySound(femaleSound);

@@ -83,7 +83,7 @@ set(Boost_USE_STATIC_LIBS ON)
 #add_subdirectory("extern/CommonLibSSE" CommonLibSSE)
 
 find_package(CommonLibSSE REQUIRED)
-find_package(spdlog REQUIRED CONFIG)
+#find_package(spdlog REQUIRED CONFIG)
 
 # ---- Add source files ----
 

@@ -76,11 +76,6 @@ public:
 		hungerSystem->Survival_HungerRestoreMediumAmount = RE::TESForm::LookupByEditorID("Survival_HungerRestoreMediumAmount")->As<RE::TESGlobal>();
 		hungerSystem->Survival_HungerRestoreSmallAmount = RE::TESForm::LookupByEditorID("Survival_HungerRestoreSmallAmount")->As<RE::TESGlobal>();
 		hungerSystem->Survival_HungerRestoreVerySmallAmount = RE::TESForm::LookupByEditorID("Survival_HungerRestoreVerySmallAmount")->As<RE::TESGlobal>();
-
-		if (!hungerSystem->Survival_FoodRestoreHungerVerySmall) {
-			logger::error("Failed to load survival effects");
-		}
-		
 		
 	}
 
@@ -91,9 +86,6 @@ public:
 		//Get these two by formID
 		fatigueSystem->WellRested = RE::TESForm::LookupByID(RE::FormID(0x000FB984))->As<RE::SpellItem>();
 		fatigueSystem->Rested = RE::TESForm::LookupByID(RE::FormID(0x000FB981))->As<RE::SpellItem>();
-
-		/*fatigueSystem->WellRested = RE::TESForm::LookupByEditorID("WellRested")->As<RE::SpellItem>();
-		fatigueSystem->Rested = RE::TESForm::LookupByEditorID("Rested")->As<RE::SpellItem>();*/
 
 		fatigueSystem->NeedSpell1 = RE::TESForm::LookupByEditorID("Survival_ExhaustionStage1")->As<RE::SpellItem>();
 		fatigueSystem->NeedSpell2 = RE::TESForm::LookupByEditorID("Survival_ExhaustionStage2")->As<RE::SpellItem>();
