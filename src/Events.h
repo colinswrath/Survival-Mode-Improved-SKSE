@@ -148,10 +148,35 @@ namespace Events
 		OnEquipEventHandler() = default;
 	};
 
+	class OnHitEventHandler : public RE::BSTEventSink<RE::TESHitEvent>
+	{
+	public:
+		static OnHitEventHandler* GetSingleton()
+		{
+			static OnHitEventHandler singleton;
+			return std::addressof(singleton);
+		}
+
+		RE::BSEventNotifyControl ProcessEvent([[maybe_unused]] const RE::TESHitEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESHitEvent>* a_eventSource) override
+		{
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		static void Register()
+		{
+			RE::ScriptEventSourceHolder* eventHolder = RE::ScriptEventSourceHolder::GetSingleton();
+			eventHolder->AddEventSink(OnHitEventHandler::GetSingleton());
+		}
+
+	private:
+		OnHitEventHandler() = default;
+	};
+
 	inline static void Register()
 	{
 		OnSleepStartEventHandler::Register();
 		OnSleepStopEventHandler::Register();
 		OnEquipEventHandler::Register();
+		OnHitEventHandler::Register();
 	}
 }
