@@ -23,6 +23,9 @@ public:
 	const char* Survival_ExhaustedAFemaleSD = "Survival_ExhaustedAFemaleSD";
 	const char* Survival_ExhaustedBFemaleSD = "Survival_ExhaustedBFemaleSD";
 
+	//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
+	float needRateDivisor = 60;
+
 	static NeedExhaustion* GetSingleton()
 	{
 		static NeedExhaustion fatigueSystem;

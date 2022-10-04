@@ -43,6 +43,7 @@ public:
 	bool WasSleeping;
 	bool Updating;
 	bool CurrentlyStopped=false;
+	float needRateDivisor;
 
 	std::mutex update_mutex;
 
@@ -145,7 +146,9 @@ public:
 		float amount = 0;
 
 		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
-		amount = (NeedRate->value/60.0f) * float(ticks);	//TODO-Abstract 60 to sub classes
+		amount = (NeedRate->value/needRateDivisor) * float(ticks);	
+
+
 		
 		if (WasSleeping) {
 			amount = amount * NeedSleepRateMult->value;
