@@ -21,6 +21,8 @@ public:
 	RE::TESGlobal* Survival_HungerRestoreSmallAmount;
 	RE::TESGlobal* Survival_HungerRestoreVerySmallAmount;
 
+	RE::BGSListForm* Survival_HungerResistanceRacesMinor;
+
 	const float hungerDivisor = 60;
 
 	float GetNeedDivisor() override
@@ -33,6 +35,16 @@ public:
 		static NeedHunger hungerSystem;
 		return &hungerSystem;
 	}
+
+	float GetNeedIncrementAmount() {	
+		float racialBonus = 0;
+		auto player = RE::PlayerCharacter::GetSingleton();
+
+		if (Survival_HungerResistanceRacesMinor->HasForm(player->GetRace())) {
+			racialBonus = Survival_RacialBonusMinor->value;
+		}
+	}
+
 
 	void UpdateNeed() override
 	{

@@ -15,6 +15,9 @@ public:
 
 	RE::TESGlobal* NeedAttributePenaltyPercent;
 
+	RE::TESGlobal* Survival_RacialBonusMinor;
+	RE::TESGlobal* Survival_RacialBonusMajor;
+
 	RE::TESGlobal* NeedStage1;
 	RE::TESGlobal* NeedStage2;
 	RE::TESGlobal* NeedStage3;
@@ -142,19 +145,23 @@ public:
 		}
 	}
 
-	virtual float GetNeedIncrementAmount(int ticks)
+	virtual float GetNeedIncrementAmount(int ticks, float racialBonus)
 	{
 		float amount = 0;
-
+		float racialBonus = 0;
+		
 		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
 		amount = (NeedRate->value/GetNeedDivisor()) * float(ticks);	
 
 
-		
+	
 		if (WasSleeping) {
-			amount = amount * NeedSleepRateMult->value;
+			amount = amount * NeedSleepRateMult->value * (1.00000 - racialBonus);
 			WasSleeping = false;
 		} 
+		else {
+			amount = amount * float(ticks) * (1.00000 - racialBonus);
+		}
 
 		return amount;
 	}

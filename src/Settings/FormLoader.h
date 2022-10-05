@@ -72,6 +72,8 @@ public:
 		hungerSystem->Survival_FoodRestoreHungerMedium = RE::TESForm::LookupByEditorID("Survival_FoodRestoreHungerMedium")->As<RE::EffectSetting>();
 		hungerSystem->Survival_FoodRestoreHungerLarge = RE::TESForm::LookupByEditorID("Survival_FoodRestoreHungerLarge")->As<RE::EffectSetting>();
 
+		hungerSystem->Survival_HungerResistanceRacesMinor = RE::TESForm::LookupByEditorID("Survival_HungerResistanceRacesMinor")->As<RE::BGSListForm>();
+
 		hungerSystem->Survival_HungerRestoreLargeAmount = RE::TESForm::LookupByEditorID("Survival_HungerRestoreLargeAmount")->As<RE::TESGlobal>();
 		hungerSystem->Survival_HungerRestoreMediumAmount = RE::TESForm::LookupByEditorID("Survival_HungerRestoreMediumAmount")->As<RE::TESGlobal>();
 		hungerSystem->Survival_HungerRestoreSmallAmount = RE::TESForm::LookupByEditorID("Survival_HungerRestoreSmallAmount")->As<RE::TESGlobal>();
