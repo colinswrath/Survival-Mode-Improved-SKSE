@@ -30,9 +30,12 @@ public:
 	}
 
 	void LoadHungerForms()
-	{
-		
+	{	
 		auto hungerSystem = NeedHunger::GetSingleton();
+
+		hungerSystem->NeedPenaltyAV = RE::ActorValue::kVariable02;
+		hungerSystem->ActorValPenaltyAttribute = RE::ActorValue::kStamina;
+		hungerSystem->NeedPenaltyUIGlobal = RE::TESForm::LookupByEditorID("Survival_HungerAttributePenaltyPercent")->As<RE::TESGlobal>();
 
 		hungerSystem->NeedSpell0 = RE::TESForm::LookupByEditorID("Survival_HungerStage0")->As<RE::SpellItem>();
 		hungerSystem->NeedSpell1 = RE::TESForm::LookupByEditorID("Survival_HungerStage1")->As<RE::SpellItem>();
@@ -85,6 +88,10 @@ public:
 	{
 		auto fatigueSystem = NeedExhaustion::GetSingleton();
 
+		fatigueSystem->NeedPenaltyAV = RE::ActorValue::kVariable03;
+		fatigueSystem->ActorValPenaltyAttribute = RE::ActorValue::kMagicka;
+		fatigueSystem->NeedPenaltyUIGlobal = RE::TESForm::LookupByEditorID("Survival_ExhaustionAttributePenaltyPercent")->As<RE::TESGlobal>();
+
 		//Get these two by formID
 		fatigueSystem->WellRested = RE::TESForm::LookupByID(RE::FormID(0x000FB984))->As<RE::SpellItem>();
 		fatigueSystem->Rested = RE::TESForm::LookupByID(RE::FormID(0x000FB981))->As<RE::SpellItem>();
@@ -132,7 +139,7 @@ public:
 
 	void LoadColdForms()
 	{
-
+		//Cold penalty AV is 4
 	}
 
 	void LoadMiscForms()

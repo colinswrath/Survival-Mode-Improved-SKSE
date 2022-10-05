@@ -29,7 +29,6 @@ namespace Events
 		if (!exhaustion->CurrentlyStopped) {
 			exhaustion->SetLastTimeStamp();
 			Hours = RE::Calendar::GetSingleton()->GetHoursPassed() - Hours;
-
 			exhaustion->DecreaseExhaustion(Hours);
 		}
 	}
