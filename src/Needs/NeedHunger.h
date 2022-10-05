@@ -21,6 +21,13 @@ public:
 	RE::TESGlobal* Survival_HungerRestoreSmallAmount;
 	RE::TESGlobal* Survival_HungerRestoreVerySmallAmount;
 
+	const float hungerDivisor = 60;
+
+	float GetNeedDivisor() override
+	{
+		return hungerDivisor;
+	}
+
 	static NeedHunger* GetSingleton()
 	{
 		static NeedHunger hungerSystem;

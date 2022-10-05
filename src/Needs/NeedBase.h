@@ -65,6 +65,8 @@ public:
 		}
 	}
 
+	virtual float GetNeedDivisor(){};
+
 	virtual void UpdateNeed(){};
 
 	virtual void InitializeNeed()
@@ -145,7 +147,9 @@ public:
 		float amount = 0;
 
 		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
-		amount = (NeedRate->value/60.0f) * float(ticks);	//TODO-Abstract 60 to sub classes
+		amount = (NeedRate->value/GetNeedDivisor()) * float(ticks);	
+
+
 		
 		if (WasSleeping) {
 			amount = amount * NeedSleepRateMult->value;

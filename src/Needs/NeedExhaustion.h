@@ -23,6 +23,13 @@ public:
 	const char* Survival_ExhaustedAFemaleSD = "Survival_ExhaustedAFemaleSD";
 	const char* Survival_ExhaustedBFemaleSD = "Survival_ExhaustedBFemaleSD";
 
+	const float exhaustionDivisor = 60;
+
+	float GetNeedDivisor() override
+	{	
+		return exhaustionDivisor;
+	}
+
 	static NeedExhaustion* GetSingleton()
 	{
 		static NeedExhaustion fatigueSystem;
