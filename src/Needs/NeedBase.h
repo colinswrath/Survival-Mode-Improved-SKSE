@@ -232,23 +232,17 @@ protected:
 		NeedPenaltyUIGlobal->value = newVal;
 	}
 
-	virtual float GetNeedIncrementAmount(int ticks, float racialBonus)
+	virtual float GetNeedIncrementAmount(int ticks)
 	{
 		float amount = 0;
-		float racialBonus = 0;
 		
 		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
 		amount = (NeedRate->value/GetNeedDivisor()) * float(ticks);	
 
-
-	
 		if (WasSleeping) {
-			amount = amount * NeedSleepRateMult->value * (1.00000 - racialBonus);
+			amount = amount * NeedSleepRateMult->value;
 			WasSleeping = false;
 		} 
-		else {
-			amount = amount * float(ticks) * (1.00000 - racialBonus);
-		}
 
 		return amount;
 	}
