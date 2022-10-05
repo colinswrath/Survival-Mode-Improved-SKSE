@@ -39,12 +39,9 @@ public:
 		int ticks = GetGameTimeTicks();
 
 		if (ticks > 0) {
-			Updating = true;
 			IncrementNeed(ticks);
 			SetLastTimeStamp(GetCurrentGameTimeInMinutes());
 		}
-
-		Updating = false;
 	}
 
 	void ApplyNeedStageEffects(bool increasing) override
