@@ -27,7 +27,7 @@ void SurvivalMode::SurvivalModeLoopUpdate()
 {
 	auto playerStatus = PlayerStatus::GetSingleton();
 	playerStatus->Survival_ModeCanBeEnabled->value = 1.0f;
-	
+
 	if (playerStatus->PlayerIsInOblivion()) {
 		ShowNotification(playerStatus->Survival_OblivionAreaMessage);
 		StopAllNeeds();
@@ -51,13 +51,16 @@ void SurvivalMode::SurvivalModeLoopUpdate()
 /// </summary>
 void SurvivalMode::InitializeAllNeeds()
 {
-	logger::info("Initializing needs");
+	logger::info("Initializing all needs");
+
 	NeedHunger::GetSingleton()->InitializeNeed();
 	NeedExhaustion::GetSingleton()->InitializeNeed();
 	//Cold
 
 	PlayerStatus::GetSingleton()->Survival_ModeEnabled->value = 1.0f;
 	PlayerStatus::GetSingleton()->Survival_ModeEnabledShared->value = 1.0f;
+
+	logger::info("Needs initialized");
 }
 
 /// <summary>
@@ -65,7 +68,7 @@ void SurvivalMode::InitializeAllNeeds()
 /// </summary>
 void SurvivalMode::StopAllNeeds()
 {
-	logger::info("Stopping needs");
+	logger::info("Stopping all needs");
 
 	NeedHunger::GetSingleton()->StopNeed();
 	NeedExhaustion::GetSingleton()->StopNeed();
@@ -73,6 +76,7 @@ void SurvivalMode::StopAllNeeds()
 
 	PlayerStatus::GetSingleton()->Survival_ModeEnabled->value = 0;
 	PlayerStatus::GetSingleton()->Survival_ModeEnabledShared->value = 0;
+	logger::info("Needs stopped");
 }
 
 /// <summary>
