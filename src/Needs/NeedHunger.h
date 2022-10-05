@@ -21,7 +21,9 @@ public:
 	RE::TESGlobal* Survival_HungerRestoreSmallAmount;
 	RE::TESGlobal* Survival_HungerRestoreVerySmallAmount;
 
-	const float hungerDivisor = 60;
+	RE::BGSListForm* Survival_HungerResistanceRacesMinor;
+
+	const float hungerDivisor = 60.0f;
 
 	float GetNeedDivisor() override
 	{
@@ -33,6 +35,27 @@ public:
 		static NeedHunger hungerSystem;
 		return &hungerSystem;
 	}
+
+	float GetNeedIncrementAmount(int ticks) override 
+	{	
+		auto player = RE::PlayerCharacter::GetSingleton();
+		float amount = 0.0f;
+
+		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
+		amount = (NeedRate->value / GetNeedDivisor()) * float(ticks);
+
+		if (WasSleeping) {
+			amount = amount * NeedSleepRateMult->value;
+			WasSleeping = false;
+		}
+
+		if (Survival_HungerResistanceRacesMinor->HasForm(player->GetRace())) {
+			amount = amount * (1.0f - Survival_RacialBonusMinor->value);
+		}
+
+		return amount;
+	}
+
 
 	void UpdateNeed() override
 	{

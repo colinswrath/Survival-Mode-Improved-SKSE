@@ -75,6 +75,9 @@ public:
 		hungerSystem->Survival_FoodRestoreHungerMedium = RE::TESForm::LookupByEditorID("Survival_FoodRestoreHungerMedium")->As<RE::EffectSetting>();
 		hungerSystem->Survival_FoodRestoreHungerLarge = RE::TESForm::LookupByEditorID("Survival_FoodRestoreHungerLarge")->As<RE::EffectSetting>();
 
+		hungerSystem->Survival_HungerResistanceRacesMinor = RE::TESForm::LookupByEditorID("Survival_HungerResistanceRacesMinor")->As<RE::BGSListForm>();
+		hungerSystem->Survival_RacialBonusMinor = RE::TESForm::LookupByEditorID("Survival_RacialBonusMinor")->As<RE::TESGlobal>();
+
 		hungerSystem->Survival_HungerRestoreLargeAmount = RE::TESForm::LookupByEditorID("Survival_HungerRestoreLargeAmount")->As<RE::TESGlobal>();
 		hungerSystem->Survival_HungerRestoreMediumAmount = RE::TESForm::LookupByEditorID("Survival_HungerRestoreMediumAmount")->As<RE::TESGlobal>();
 		hungerSystem->Survival_HungerRestoreSmallAmount = RE::TESForm::LookupByEditorID("Survival_HungerRestoreSmallAmount")->As<RE::TESGlobal>();
@@ -129,8 +132,11 @@ public:
 
 		fatigueSystem->PlayerSleepQuest = RE::TESForm::LookupByEditorID("PlayerSleepQuest")->As<RE::TESQuest>();
 		fatigueSystem->Survival_ExhaustionRestorePerHour = RE::TESForm::LookupByEditorID("Survival_ExhaustionRestorePerHour")->As<RE::TESGlobal>();
+
 		fatigueSystem->Survival_ExhaustionResistRacesMajor = RE::TESForm::LookupByEditorID("Survival_ExhaustionResistRacesMajor")->As<RE::BGSListForm>();
 		fatigueSystem->Survival_ExhaustionResistRacesMinor = RE::TESForm::LookupByEditorID("Survival_ExhaustionResistRacesMinor")->As<RE::BGSListForm>();
+		fatigueSystem->Survival_RacialBonusMinor = RE::TESForm::LookupByEditorID("Survival_RacialBonusMinor")->As<RE::TESGlobal>();
+		fatigueSystem->Survival_RacialBonusMajor = RE::TESForm::LookupByEditorID("Survival_RacialBonusMajor")->As<RE::TESGlobal>();
 
 		//VampireBloodMessage
 	}

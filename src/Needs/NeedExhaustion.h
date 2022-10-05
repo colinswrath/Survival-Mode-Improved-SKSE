@@ -23,7 +23,7 @@ public:
 	const char* Survival_ExhaustedAFemaleSD = "Survival_ExhaustedAFemaleSD";
 	const char* Survival_ExhaustedBFemaleSD = "Survival_ExhaustedBFemaleSD";
 
-	const float exhaustionDivisor = 60;
+	const float exhaustionDivisor = 60.0f;
 
 	float GetNeedDivisor() override
 	{	
