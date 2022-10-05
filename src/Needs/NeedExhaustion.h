@@ -23,10 +23,10 @@ public:
 	const char* Survival_ExhaustedAFemaleSD = "Survival_ExhaustedAFemaleSD";
 	const char* Survival_ExhaustedBFemaleSD = "Survival_ExhaustedBFemaleSD";
 
+	const float exhaustionDivisor = 60;
+
 	float GetNeedDivisor() override
-	{
-		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
-		float exhaustionDivisor = 60;
+	{	
 		return exhaustionDivisor;
 	}
 
