@@ -181,19 +181,14 @@ protected:
 	virtual void ApplyAttributePenalty()
 	{
 		auto player = RE::PlayerCharacter::GetSingleton();
-
 		float maxPenAv = GetMaxAttributeAv(player);
-
 		float penaltyPerc = GetPenaltyPercentAmount();
-
 		float currentPenaltyMag = player->AsActorValueOwner()->GetActorValue(NeedPenaltyAV);
-
 		float newPenaltyMag = maxPenAv * penaltyPerc;
 
 		if (newPenaltyMag > maxPenAv) {
 			newPenaltyMag = maxPenAv;
 		}
-
 		auto magDelta = currentPenaltyMag - newPenaltyMag;
 
 		//Set tracker av not actual damage
