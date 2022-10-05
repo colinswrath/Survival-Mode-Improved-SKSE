@@ -65,9 +65,9 @@ public:
 		}
 	}
 
-	virtual float GetNeedDivisor(){};
+	virtual float GetNeedDivisor() = 0;
 
-	virtual void UpdateNeed(){};
+	virtual void UpdateNeed() = 0;
 
 	virtual void InitializeNeed()
 	{
