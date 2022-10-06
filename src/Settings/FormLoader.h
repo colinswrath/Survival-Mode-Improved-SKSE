@@ -138,6 +138,8 @@ public:
 		fatigueSystem->Survival_RacialBonusMinor = RE::TESForm::LookupByEditorID("Survival_RacialBonusMinor")->As<RE::TESGlobal>();
 		fatigueSystem->Survival_RacialBonusMajor = RE::TESForm::LookupByEditorID("Survival_RacialBonusMajor")->As<RE::TESGlobal>();
 
+		fatigueSystem->Survival_ExhaustionOverEncumberedMult = RE::TESForm::LookupByEditorID("Survival_ExhaustionOverEncumberedMult")->As<RE::TESGlobal>();
+
 		//VampireBloodMessage
 	}
 
