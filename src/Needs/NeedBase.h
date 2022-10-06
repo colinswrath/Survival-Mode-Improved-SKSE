@@ -129,6 +129,10 @@ protected:
 
 	virtual float GetNeedDivisor() = 0;
 
+	virtual float GetNeedIncrementAmount(int ticks) = 0;
+
+	virtual void ApplyNeedStageEffects(bool increasing) = 0;
+
 	/// <summary>
 	/// Get delta between time stamps in game seconds. For now, 1 tick = 1 in game minute
 	/// </summary>
@@ -178,8 +182,6 @@ protected:
 			ApplyNeedStageEffects(increasing);
 		}
 	}
-
-	virtual void ApplyNeedStageEffects(bool increasing) = 0;
 
 	virtual void ApplyAttributePenalty()
 	{
@@ -232,20 +234,7 @@ protected:
 		NeedPenaltyUIGlobal->value = newVal;
 	}
 
-	virtual float GetNeedIncrementAmount(int ticks)
-	{
-		float amount = 0;
-		
-		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
-		amount = (NeedRate->value/GetNeedDivisor()) * float(ticks);	
-
-		if (WasSleeping) {
-			amount = amount * NeedSleepRateMult->value;
-			WasSleeping = false;
-		} 
-
-		return amount;
-	}
+	
 
 	/// <summary>
 	/// Remove all need effects

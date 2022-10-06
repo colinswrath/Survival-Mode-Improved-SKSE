@@ -21,7 +21,7 @@ public:
 	RE::TESGlobal* Survival_HungerRestoreSmallAmount;
 	RE::TESGlobal* Survival_HungerRestoreVerySmallAmount;
 
-	RE::BGSListForm* Survival_HungerResistanceRacesMinor;
+	RE::BGSListForm* Survival_HungerResistRacesMinor;
 
 	const float hungerDivisor = 60.0f;
 
@@ -49,7 +49,7 @@ public:
 			WasSleeping = false;
 		}
 
-		if (Survival_HungerResistanceRacesMinor->HasForm(player->GetRace())) {
+		if (Survival_HungerResistRacesMinor->HasForm(player->GetRace())) {
 			amount = amount * (1.0f - Survival_RacialBonusMinor->value);
 		}
 
