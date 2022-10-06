@@ -44,6 +44,11 @@ public:
 		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
 		amount = (NeedRate->value / GetNeedDivisor()) * float(ticks);
 
+		if (WasSleeping) {
+			amount = amount * NeedSleepRateMult->value;
+			WasSleeping = false;
+		}
+
 		if (Survival_HungerResistRacesMinor->HasForm(player->GetRace())) {
 			amount = amount * (1.0f - Survival_RacialBonusMinor->value);
 		}
