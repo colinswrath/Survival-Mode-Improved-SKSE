@@ -34,16 +34,24 @@ void SurvivalMode::SurvivalModeLoopUpdate()
 	} else {
 
 		if (playerStatus->IsSurvivalEnabled() && !playerStatus->SurvivalToggle()) {
-			//If SM is on but should be off
-			StopAllNeeds();
+			StopSurvivalMode();
 		} else if (!playerStatus->IsSurvivalEnabled() && playerStatus->SurvivalToggle()) {
-			//If SM is off but should be on
-			InitializeAllNeeds();
-			SendAllNeedsUpdate();
+			StartSurvivalMode();	
 		} else if (playerStatus->IsSurvivalEnabled()) {
 			SendAllNeedsUpdate();
 		}
 	}
+}
+
+void SurvivalMode::StartSurvivalMode()
+{
+	InitializeAllNeeds();
+	SendAllNeedsUpdate();
+}
+
+void SurvivalMode::StopSurvivalMode()
+{
+	StopAllNeeds();
 }
 
 /// <summary>
@@ -64,6 +72,16 @@ void SurvivalMode::InitializeAllNeeds()
 }
 
 /// <summary>
+/// Send update to all needs
+/// </summary>
+void SurvivalMode::SendAllNeedsUpdate()
+{
+	NeedHunger::GetSingleton()->OnUpdatePass();
+	NeedExhaustion::GetSingleton()->OnUpdatePass();
+	//Cold
+}
+
+/// <summary>
 /// Send stop to all needs
 /// </summary>
 void SurvivalMode::StopAllNeeds()
@@ -77,16 +95,6 @@ void SurvivalMode::StopAllNeeds()
 	PlayerStatus::GetSingleton()->Survival_ModeEnabled->value = 0;
 	PlayerStatus::GetSingleton()->Survival_ModeEnabledShared->value = 0;
 	logger::info("Needs stopped");
-}
-
-/// <summary>
-/// Send update to all needs
-/// </summary>
-void SurvivalMode::SendAllNeedsUpdate()
-{
-	NeedHunger::GetSingleton()->OnUpdatePass();
-	NeedExhaustion::GetSingleton()->OnUpdatePass();
-	//Cold
 }
 
 void SurvivalMode::ShowNotification(RE::BGSMessage* msg)
