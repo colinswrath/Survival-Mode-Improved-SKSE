@@ -45,9 +45,9 @@ void SurvivalMode::SurvivalModeLoopUpdate()
 
 void SurvivalMode::StartSurvivalMode()
 {
+	AddPlayerSpellPerks();
 	InitializeAllNeeds();
 	SendAllNeedsUpdate();
-	AddPlayerSpellPerks();
 }
 
 void SurvivalMode::StopSurvivalMode()
