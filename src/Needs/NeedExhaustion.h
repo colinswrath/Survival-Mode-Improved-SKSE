@@ -15,6 +15,8 @@ public:
 	
 	RE::TESGlobal* Survival_ExhaustionRestorePerHour;
 
+	RE::TESGlobal* Survival_ExhaustionOverEncumberedMult;
+
 	RE::BGSListForm* Survival_ExhaustionResistRacesMajor;
 	RE::BGSListForm* Survival_ExhaustionResistRacesMinor;
 
@@ -66,6 +68,10 @@ public:
 			amount = amount * (1.0f - Survival_RacialBonusMinor->value);
 		} else if (Survival_ExhaustionResistRacesMajor->HasForm(player->GetRace())) {
 			amount = amount * (1.0f - Survival_RacialBonusMajor->value);
+		}
+
+		if (player->IsOverEncumbered()) {
+			amount = amount * Survival_ExhaustionOverEncumberedMult->value;
 		}
 
 		return amount;

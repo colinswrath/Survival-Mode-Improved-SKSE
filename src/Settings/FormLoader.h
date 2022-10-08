@@ -139,6 +139,8 @@ public:
 		fatigueSystem->Survival_RacialBonusMinor = RE::TESForm::LookupByEditorID("Survival_RacialBonusMinor")->As<RE::TESGlobal>();
 		fatigueSystem->Survival_RacialBonusMajor = RE::TESForm::LookupByEditorID("Survival_RacialBonusMajor")->As<RE::TESGlobal>();
 
+		fatigueSystem->Survival_ExhaustionOverEncumberedMult = RE::TESForm::LookupByEditorID("Survival_ExhaustionOverEncumberedMult")->As<RE::TESGlobal>();
+
 		//VampireBloodMessage
 	}
 
@@ -170,6 +172,19 @@ public:
 		auto playerStatus = PlayerStatus::GetSingleton();
 		playerStatus->Survival_ModeToggle = RE::TESForm::LookupByEditorID("Survival_ModeToggle")->As<RE::TESGlobal>();
 		playerStatus->Survival_ModeEnabled = RE::TESForm::LookupByEditorID("Survival_ModeEnabled")->As<RE::TESGlobal>();
+
+		playerStatus->Survival_abLowerCarryWeightSpell = RE::TESForm::LookupByEditorID("Survival_abLowerCarryWeightSpell")->As<RE::SpellItem>();
+		playerStatus->Survival_abRacialNord = RE::TESForm::LookupByEditorID("Survival_abRacialNord")->As<RE::SpellItem>();
+		playerStatus->Survival_abRacialAltmer = RE::TESForm::LookupByEditorID("Survival_abRacialAltmer")->As<RE::SpellItem>();
+		playerStatus->Survival_abRacialOrc = RE::TESForm::LookupByEditorID("Survival_abRacialOrc")->As<RE::SpellItem>();
+		playerStatus->Survival_abRacialBosmer = RE::TESForm::LookupByEditorID("Survival_abRacialBosmer")->As<RE::SpellItem>();
+		playerStatus->Survival_abRacialDunmer = RE::TESForm::LookupByEditorID("Survival_abRacialDunmer")->As<RE::SpellItem>();
+		playerStatus->Survival_abRacialKhajiit = RE::TESForm::LookupByEditorID("Survival_abRacialKhajiit")->As<RE::SpellItem>();
+		playerStatus->Survival_abRacialArgonianRawMeat = RE::TESForm::LookupByEditorID("Survival_abRacialArgonianRawMeat")->As<RE::SpellItem>();
+		playerStatus->Survival_abRacialKhajiitRawMeat = RE::TESForm::LookupByEditorID("Survival_abRacialKhajiitRawMeat")->As<RE::SpellItem>();
+		playerStatus->Survival_abWarmthTorch = RE::TESForm::LookupByEditorID("Survival_abWarmthTorch")->As<RE::SpellItem>();
+		playerStatus->Survival_OverencumberedSpell = RE::TESForm::LookupByEditorID("Survival_OverencumberedSpell")->As<RE::SpellItem>();
+
 		playerStatus->Survival_ModeEnabledShared = RE::TESForm::LookupByEditorID("Survival_ModeEnabledShared")->As<RE::TESGlobal>();
 		playerStatus->Survival_ModeCanBeEnabled = RE::TESForm::LookupByEditorID("Survival_ModeCanBeEnabled")->As<RE::TESGlobal>();
 
