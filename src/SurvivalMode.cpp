@@ -115,7 +115,7 @@ bool SurvivalMode::InstallUpdateHook()
 	return true;
 }
 
-void AddPlayerSpellPerks() 
+void SurvivalMode::AddPlayerSpellPerks()
 {
 	auto player = RE::PlayerCharacter::GetSingleton();
 
@@ -132,7 +132,7 @@ void AddPlayerSpellPerks()
 	player->AddSpell(PlayerStatus::GetSingleton()->Survival_OverencumberedSpell);
 }
 
-void RemovePlayerSpellPerks() 
+void SurvivalMode::RemovePlayerSpellPerks()
 {
 	auto player = RE::PlayerCharacter::GetSingleton();
 
