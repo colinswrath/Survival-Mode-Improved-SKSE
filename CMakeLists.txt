@@ -98,6 +98,7 @@ set(SOURCES
 	src/Needs/NeedBase.h
 	src/Needs/NeedHunger.h
 	src/Needs/NeedExhaustion.h
+	src/Needs/NeedCold.h
 	src/Settings/FormLoader.h
 )
 

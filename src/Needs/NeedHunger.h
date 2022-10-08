@@ -25,15 +25,20 @@ public:
 
 	const float hungerDivisor = 60.0f;
 
-	float GetNeedDivisor() override
-	{
-		return hungerDivisor;
-	}
-
 	static NeedHunger* GetSingleton()
 	{
 		static NeedHunger hungerSystem;
 		return &hungerSystem;
+	}
+
+	void UpdateNeed() override
+	{
+		int ticks = GetGameTimeTicks();
+
+		if (ticks > 0) {
+			IncrementNeed(ticks);
+			SetLastTimeStamp(GetCurrentGameTimeInMinutes());
+		}
 	}
 
 	float GetNeedIncrementAmount(int ticks) override 
@@ -42,7 +47,7 @@ public:
 		float amount = 0.0f;
 
 		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
-		amount = (NeedRate->value / GetNeedDivisor()) * float(ticks);
+		amount = (NeedRate->value / hungerDivisor) * float(ticks);
 
 		if (WasSleeping) {
 			amount = amount * NeedSleepRateMult->value;
@@ -54,17 +59,6 @@ public:
 		}
 
 		return amount;
-	}
-
-
-	void UpdateNeed() override
-	{
-		int ticks = GetGameTimeTicks();
-
-		if (ticks > 0) {
-			IncrementNeed(ticks);
-			SetLastTimeStamp(GetCurrentGameTimeInMinutes());
-		}
 	}
 
 	void ApplyNeedStageEffects(bool increasing) override

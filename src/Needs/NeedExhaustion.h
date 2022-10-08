@@ -25,11 +25,6 @@ public:
 
 	const float exhaustionDivisor = 60.0f;
 
-	float GetNeedDivisor() override
-	{	
-		return exhaustionDivisor;
-	}
-
 	static NeedExhaustion* GetSingleton()
 	{
 		static NeedExhaustion fatigueSystem;
@@ -65,7 +60,7 @@ public:
 		float amount = 0.0f;
 
 		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
-		amount = (NeedRate->value / GetNeedDivisor()) * float(ticks);
+		amount = (NeedRate->value / exhaustionDivisor) * float(ticks);
 
 		if (Survival_ExhaustionResistRacesMinor->HasForm(player->GetRace())) {
 			amount = amount * (1.0f - Survival_RacialBonusMinor->value);

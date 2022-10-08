@@ -58,7 +58,6 @@ public:
 	/// </summary>
 	void OnUpdatePass()
 	{
-		
 		auto status = PlayerStatus::GetSingleton();
 		//TODO- Pause needs if you are:
 		//InCombat
@@ -126,8 +125,6 @@ public:
 protected:
 
 	virtual void UpdateNeed() = 0;
-
-	virtual float GetNeedDivisor() = 0;
 
 	virtual float GetNeedIncrementAmount(int ticks) = 0;
 
@@ -233,8 +230,6 @@ protected:
 
 		NeedPenaltyUIGlobal->value = newVal;
 	}
-
-	
 
 	/// <summary>
 	/// Remove all need effects

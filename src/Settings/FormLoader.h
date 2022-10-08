@@ -2,6 +2,7 @@
 
 #include "Needs/NeedHunger.h"
 #include "Needs/NeedExhaustion.h"
+#include "Needs/NeedCold.h"
 #include "PlayerStatus.h"
 
 class FormLoader
@@ -23,7 +24,7 @@ public:
 
 		LoadHungerForms();
 		LoadFatigueForms();
-		//LoadColdForms();
+		LoadColdForms();
 		LoadMiscForms();
 
 		logger::info("All forms are loaded.");
@@ -144,6 +145,24 @@ public:
 	void LoadColdForms()
 	{
 		//Cold penalty AV is 4
+
+		auto coldSystem = NeedCold::GetSingleton();
+
+		coldSystem->NeedPenaltyAV = RE::ActorValue::kVariable04;
+		coldSystem->ActorValPenaltyAttribute = RE::ActorValue::kHealth;
+		coldSystem->NeedPenaltyUIGlobal = RE::TESForm::LookupByEditorID("Survival_ColdAttributePenaltyPercent")->As<RE::TESGlobal>();
+
+		coldSystem->Survival_ColdTargetGameHoursToNumb = RE::TESForm::LookupByEditorID("Survival_ColdTargetGameHoursToNumb")->As<RE::TESGlobal>();
+		coldSystem->SMI_ColdRate = RE::TESForm::LookupByEditorID("SMI_ColdRate")->As<RE::TESGlobal>();
+		coldSystem->SMI_CurrentAmbientTemp = RE::TESForm::LookupByEditorID("SMI_CurrentAmbientTemp")->As<RE::TESGlobal>();
+
+		RE::SpellItem* regionInfoSpell = RE::TESForm::LookupByEditorID("Survival_RegionInfoSpell")->As<RE::SpellItem>();
+		coldSystem->IsInWarmArea = &regionInfoSpell->effects[0]->conditions;
+		coldSystem->IsInCoolArea = &regionInfoSpell->effects[1]->conditions;
+		coldSystem->IsInFreezingArea = &regionInfoSpell->effects[2]->conditions;
+		coldSystem->IsInFallForestFreezingArea = &regionInfoSpell->effects[3]->conditions;
+		coldSystem->IsInPineForestFreezingArea = &regionInfoSpell->effects[4]->conditions;
+		coldSystem->IsInReachArea = &regionInfoSpell->effects[5]->conditions;
 	}
 
 	void LoadMiscForms()
@@ -161,7 +180,6 @@ public:
 		
 		RE::SpellItem* isVampireSpell = RE::TESForm::LookupByEditorID("SMI_VampireSpell")->As<RE::SpellItem>();
 		playerStatus->IsVampireConditions = &isVampireSpell->effects[0]->conditions;
-
 		playerStatus->DA16 = RE::TESForm::LookupByEditorID("DA16")->As<RE::TESQuest>();
 
 	}

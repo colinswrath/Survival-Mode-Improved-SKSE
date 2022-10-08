@@ -2,6 +2,7 @@
 #include "Hooks.h"
 #include "Needs/NeedHunger.h"
 #include "Needs/NeedExhaustion.h"
+#include "Needs/NeedCold.h"
 #include "PlayerStatus.h"
 
 std::int32_t SurvivalMode::OnUpdate(std::int64_t a1)
@@ -63,7 +64,7 @@ void SurvivalMode::InitializeAllNeeds()
 
 	NeedHunger::GetSingleton()->InitializeNeed();
 	NeedExhaustion::GetSingleton()->InitializeNeed();
-	//Cold
+	//NeedCold::GetSingleton()->InitializeNeed();
 
 	PlayerStatus::GetSingleton()->Survival_ModeEnabled->value = 1.0f;
 	PlayerStatus::GetSingleton()->Survival_ModeEnabledShared->value = 1.0f;
@@ -78,7 +79,7 @@ void SurvivalMode::SendAllNeedsUpdate()
 {
 	NeedHunger::GetSingleton()->OnUpdatePass();
 	NeedExhaustion::GetSingleton()->OnUpdatePass();
-	//Cold
+	//NeedCold::GetSingleton()->OnUpdatePass();
 }
 
 /// <summary>
@@ -90,7 +91,7 @@ void SurvivalMode::StopAllNeeds()
 
 	NeedHunger::GetSingleton()->StopNeed();
 	NeedExhaustion::GetSingleton()->StopNeed();
-	//Cold
+	//NeedCold::GetSingleton()->StopNeed();
 
 	PlayerStatus::GetSingleton()->Survival_ModeEnabled->value = 0;
 	PlayerStatus::GetSingleton()->Survival_ModeEnabledShared->value = 0;
