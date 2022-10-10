@@ -21,6 +21,13 @@ public:
 	RE::TESGlobal* Survival_HungerRestoreSmallAmount;
 	RE::TESGlobal* Survival_HungerRestoreVerySmallAmount;
 
+	RE::BGSListForm* Survival_FoodRawMeat;
+	RE::BGSKeyword* VendorItemFoodRaw;
+	RE::BGSListForm* Survival_FoodPoisoningImmuneRaces;
+	RE::BGSKeyword* Survival_DiseaseFoodPoisoningKeyword;
+	RE::BGSMessage* Survival_FoodPoisoningMsg;
+	RE::SpellItem* Survival_DiseaseFoodPoisoning;
+
 	RE::BGSListForm* Survival_HungerResistRacesMinor;
 
 	const float hungerDivisor = 60.0f;
