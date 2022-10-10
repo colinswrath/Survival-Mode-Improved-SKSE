@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PlayerStatus.h"
+#include "Utility.h"
 #include <mutex>
 
 class NeedBase
@@ -59,7 +59,7 @@ public:
 	void OnUpdatePass()
 	{
 		
-		auto status = PlayerStatus::GetSingleton();
+		auto status = Utility::GetSingleton();
 		//TODO- Pause needs if you are:
 		//InCombat
 		//InDialogue (maybe)
@@ -254,9 +254,9 @@ protected:
 	{
 		RE::PlayerCharacter::GetSingleton()->AddSpell(spell);
 		if (increasing)
-			ShowNotification(increasingMsg);
+			Utility::ShowNotification(increasingMsg);
 		else
-			ShowNotification(decreasingMsg);
+			Utility::ShowNotification(decreasingMsg);
 	}
 
 	virtual void PlaySFX(const char* maleSound, const char* femaleSound)
@@ -266,13 +266,6 @@ protected:
 		} else {
 			RE::PlaySound(maleSound);
 		}
-	}
-
-	void ShowNotification(RE::BGSMessage* msg)
-	{
-		RE::BSString messageDesc;
-		msg->GetDescription(messageDesc, msg);
-		RE::DebugNotification(messageDesc.c_str());
 	}
 
 	float GetCurrentGameTimeInMinutes()

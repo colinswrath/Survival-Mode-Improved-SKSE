@@ -1,6 +1,7 @@
 #pragma once
 #include "Needs/NeedHunger.h"
 #include "Needs/NeedExhaustion.h"
+#include "Utility.h"
 
 namespace Events
 {
@@ -37,8 +38,22 @@ namespace Events
 	static void ProcessHungerOnEquipEvent(RE::AlchemyItem* food)
 	{
 		auto hunger = NeedHunger::GetSingleton();
+		auto player = RE::PlayerCharacter::GetSingleton();
 
 		if (!hunger->CurrentlyStopped) {
+			if (hunger->Survival_FoodRawMeat->HasForm(food) || food->HasKeyword(hunger->VendorItemFoodRaw)) {
+				float diseaseResistMult = player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kResistDisease);
+
+				if (!hunger->Survival_FoodPoisoningImmuneRaces->HasForm(player->GetRace()) && (diseaseResistMult < 1) && !player->HasKeyword(hunger->Survival_DiseaseFoodPoisoningKeyword)) {
+					float baseChance = 50.0f;
+					float chance = baseChance * (1.0f - diseaseResistMult);
+					float result = Utility::GetRandomFloat(0, 100);
+					if (result <= chance) {
+						Utility::ShowNotification(hunger->Survival_FoodPoisoningMsg);
+					}
+				} 
+			}
+
 			for (auto effect : food->effects) {
 				if (hunger->Survival_FoodRestoreHungerVerySmall == effect->baseEffect) {
 					hunger->DecrementNeed(hunger->Survival_HungerRestoreVerySmallAmount->value);
@@ -51,6 +66,7 @@ namespace Events
 				}
 			}
 		}
+
 	}
 
 	class OnSleepStartEventHandler : public RE::BSTEventSink<RE::TESSleepStartEvent>

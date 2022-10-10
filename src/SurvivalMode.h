@@ -18,4 +18,6 @@ protected:
 	inline static void InitializeAllNeeds();
 	inline static void StopAllNeeds();
 	inline static void ShowNotification(RE::BGSMessage* msg);
+	inline static void AddPlayerSpellPerks();
+	inline static void RemovePlayerSpellPerks();
 };

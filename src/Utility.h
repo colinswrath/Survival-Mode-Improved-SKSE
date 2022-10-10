@@ -1,7 +1,7 @@
 #pragma once
 
 
-class PlayerStatus
+class Utility
 {
 public:
 
@@ -32,20 +32,32 @@ public:
 
 	RE::TESCondition* IsVampireConditions;
 
-	static PlayerStatus* GetSingleton()
+	static Utility* GetSingleton()
 	{
-		static PlayerStatus playerStatus;
+		static Utility playerStatus;
 		return &playerStatus;
+	}
+
+	static float GetRandomFloat(float min, float max) 
+	{
+		return SKSE::stl::RNG::GetSingleton()->Generate<float>(min, max);
 	}
 
 	bool IsSurvivalEnabled()
 	{
-		return (bool)PlayerStatus::GetSingleton()->Survival_ModeEnabled->value;
+		return (bool)Utility::GetSingleton()->Survival_ModeEnabled->value;
+	}
+
+	static void ShowNotification(RE::BGSMessage* msg)
+	{
+		RE::BSString messageDesc;
+		msg->GetDescription(messageDesc, msg);
+		RE::DebugNotification(messageDesc.c_str());
 	}
 
 	bool SurvivalToggle()
 	{
-		return (bool)PlayerStatus::GetSingleton()->Survival_ModeToggle->value;
+		return (bool)Utility::GetSingleton()->Survival_ModeToggle->value;
 	}
 
 	bool PlayerIsInCombat()

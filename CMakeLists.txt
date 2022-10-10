@@ -92,7 +92,7 @@ set(SOURCES
 	src/PCH.h
 	src/Events.h
 	src/Hooks.h
-	src/PlayerStatus.h
+	src/Utility.h
 	src/SurvivalMode.cpp
 	src/SurvivalMode.h
 	src/Needs/NeedBase.h
