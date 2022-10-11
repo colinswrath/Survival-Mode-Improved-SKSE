@@ -2,6 +2,7 @@
 
 #include "Needs/NeedHunger.h"
 #include "Needs/NeedExhaustion.h"
+#include "Needs/NeedCold.h"
 #include "Utility.h"
 
 class FormLoader
@@ -18,14 +19,18 @@ public:
 
 	void LoadAllForms() 
 	{
+		logger::info("Loading all forms.");
+
 		if (!RE::TESDataHandler::GetSingleton()->LookupLoadedLightModByName("ccQDRSSE001-SurvivalMode.esl"))
 			return;
 
 		LoadHungerForms();
+		logger::info("Hunger forms are loaded.");
 		LoadFatigueForms();
-		//LoadColdForms();
+		logger::info("Fatigue forms are loaded.");
+		LoadColdForms();
+		logger::info("Cold forms are loaded.");
 		LoadMiscForms();
-
 		logger::info("All forms are loaded.");
 	}
 
@@ -153,6 +158,62 @@ public:
 	void LoadColdForms()
 	{
 		//Cold penalty AV is 4
+
+		auto coldSystem = NeedCold::GetSingleton();
+
+		coldSystem->NeedPenaltyAV = RE::ActorValue::kVariable04;
+		coldSystem->ActorValPenaltyAttribute = RE::ActorValue::kHealth;
+		coldSystem->NeedPenaltyUIGlobal = RE::TESForm::LookupByEditorID("Survival_ColdAttributePenaltyPercent")->As<RE::TESGlobal>();
+
+		coldSystem->Survival_ColdTargetGameHoursToNumb = RE::TESForm::LookupByEditorID("Survival_ColdTargetGameHoursToNumb")->As<RE::TESGlobal>();
+		coldSystem->SMI_ColdRate = RE::TESForm::LookupByEditorID("SMI_ColdRate")->As<RE::TESGlobal>();
+		coldSystem->SMI_CurrentAmbientTemp = RE::TESForm::LookupByEditorID("SMI_CurrentAmbientTemp")->As<RE::TESGlobal>();
+
+		coldSystem->NeedSpell0 = RE::TESForm::LookupByEditorID("Survival_ColdStage0")->As<RE::SpellItem>();
+		coldSystem->NeedSpell1 = RE::TESForm::LookupByEditorID("Survival_ColdStage1")->As<RE::SpellItem>();
+		coldSystem->NeedSpell2 = RE::TESForm::LookupByEditorID("Survival_ColdStage2")->As<RE::SpellItem>();
+		coldSystem->NeedSpell3 = RE::TESForm::LookupByEditorID("Survival_ColdStage3")->As<RE::SpellItem>();
+		coldSystem->NeedSpell4 = RE::TESForm::LookupByEditorID("Survival_ColdStage4")->As<RE::SpellItem>();
+		coldSystem->NeedSpell5 = RE::TESForm::LookupByEditorID("Survival_ColdStage5")->As<RE::SpellItem>();
+
+		coldSystem->NeedStage1 = RE::TESForm::LookupByEditorID("Survival_ColdStage1Value")->As<RE::TESGlobal>();
+		coldSystem->NeedStage2 = RE::TESForm::LookupByEditorID("Survival_ColdStage2Value")->As<RE::TESGlobal>();
+		coldSystem->NeedStage3 = RE::TESForm::LookupByEditorID("Survival_ColdStage3Value")->As<RE::TESGlobal>();
+		coldSystem->NeedStage4 = RE::TESForm::LookupByEditorID("Survival_ColdStage4Value")->As<RE::TESGlobal>();
+		coldSystem->NeedStage5 = RE::TESForm::LookupByEditorID("Survival_ColdStage5Value")->As<RE::TESGlobal>();
+		coldSystem->NeedMaxValue = RE::TESForm::LookupByEditorID("Survival_ColdNeedMaxValue")->As<RE::TESGlobal>();
+
+		coldSystem->Survival_ColdConditionStage0 = RE::TESForm::LookupByEditorID("Survival_ColdConditionStage0")->As<RE::BGSMessage>();
+		coldSystem->Survival_ColdConditionStage1 = RE::TESForm::LookupByEditorID("Survival_ColdConditionStage1")->As<RE::BGSMessage>();
+		coldSystem->Survival_ColdConditionStage2 = RE::TESForm::LookupByEditorID("Survival_ColdConditionStage2")->As<RE::BGSMessage>();
+		coldSystem->Survival_ColdConditionStage3 = RE::TESForm::LookupByEditorID("Survival_ColdConditionStage3")->As<RE::BGSMessage>();
+		coldSystem->Survival_ColdConditionStage4 = RE::TESForm::LookupByEditorID("Survival_ColdConditionStage4")->As<RE::BGSMessage>();
+		coldSystem->Survival_ColdConditionStage5 = RE::TESForm::LookupByEditorID("Survival_ColdConditionStage5")->As<RE::BGSMessage>();
+
+		coldSystem->NeedMessage0 = RE::TESForm::LookupByEditorID("Survival_Cold0Message")->As<RE::BGSMessage>();
+		coldSystem->NeedMessage1 = RE::TESForm::LookupByEditorID("Survival_Cold1Message")->As<RE::BGSMessage>();
+		coldSystem->NeedMessage1Decreasing = RE::TESForm::LookupByEditorID("Survival_Cold1MessageDecreasing")->As<RE::BGSMessage>();
+		coldSystem->NeedMessage2 = RE::TESForm::LookupByEditorID("Survival_Cold2Message")->As<RE::BGSMessage>();
+		coldSystem->NeedMessage2Decreasing = RE::TESForm::LookupByEditorID("Survival_Cold2MessageDecreasing")->As<RE::BGSMessage>();
+		coldSystem->NeedMessage3 = RE::TESForm::LookupByEditorID("Survival_Cold3Message")->As<RE::BGSMessage>();
+		coldSystem->NeedMessage3Decreasing = RE::TESForm::LookupByEditorID("Survival_Cold3MessageDecreasing")->As<RE::BGSMessage>();
+		coldSystem->NeedMessage4 = RE::TESForm::LookupByEditorID("Survival_Cold4Message")->As<RE::BGSMessage>();
+		coldSystem->NeedMessage4Decreasing = RE::TESForm::LookupByEditorID("Survival_Cold4MessageDecreasing")->As<RE::BGSMessage>();
+		coldSystem->NeedMessage5 = RE::TESForm::LookupByEditorID("Survival_Cold5Message")->As<RE::BGSMessage>();
+
+		coldSystem->CurrentNeedStage = RE::TESForm::LookupByEditorID("SMI_CurrentColdStage")->As<RE::TESGlobal>();
+		coldSystem->CurrentNeedValue = RE::TESForm::LookupByEditorID("Survival_ColdNeedValue")->As<RE::TESGlobal>();
+		coldSystem->Survival_ColdLevelInFreezingWater = RE::TESForm::LookupByEditorID("Survival_ColdLevelInFreezingWater")->As<RE::TESGlobal>();
+
+		coldSystem->Survival_AshWeather = RE::TESForm::LookupByEditorID("Survival_AshWeather")->As<RE::BGSListForm>();
+		coldSystem->Survival_BlizzardWeather = RE::TESForm::LookupByEditorID("Survival_BlizzardWeather")->As<RE::BGSListForm>();
+		coldSystem->SMI_ColdCloudyWeather = RE::TESForm::LookupByEditorID("SMI_ColdCloudyWeather")->As<RE::BGSListForm>();	
+
+		coldSystem->LastUpdateTimeStamp = RE::TESForm::LookupByEditorID("SMI_ColdLastUpdateTimeStamp")->As<RE::TESGlobal>();
+		coldSystem->NeedSleepRateMult = RE::TESForm::LookupByEditorID("Survival_NeedSleepReducedMetabolismMult")->As<RE::TESGlobal>();
+		coldSystem->NeedAttributePenaltyPercent = RE::TESForm::LookupByEditorID("Survival_ColdAttributePenaltyPercent")->As<RE::TESGlobal>();
+		coldSystem->Survival_ColdResistMaxValue = RE::TESForm::LookupByEditorID("Survival_ColdResistMaxValue")->As<RE::TESGlobal>();
+		coldSystem->Survival_TemperatureLevel = RE::TESForm::LookupByEditorID("Survival_TemperatureLevel")->As<RE::TESGlobal>();	
 	}
 
 	void LoadMiscForms()
@@ -180,11 +241,23 @@ public:
 		playerStatus->Survival_OblivionCells = RE::TESForm::LookupByEditorID("Survival_OblivionCells")->As<RE::BGSListForm>();
 		playerStatus->Survival_OblivionLocations = RE::TESForm::LookupByEditorID("Survival_OblivionLocations")->As<RE::BGSListForm>();
 		playerStatus->Survival_OblivionAreas = RE::TESForm::LookupByEditorID("Survival_OblivionAreas")->As<RE::BGSListForm>();
+
+		playerStatus->Survival_ColdInteriorCells = RE::TESForm::LookupByEditorID("Survival_ColdInteriorCells")->As<RE::BGSListForm>();
+		playerStatus->Survival_ColdInteriorLocations = RE::TESForm::LookupByEditorID("Survival_ColdInteriorLocations")->As<RE::BGSListForm>();
+		playerStatus->Survival_InteriorAreas = RE::TESForm::LookupByEditorID("Survival_InteriorAreas")->As<RE::BGSListForm>();
 		
 		RE::SpellItem* isVampireSpell = RE::TESForm::LookupByEditorID("SMI_VampireSpell")->As<RE::SpellItem>();
 		playerStatus->IsVampireConditions = &isVampireSpell->effects[0]->conditions;
-
 		playerStatus->DA16 = RE::TESForm::LookupByEditorID("DA16")->As<RE::TESQuest>();
+
+		RE::SpellItem* regionInfoSpell = RE::TESForm::LookupByEditorID("Survival_RegionInfoSpell")->As<RE::SpellItem>();
+
+		playerStatus->IsInWarmArea = &regionInfoSpell->effects[0]->conditions;
+		playerStatus->IsInCoolArea = &regionInfoSpell->effects[1]->conditions;
+		playerStatus->IsInFreezingArea = &regionInfoSpell->effects[2]->conditions;
+		playerStatus->IsInFallForestFreezingArea = &regionInfoSpell->effects[3]->conditions;
+		playerStatus->IsInPineForestFreezingArea = &regionInfoSpell->effects[4]->conditions;
+		playerStatus->IsInReachArea = &regionInfoSpell->effects[5]->conditions;
 
 	}
 };

@@ -2,6 +2,7 @@
 
 #include "Utility.h"
 #include <mutex>
+#include <algorithm>
 
 class NeedBase
 {
@@ -127,8 +128,6 @@ protected:
 
 	virtual void UpdateNeed() = 0;
 
-	virtual float GetNeedDivisor() = 0;
-
 	virtual float GetNeedIncrementAmount(int ticks) = 0;
 
 	virtual void ApplyNeedStageEffects(bool increasing) = 0;
@@ -165,17 +164,17 @@ protected:
 		float lastStage = CurrentNeedStage->value;
 
 		if (currentNeedValue < NeedStage1->value) {
-			CurrentNeedStage->value = 0;
+			CurrentNeedStage->value = 0.0f;
 		} else if (currentNeedValue < NeedStage2->value) {
-			CurrentNeedStage->value = 1;
+			CurrentNeedStage->value = 1.0f;
 		} else if (currentNeedValue < NeedStage3->value) {
-			CurrentNeedStage->value = 2;
+			CurrentNeedStage->value = 2.0f;
 		} else if (currentNeedValue < NeedStage4->value) {
-			CurrentNeedStage->value = 3;
+			CurrentNeedStage->value = 3.0f;
 		} else if (currentNeedValue < NeedStage5->value) {
-			CurrentNeedStage->value = 4;
+			CurrentNeedStage->value = 4.0f;
 		} else {
-			CurrentNeedStage->value = 5;
+			CurrentNeedStage->value = 5.0f;
 		}
 
 		if (lastStage != CurrentNeedStage->value) {
@@ -212,29 +211,18 @@ protected:
 	virtual float GetPenaltyPercentAmount()
 	{
 		auto penalty = (CurrentNeedValue->value - NeedStage2->value - 1) / (NeedMaxValue->value - NeedStage2->value - 1);
-		if (penalty < 0) {
-			penalty = 0;
-		} else if (penalty > 1.0) {
-			penalty = 1.0;
-		}
+		penalty = std::clamp(penalty, 0.0f, 1.0f);
 
 		return penalty;
 	}
 
 	void SetAttributePenaltyUIGlobal(float penaltyPerc) 
 	{
-		auto newVal = penaltyPerc * 100;
-		
-		if (newVal < 0) {
-			newVal = 0;
-		} else if (newVal > 100) {
-			newVal = 100;
-		}
+		auto newVal = penaltyPerc * 100.0f;
+		newVal = std::clamp(newVal, 0.0f, 100.0f);
 
 		NeedPenaltyUIGlobal->value = newVal;
 	}
-
-	
 
 	/// <summary>
 	/// Remove all need effects
