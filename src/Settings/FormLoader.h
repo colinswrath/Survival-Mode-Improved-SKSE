@@ -3,7 +3,7 @@
 #include "Needs/NeedHunger.h"
 #include "Needs/NeedExhaustion.h"
 #include "Needs/NeedCold.h"
-#include "PlayerStatus.h"
+#include "Utility.h"
 
 class FormLoader
 {
@@ -87,6 +87,13 @@ public:
 		hungerSystem->Survival_HungerRestoreMediumAmount = RE::TESForm::LookupByEditorID("Survival_HungerRestoreMediumAmount")->As<RE::TESGlobal>();
 		hungerSystem->Survival_HungerRestoreSmallAmount = RE::TESForm::LookupByEditorID("Survival_HungerRestoreSmallAmount")->As<RE::TESGlobal>();
 		hungerSystem->Survival_HungerRestoreVerySmallAmount = RE::TESForm::LookupByEditorID("Survival_HungerRestoreVerySmallAmount")->As<RE::TESGlobal>();
+
+		hungerSystem->Survival_FoodRawMeat = RE::TESForm::LookupByEditorID("Survival_FoodRawMeat")->As<RE::BGSListForm>();
+		hungerSystem->VendorItemFoodRaw = RE::TESForm::LookupByEditorID("VendorItemFoodRaw")->As<RE::BGSKeyword>();
+		hungerSystem->Survival_FoodPoisoningImmuneRaces = RE::TESForm::LookupByEditorID("Survival_FoodPoisoningImmuneRaces")->As<RE::BGSListForm>();
+		hungerSystem->Survival_DiseaseFoodPoisoningKeyword = RE::TESForm::LookupByEditorID("Survival_DiseaseFoodPoisoningKeyword")->As<RE::BGSKeyword>();
+		hungerSystem->Survival_FoodPoisoningMsg = RE::TESForm::LookupByEditorID("FoodPoisoningMsg")->As<RE::BGSMessage>();
+		hungerSystem->Survival_DiseaseFoodPoisoning = RE::TESForm::LookupByEditorID("DiseaseFoodPoisoning")->As<RE::SpellItem>();
 		
 	}
 
@@ -211,7 +218,7 @@ public:
 
 	void LoadMiscForms()
 	{
-		auto playerStatus = PlayerStatus::GetSingleton();
+		auto playerStatus = Utility::GetSingleton();
 		playerStatus->Survival_ModeToggle = RE::TESForm::LookupByEditorID("Survival_ModeToggle")->As<RE::TESGlobal>();
 		playerStatus->Survival_ModeEnabled = RE::TESForm::LookupByEditorID("Survival_ModeEnabled")->As<RE::TESGlobal>();
 

@@ -10,7 +10,7 @@ enum class AREA_TYPE
 	kAreaTypeReach = 4
 };
 
-class PlayerStatus
+class Utility
 {
 public:
 	RE::TESGlobal* Survival_ModeToggle;
@@ -50,9 +50,9 @@ public:
 	RE::BGSMessage* Survival_OblivionAreaMessage;
 	RE::TESQuest* DA16;
 
-	static PlayerStatus* GetSingleton()
+	static Utility* GetSingleton()
 	{
-		static PlayerStatus playerStatus;
+		static Utility playerStatus;
 		return &playerStatus;
 	}
 
@@ -82,11 +82,21 @@ public:
 		} else {
 			return AREA_TYPE::kAreaTypeCool;
 		}
+	static float GetRandomFloat(float min, float max) 
+	{
+		return SKSE::stl::RNG::GetSingleton()->Generate<float>(min, max);
 	}
 
 	bool IsSurvivalEnabled()
 	{
 		return (bool)Survival_ModeEnabled->value;
+	}
+
+	static void ShowNotification(RE::BGSMessage* msg)
+	{
+		RE::BSString messageDesc;
+		msg->GetDescription(messageDesc, msg);
+		RE::DebugNotification(messageDesc.c_str());
 	}
 
 	bool SurvivalToggle()

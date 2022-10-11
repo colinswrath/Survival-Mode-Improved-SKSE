@@ -89,7 +89,7 @@ public:
 		float stage = CurrentNeedStage->value;
 		
 		if (stage == 0) {
-			if (PlayerStatus::GetSingleton()->PlayerCanGetWellRested()) {
+			if (Utility::GetSingleton()->PlayerCanGetWellRested()) {
 				NotifyAddEffect(WellRestedMessage, WellRestedMessage, WellRested);
 			} else {
 				NotifyAddEffect(RestedMessage, RestedMessage, Rested);	
