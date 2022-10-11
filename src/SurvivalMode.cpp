@@ -66,7 +66,7 @@ void SurvivalMode::InitializeAllNeeds()
 
 	NeedHunger::GetSingleton()->InitializeNeed();
 	NeedExhaustion::GetSingleton()->InitializeNeed();
-	//NeedCold::GetSingleton()->InitializeNeed();
+	NeedCold::GetSingleton()->InitializeNeed();
 
 	PlayerStatus::GetSingleton()->Survival_ModeEnabled->value = 1.0f;
 	PlayerStatus::GetSingleton()->Survival_ModeEnabledShared->value = 1.0f;
@@ -81,7 +81,7 @@ void SurvivalMode::SendAllNeedsUpdate()
 {
 	NeedHunger::GetSingleton()->OnUpdatePass();
 	NeedExhaustion::GetSingleton()->OnUpdatePass();
-	//NeedCold::GetSingleton()->OnUpdatePass();
+	NeedCold::GetSingleton()->OnUpdatePass();
 }
 
 /// <summary>
@@ -93,7 +93,7 @@ void SurvivalMode::StopAllNeeds()
 
 	NeedHunger::GetSingleton()->StopNeed();
 	NeedExhaustion::GetSingleton()->StopNeed();
-	//NeedCold::GetSingleton()->StopNeed();
+	NeedCold::GetSingleton()->StopNeed();
 
 	PlayerStatus::GetSingleton()->Survival_ModeEnabled->value = 0;
 	PlayerStatus::GetSingleton()->Survival_ModeEnabledShared->value = 0;
@@ -118,34 +118,36 @@ bool SurvivalMode::InstallUpdateHook()
 void SurvivalMode::AddPlayerSpellPerks()
 {
 	auto player = RE::PlayerCharacter::GetSingleton();
+	auto playerStatus = PlayerStatus::GetSingleton();
 
-	player->AddSpell(PlayerStatus::GetSingleton()->Survival_abLowerCarryWeightSpell);
-	player->AddSpell(PlayerStatus::GetSingleton()->Survival_abRacialNord);
-	player->AddSpell(PlayerStatus::GetSingleton()->Survival_abRacialAltmer);
-	player->AddSpell(PlayerStatus::GetSingleton()->Survival_abRacialOrc);
-	player->AddSpell(PlayerStatus::GetSingleton()->Survival_abRacialBosmer);
-	player->AddSpell(PlayerStatus::GetSingleton()->Survival_abRacialDunmer);
-	player->AddSpell(PlayerStatus::GetSingleton()->Survival_abRacialKhajiit);
-	player->AddSpell(PlayerStatus::GetSingleton()->Survival_abRacialArgonianRawMeat);
-	player->AddSpell(PlayerStatus::GetSingleton()->Survival_abRacialKhajiitRawMeat);
-	player->AddSpell(PlayerStatus::GetSingleton()->Survival_abWarmthTorch);
-	player->AddSpell(PlayerStatus::GetSingleton()->Survival_OverencumberedSpell);
+	player->AddSpell(playerStatus->Survival_abLowerCarryWeightSpell);
+	player->AddSpell(playerStatus->Survival_abRacialNord);
+	player->AddSpell(playerStatus->Survival_abRacialAltmer);
+	player->AddSpell(playerStatus->Survival_abRacialOrc);
+	player->AddSpell(playerStatus->Survival_abRacialBosmer);
+	player->AddSpell(playerStatus->Survival_abRacialDunmer);
+	player->AddSpell(playerStatus->Survival_abRacialKhajiit);
+	player->AddSpell(playerStatus->Survival_abRacialArgonianRawMeat);
+	player->AddSpell(playerStatus->Survival_abRacialKhajiitRawMeat);
+	player->AddSpell(playerStatus->Survival_abWarmthTorch);
+	player->AddSpell(playerStatus->Survival_OverencumberedSpell);
 }
 
 void SurvivalMode::RemovePlayerSpellPerks()
 {
 	auto player = RE::PlayerCharacter::GetSingleton();
+	auto playerStatus = PlayerStatus::GetSingleton();
 
-	player->RemoveSpell(PlayerStatus::GetSingleton()->Survival_abLowerCarryWeightSpell);
-	player->RemoveSpell(PlayerStatus::GetSingleton()->Survival_abRacialNord);
-	player->RemoveSpell(PlayerStatus::GetSingleton()->Survival_abRacialAltmer);
-	player->RemoveSpell(PlayerStatus::GetSingleton()->Survival_abRacialOrc);
-	player->RemoveSpell(PlayerStatus::GetSingleton()->Survival_abRacialBosmer);
-	player->RemoveSpell(PlayerStatus::GetSingleton()->Survival_abRacialDunmer);
-	player->RemoveSpell(PlayerStatus::GetSingleton()->Survival_abRacialKhajiit);
-	player->RemoveSpell(PlayerStatus::GetSingleton()->Survival_abRacialArgonianRawMeat);
-	player->RemoveSpell(PlayerStatus::GetSingleton()->Survival_abRacialKhajiitRawMeat);
-	player->RemoveSpell(PlayerStatus::GetSingleton()->Survival_abWarmthTorch);
-	player->RemoveSpell(PlayerStatus::GetSingleton()->Survival_OverencumberedSpell);
+	player->RemoveSpell(playerStatus->Survival_abLowerCarryWeightSpell);
+	player->RemoveSpell(playerStatus->Survival_abRacialNord);
+	player->RemoveSpell(playerStatus->Survival_abRacialAltmer);
+	player->RemoveSpell(playerStatus->Survival_abRacialOrc);
+	player->RemoveSpell(playerStatus->Survival_abRacialBosmer);
+	player->RemoveSpell(playerStatus->Survival_abRacialDunmer);
+	player->RemoveSpell(playerStatus->Survival_abRacialKhajiit);
+	player->RemoveSpell(playerStatus->Survival_abRacialArgonianRawMeat);
+	player->RemoveSpell(playerStatus->Survival_abRacialKhajiitRawMeat);
+	player->RemoveSpell(playerStatus->Survival_abWarmthTorch);
+	player->RemoveSpell(playerStatus->Survival_OverencumberedSpell);
 }
 

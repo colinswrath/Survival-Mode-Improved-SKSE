@@ -44,6 +44,7 @@ public:
 	float GetNeedIncrementAmount(int ticks) override 
 	{	
 		auto player = RE::PlayerCharacter::GetSingleton();
+	
 		float amount = 0.0f;
 
 		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
