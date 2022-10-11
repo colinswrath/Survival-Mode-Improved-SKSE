@@ -1,7 +1,7 @@
 #pragma once
 
 #include "NeedBase.h"
-#include "PlayerStatus.h"
+#include "Utility.h"
 #include <algorithm>
 
 enum class REGION_TEMPS
@@ -151,8 +151,8 @@ public:
 	void UpdateCurrentAmbientTemp()
 	{
 		//TODO-Check if you are in freezing water and return high cold level if so
-		auto playerStatus = PlayerStatus::GetSingleton();
-		auto currentArea = playerStatus->GetCurrentAreaType();
+		auto utility = Utility::GetSingleton();
+		auto currentArea = utility->GetCurrentAreaType();
 
 		auto oldAmbientTemp = SMI_CurrentAmbientTemp->value;
 
@@ -221,7 +221,7 @@ public:
 
 	float GetWarmthRatingBonus()
 	{
-		auto warmthRating = PlayerStatus::GetWarmthRating(RE::PlayerCharacter::GetSingleton());
+		auto warmthRating = Utility::GetWarmthRating(RE::PlayerCharacter::GetSingleton());
 		auto totalBonus = std::clamp(warmthRating, 0.0f, Survival_ColdResistMaxValue->value);
 		return MaxWarmthRatingBonusPerc * totalBonus / Survival_ColdResistMaxValue->value;
 	}
@@ -275,18 +275,18 @@ public:
 	void DisplayAmbientTempTransitionMessage(float previousTemp, float currentTemp)
 	{
 		if (previousTemp < NeedStage5->value && currentTemp >= NeedStage5->value) {
-			ShowNotification(Survival_ColdConditionStage5);
+			Utility::ShowNotification(Survival_ColdConditionStage5);
 		} else if (previousTemp < NeedStage4->value && currentTemp >= NeedStage4->value) {
-			ShowNotification(Survival_ColdConditionStage4);
+			Utility::ShowNotification(Survival_ColdConditionStage4);
 		} else if (previousTemp < NeedStage3->value && currentTemp >= NeedStage3->value) {
-			ShowNotification(Survival_ColdConditionStage3);
+			Utility::ShowNotification(Survival_ColdConditionStage3);
 		} else if (previousTemp < NeedStage2->value && currentTemp >= NeedStage2->value) {
-			ShowNotification(Survival_ColdConditionStage2);
+			Utility::ShowNotification(Survival_ColdConditionStage2);
 		} else if (previousTemp < NeedStage1->value && currentTemp >= NeedStage1->value) {
-			ShowNotification(Survival_ColdConditionStage1);
+			Utility::ShowNotification(Survival_ColdConditionStage1);
 		} else if (previousTemp < static_cast<float>(REGION_TEMPS::kColdLevelWarmArea) && 
 			currentTemp >= static_cast<float>(REGION_TEMPS::kColdLevelWarmArea)) {
-			ShowNotification(Survival_ColdConditionStage0);
+			Utility::ShowNotification(Survival_ColdConditionStage0);
 		}
 	}
 

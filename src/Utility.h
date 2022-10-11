@@ -82,6 +82,8 @@ public:
 		} else {
 			return AREA_TYPE::kAreaTypeCool;
 		}
+	}
+
 	static float GetRandomFloat(float min, float max) 
 	{
 		return SKSE::stl::RNG::GetSingleton()->Generate<float>(min, max);
@@ -138,7 +140,7 @@ public:
 
 	static float GetWarmthRating(RE::Actor* actor)
 	{
-		using func_t = decltype(&PlayerStatus::GetWarmthRating);
+		using func_t = decltype(&Utility::GetWarmthRating);
 		REL::Relocation<func_t> func{ RELOCATION_ID(25834, 26394) };
 		return func(actor);
 	}
