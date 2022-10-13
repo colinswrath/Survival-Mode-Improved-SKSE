@@ -83,6 +83,7 @@ public:
 	{
 		CurrentlyStopped = true;
 		RemoveNeedEffects();
+		RemoveAttributePenalty();
 		CurrentNeedStage->value = -1;
 	}
 
@@ -201,6 +202,15 @@ protected:
 		//Damage or restore AV
 		player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, magDelta);
 		SetAttributePenaltyUIGlobal(penaltyPerc);
+	}
+
+	virtual void RemoveAttributePenalty()
+	{
+		auto player = RE::PlayerCharacter::GetSingleton();
+		float currentPenaltyMag = player->AsActorValueOwner()->GetActorValue(NeedPenaltyAV);
+
+		player->AsActorValueOwner()->SetActorValue(NeedPenaltyAV, 0.0f);
+		player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, currentPenaltyMag);
 	}
 
 	float GetMaxAttributeAv(RE::PlayerCharacter* player)

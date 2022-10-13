@@ -92,8 +92,8 @@ public:
 		hungerSystem->VendorItemFoodRaw = RE::TESForm::LookupByEditorID("VendorItemFoodRaw")->As<RE::BGSKeyword>();
 		hungerSystem->Survival_FoodPoisoningImmuneRaces = RE::TESForm::LookupByEditorID("Survival_FoodPoisoningImmuneRaces")->As<RE::BGSListForm>();
 		hungerSystem->Survival_DiseaseFoodPoisoningKeyword = RE::TESForm::LookupByEditorID("Survival_DiseaseFoodPoisoningKeyword")->As<RE::BGSKeyword>();
-		hungerSystem->Survival_FoodPoisoningMsg = RE::TESForm::LookupByEditorID("FoodPoisoningMsg")->As<RE::BGSMessage>();
-		hungerSystem->Survival_DiseaseFoodPoisoning = RE::TESForm::LookupByEditorID("DiseaseFoodPoisoning")->As<RE::SpellItem>();
+		hungerSystem->Survival_FoodPoisoningMsg = RE::TESForm::LookupByEditorID("Survival_FoodPoisoningMsg")->As<RE::BGSMessage>();
+		hungerSystem->Survival_DiseaseFoodPoisoning = RE::TESForm::LookupByEditorID("Survival_DiseaseFoodPoisoning")->As<RE::SpellItem>();
 		
 	}
 

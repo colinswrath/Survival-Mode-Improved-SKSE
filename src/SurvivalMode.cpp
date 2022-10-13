@@ -48,7 +48,6 @@ void SurvivalMode::StartSurvivalMode()
 {
 	AddPlayerSpellPerks();
 	InitializeAllNeeds();
-	SendAllNeedsUpdate();
 }
 
 void SurvivalMode::StopSurvivalMode()

@@ -82,7 +82,6 @@ public:
 		//TODO-Check freezing water
 		
 		if (ticks > 0) {
-			logger::info("Cold tick update");
 			//Update ambient temp
 			//Display Ambient Transition Message
 
@@ -102,17 +101,13 @@ public:
 		const std::lock_guard<std::mutex> lock(update_mutex);
 
 		float incAmount = GetNeedIncrementAmount(ticks);
-		logger::info(FMT_STRING("IncAmount {}"),incAmount);
 
 		float currentNeedLevel = CurrentNeedValue->value;
 		float newNeedLevel = currentNeedLevel + incAmount;
-		logger::info(FMT_STRING("New Need val {}"), newNeedLevel);
 
 		float maxLevel = GetMaxStageValue(); 
-		logger::info(FMT_STRING("Max stage val {}"), maxLevel);
 
 		if (currentNeedLevel > maxLevel) {
-			logger::info("Ambient warm up");
 			//Decrement
 			newNeedLevel = currentNeedLevel - (ColdToRestoreInWarmArea * ticks);
 			if (newNeedLevel < maxLevel) {
@@ -229,7 +224,7 @@ public:
 	float GetNightPenalty(AREA_TYPE area)
 	{
 		float nightPen = 0.0f;
-		if (area != AREA_TYPE::kAreaTypeInterior || area !=AREA_TYPE::kAreaTypeChillyInterior) {
+		if (area != AREA_TYPE::kAreaTypeInterior && area != AREA_TYPE::kAreaTypeChillyInterior) {
 			auto sky = RE::Sky::GetSingleton();
 
 			if (sky) {
@@ -244,30 +239,29 @@ public:
 					auto sunsetEnd = static_cast<float>(climate->timing.sunset.end);
 					bool night = false;
 
-					if (hour < (sunriseBegin + sunriseEnd /2 ) / 6.0f) {		//NightPen sunrise
+					if (hour < ((sunriseBegin + sunriseEnd) / 2.0f ) / 6.0f) {		//NightPen sunrise
 						night = true;
-					} else if (hour > (sunsetBegin + sunsetEnd / 2) / 6.0f) {  //NightPen sunset
+					} else if (hour > ((sunsetBegin + sunsetEnd) / 2.0f) / 6.0f) {  //NightPen sunset
 						night = true;		
 					} 
 
-					logger::info(FMT_STRING("Night: {}"),night);
-
-					switch (area) {
-					case AREA_TYPE::kAreaTypeWarm:
-						nightPen = WarmAreaNightMod;
-						break;
-					case AREA_TYPE::kAreaTypeCool:
-					case AREA_TYPE::kAreaTypeReach:
-						nightPen = CoolAreaNightMod;
-						break;
-					case AREA_TYPE::kAreaTypeFreezing:
-						nightPen = FreezingAreaNightMod;
-						break;
+					if (night) {
+						switch (area) {
+						case AREA_TYPE::kAreaTypeWarm:
+							nightPen = WarmAreaNightMod;
+							break;
+						case AREA_TYPE::kAreaTypeCool:
+						case AREA_TYPE::kAreaTypeReach:
+							nightPen = CoolAreaNightMod;
+							break;
+						case AREA_TYPE::kAreaTypeFreezing:
+							nightPen = FreezingAreaNightMod;
+							break;
+						}
 					}
 				}
 			}
 		}
-		logger::info(FMT_STRING("Returning night pen: {}"), nightPen);
 
 		return nightPen;
 	}
@@ -284,8 +278,8 @@ public:
 			Utility::ShowNotification(Survival_ColdConditionStage2);
 		} else if (previousTemp < NeedStage1->value && currentTemp >= NeedStage1->value) {
 			Utility::ShowNotification(Survival_ColdConditionStage1);
-		} else if (previousTemp < static_cast<float>(REGION_TEMPS::kColdLevelWarmArea) && 
-			currentTemp >= static_cast<float>(REGION_TEMPS::kColdLevelWarmArea)) {
+		} else if (previousTemp > static_cast<float>(REGION_TEMPS::kColdLevelWarmArea) && 
+			currentTemp <= static_cast<float>(REGION_TEMPS::kColdLevelWarmArea)) {
 			Utility::ShowNotification(Survival_ColdConditionStage0);
 		}
 	}
