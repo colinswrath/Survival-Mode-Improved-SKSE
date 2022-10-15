@@ -176,6 +176,8 @@ public:
 		coldSystem->NeedSpell4 = RE::TESForm::LookupByEditorID("Survival_ColdStage4")->As<RE::SpellItem>();
 		coldSystem->NeedSpell5 = RE::TESForm::LookupByEditorID("Survival_ColdStage5")->As<RE::SpellItem>();
 
+		coldSystem->Survival_FreezingWaterDamage = RE::TESForm::LookupByEditorID("Survival_FreezingWaterDamage")->As<RE::SpellItem>();
+
 		coldSystem->NeedStage1 = RE::TESForm::LookupByEditorID("Survival_ColdStage1Value")->As<RE::TESGlobal>();
 		coldSystem->NeedStage2 = RE::TESForm::LookupByEditorID("Survival_ColdStage2Value")->As<RE::TESGlobal>();
 		coldSystem->NeedStage3 = RE::TESForm::LookupByEditorID("Survival_ColdStage3Value")->As<RE::TESGlobal>();
@@ -201,19 +203,28 @@ public:
 		coldSystem->NeedMessage4Decreasing = RE::TESForm::LookupByEditorID("Survival_Cold4MessageDecreasing")->As<RE::BGSMessage>();
 		coldSystem->NeedMessage5 = RE::TESForm::LookupByEditorID("Survival_Cold5Message")->As<RE::BGSMessage>();
 
+		coldSystem->Survival_WaterFreezingMessage = RE::TESForm::LookupByEditorID("Survival_WaterFreezingMessage")->As<RE::BGSMessage>();
+
 		coldSystem->CurrentNeedStage = RE::TESForm::LookupByEditorID("SMI_CurrentColdStage")->As<RE::TESGlobal>();
 		coldSystem->CurrentNeedValue = RE::TESForm::LookupByEditorID("Survival_ColdNeedValue")->As<RE::TESGlobal>();
 		coldSystem->Survival_ColdLevelInFreezingWater = RE::TESForm::LookupByEditorID("Survival_ColdLevelInFreezingWater")->As<RE::TESGlobal>();
 
 		coldSystem->Survival_AshWeather = RE::TESForm::LookupByEditorID("Survival_AshWeather")->As<RE::BGSListForm>();
 		coldSystem->Survival_BlizzardWeather = RE::TESForm::LookupByEditorID("Survival_BlizzardWeather")->As<RE::BGSListForm>();
-		coldSystem->SMI_ColdCloudyWeather = RE::TESForm::LookupByEditorID("SMI_ColdCloudyWeather")->As<RE::BGSListForm>();	
+		coldSystem->SMI_ColdCloudyWeather = RE::TESForm::LookupByEditorID("SMI_ColdCloudyWeather")->As<RE::BGSListForm>();
+		coldSystem->Survival_WarmUpObjectsList = RE::TESForm::LookupByEditorID("Survival_WarmUpObjectsList")->As<RE::BGSListForm>();	
 
 		coldSystem->LastUpdateTimeStamp = RE::TESForm::LookupByEditorID("SMI_ColdLastUpdateTimeStamp")->As<RE::TESGlobal>();
 		coldSystem->NeedSleepRateMult = RE::TESForm::LookupByEditorID("Survival_NeedSleepReducedMetabolismMult")->As<RE::TESGlobal>();
 		coldSystem->NeedAttributePenaltyPercent = RE::TESForm::LookupByEditorID("Survival_ColdAttributePenaltyPercent")->As<RE::TESGlobal>();
 		coldSystem->Survival_ColdResistMaxValue = RE::TESForm::LookupByEditorID("Survival_ColdResistMaxValue")->As<RE::TESGlobal>();
-		coldSystem->Survival_TemperatureLevel = RE::TESForm::LookupByEditorID("Survival_TemperatureLevel")->As<RE::TESGlobal>();	
+		coldSystem->Survival_TemperatureLevel = RE::TESForm::LookupByEditorID("Survival_TemperatureLevel")->As<RE::TESGlobal>();
+		coldSystem->Survival_ColdLevelInFreezingWater = RE::TESForm::LookupByEditorID("Survival_ColdLevelInFreezingWater")->As<RE::TESGlobal>();
+		coldSystem->Survival_LastWaterFreezingMsgTime = RE::TESForm::LookupByEditorID("Survival_LastWaterFreezingMsgTime")->As<RE::TESGlobal>();
+		coldSystem->Survival_ColdRestoreSmallAmount = RE::TESForm::LookupByEditorID("Survival_ColdRestoreSmallAmount")->As<RE::TESGlobal>();
+
+		coldSystem->DLC1HunterHQWorld = RE::TESForm::LookupByEditorID("DLC1HunterHQWorld")->As<RE::TESWorldSpace>();	
+
 	}
 
 	void LoadMiscForms()
@@ -221,6 +232,7 @@ public:
 		auto playerStatus = Utility::GetSingleton();
 		playerStatus->Survival_ModeToggle = RE::TESForm::LookupByEditorID("Survival_ModeToggle")->As<RE::TESGlobal>();
 		playerStatus->Survival_ModeEnabled = RE::TESForm::LookupByEditorID("Survival_ModeEnabled")->As<RE::TESGlobal>();
+		playerStatus->SMI_WasInOblivion = RE::TESForm::LookupByEditorID("SMI_WasInOblivion")->As<RE::TESGlobal>();
 
 		playerStatus->Survival_abLowerCarryWeightSpell = RE::TESForm::LookupByEditorID("Survival_abLowerCarryWeightSpell")->As<RE::SpellItem>();
 		playerStatus->Survival_abRacialNord = RE::TESForm::LookupByEditorID("Survival_abRacialNord")->As<RE::SpellItem>();
@@ -259,5 +271,12 @@ public:
 		playerStatus->IsInPineForestFreezingArea = &regionInfoSpell->effects[4]->conditions;
 		playerStatus->IsInReachArea = &regionInfoSpell->effects[5]->conditions;
 
+		/*auto flameCloak = new RE::TESConditionItem;
+		flameCloak->next = nullptr;
+		flameCloak->data.comparisonValue.f = 1.0f;
+		flameCloak->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kHasMagicEffect;
+		flameCloak->data.functionData.params[0] = fireCloakEffect;
+
+		playerStatus->HasFlameCloakCondition = flameCloak;*/
 	}
 };

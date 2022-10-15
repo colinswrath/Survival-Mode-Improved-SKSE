@@ -38,9 +38,9 @@ public:
 	RE::TESGlobal* Survival_ColdTargetGameHoursToNumb;
 	RE::TESGlobal* SMI_ColdRate;
 	RE::TESGlobal* SMI_CurrentAmbientTemp;
-	RE::TESGlobal* Survival_ColdLevelInFreezingWater;
 	RE::TESGlobal* Survival_ColdResistMaxValue;
 	RE::TESGlobal* Survival_TemperatureLevel;
+	RE::TESGlobal* Survival_ColdRestoreSmallAmount;
 
 	RE::BGSMessage* Survival_ColdConditionStage0;
 	RE::BGSMessage* Survival_ColdConditionStage1;
@@ -52,6 +52,16 @@ public:
 	RE::BGSListForm* Survival_AshWeather;
 	RE::BGSListForm* Survival_BlizzardWeather;
 	RE::BGSListForm* SMI_ColdCloudyWeather;
+	RE::BGSListForm* Survival_WarmUpObjectsList;
+
+	RE::TESGlobal* Survival_ColdLevelInFreezingWater;
+	RE::SpellItem* Survival_FreezingWaterDamage;
+	RE::TESGlobal* Survival_LastWaterFreezingMsgTime;
+	RE::BGSMessage* Survival_WaterFreezingMessage;
+	RE::TESWorldSpace* DLC1HunterHQWorld;
+
+	const char* FXFreezingWaterSoundFX = "FXFreezingWaterSoundFX";
+	const char* FXFreezingWaterSoundFXFemale = "FXFreezingWaterSoundFXFemale";
 
 	const char* Survival_FreezingASD = "Survival_FreezingASD";
 	const char* Survival_FreezingBSD = "Survival_FreezingBSD";
@@ -60,7 +70,7 @@ public:
 
 	const float MaxWarmthRatingBonusPerc = 0.80f;		//TODO-Make this an ini setting
 	const float ColdMaxStageThreshold = 600.0f;
-	const float ColdToRestoreInWarmArea = 20.0f;
+	const float ColdToRestoreInWarmArea = 1.5f;
 
 	//Night mod - TODO - Make ini setting
 	float WarmAreaNightMod = 25.0f;
@@ -75,17 +85,24 @@ public:
 
 	void UpdateNeed() override
 	{
-		UpdateCurrentAmbientTemp(); //TODO-Here or inside of ticks?
-
 		int ticks = GetGameTimeTicks();
-		//TODO-Check heat source
-		//TODO-Check freezing water
+		auto utility = Utility::GetSingleton();
+		auto currentArea = utility->GetCurrentAreaType();
+		bool nearHeat = false;
+
+		if (!FreezingWaterCheck(currentArea)) {
+			nearHeat = HeatSourceCheck();
+			UpdateCurrentAmbientTemp(currentArea);
+		}	
 		
 		if (ticks > 0) {
-			//Update ambient temp
-			//Display Ambient Transition Message
+			if (!nearHeat) {
+				IncrementNeed(ticks);
+			} else {
+				DecreaseNeed(Survival_ColdRestoreSmallAmount->value*ticks);
+				SetUIHeat();
+			}
 
-			IncrementNeed(ticks);
 			SetLastTimeStamp(GetCurrentGameTimeInMinutes());
 		}
 	}
@@ -96,69 +113,72 @@ public:
 		Survival_TemperatureLevel->value = static_cast<float>(UI_LEVEL::kNeutral);
 	}
 
+	void UpdateCurrentAmbientTemp(AREA_TYPE currentArea)
+	{
+		auto oldAmbientTemp = SMI_CurrentAmbientTemp->value;
+		float newAmbientTemp = 0.0f;
+
+		newAmbientTemp = std::clamp(GetWeatherTemperature(currentArea) + GetRegionTemperature(currentArea) + GetNightPenalty(currentArea), 0.0f, NeedMaxValue->value);
+
+		SMI_CurrentAmbientTemp->value = newAmbientTemp;
+		DisplayAmbientTempTransitionMessage(oldAmbientTemp, newAmbientTemp);
+	}
+
+	//In this case its more of an "update" than a definite increment 
 	void IncrementNeed(int ticks) override
 	{
 		const std::lock_guard<std::mutex> lock(update_mutex);
+		float currentNeedLevel = CurrentNeedValue->value;
 
 		float incAmount = GetNeedIncrementAmount(ticks);
 
-		float currentNeedLevel = CurrentNeedValue->value;
-		float newNeedLevel = currentNeedLevel + incAmount;
-
-		float maxLevel = GetMaxStageValue(); 
+		float maxLevel = GetMaxStageValue();
 
 		if (currentNeedLevel > maxLevel) {
-			//Decrement
-			newNeedLevel = currentNeedLevel - (ColdToRestoreInWarmArea * ticks);
-			if (newNeedLevel < maxLevel) {
-				newNeedLevel = maxLevel;
-			} 
-
-		} else if (newNeedLevel > maxLevel) {
-			newNeedLevel = maxLevel;
+			DecreaseNeed((ColdToRestoreInWarmArea * ticks), maxLevel);
+		} else {
+			IncreaseColdLevel(incAmount, NeedMaxValue->value);
 		}
+
+		//Damage if max cold
+	}
+
+	void IncreaseColdLevel(float increaseAmount, float max) 
+	{
+		float currentNeedLevel = CurrentNeedValue->value;
+
+		float newNeedLevel = std::clamp(currentNeedLevel + increaseAmount, 0.0f, max);
+		
+		CurrentNeedValue->value = newNeedLevel;
+		UpdateTemperatureUI(currentNeedLevel, newNeedLevel);
+		SetNeedStage(true);
+		ApplyAttributePenalty();
+	}
+
+	void DecreaseNeed(float decreaseAmount, float min = 0.0f) override
+	{
+		float currentNeedLevel = CurrentNeedValue->value;
+
+		float newNeedLevel = std::clamp(currentNeedLevel - decreaseAmount, min, NeedMaxValue->value);
 
 		CurrentNeedValue->value = newNeedLevel;
 		UpdateTemperatureUI(currentNeedLevel, newNeedLevel);
 		SetNeedStage(true);
 		ApplyAttributePenalty();
-		//Damage if max cold
 	}
 
 	float GetNeedIncrementAmount(int ticks) override
 	{
 		float valPerTick = GetColdPerTick();
-		logger::info(FMT_STRING("Val per tick {}"), valPerTick);
 
 		float amount = valPerTick * static_cast<float>(ticks); 
 			
-		if (WasSleeping)
-		{
+		if (WasSleeping){
 			amount *= NeedSleepRateMult->value;
 			WasSleeping = false;
 		}
-
 		amount *= (1.0f - GetWarmthRatingBonus());
-
 		return amount;
-	}
-
-	void UpdateCurrentAmbientTemp()
-	{
-		//TODO-Check if you are in freezing water and return high cold level if so
-		auto utility = Utility::GetSingleton();
-		auto currentArea = utility->GetCurrentAreaType();
-
-		auto oldAmbientTemp = SMI_CurrentAmbientTemp->value;
-
-		float newAmbientTemp = GetWeatherTemperature(currentArea) + GetRegionTemperature(currentArea) + GetNightPenalty(currentArea);
-
-		if (newAmbientTemp > NeedMaxValue->value) {
-			newAmbientTemp = NeedMaxValue->value;
-		}
-
-		SMI_CurrentAmbientTemp->value = newAmbientTemp;
-		DisplayAmbientTempTransitionMessage(oldAmbientTemp, newAmbientTemp);
 	}
 
 	float GetWeatherTemperature(AREA_TYPE area)
@@ -166,10 +186,8 @@ public:
 		auto sky = RE::Sky::GetSingleton();
 		auto currentWeather = sky->currentWeather;
 	
-		if (currentWeather) 
-		{
-			if (area != AREA_TYPE::kAreaTypeInterior) 
-			{
+		if (currentWeather) {
+			if (area != AREA_TYPE::kAreaTypeInterior) {
 				bool coldCloudy = SMI_ColdCloudyWeather->HasForm(currentWeather);
 				if (coldCloudy && (area == AREA_TYPE::kAreaTypeFreezing)) {
 					return static_cast<float>(WEATHER_TEMPS::kSnowTemp);	
@@ -197,28 +215,22 @@ public:
 
 	float GetRegionTemperature(AREA_TYPE area)
 	{
-		if (area == AREA_TYPE::kAreaTypeChillyInterior) {
+		switch (area) {
+		case AREA_TYPE::kAreaTypeChillyInterior:
 			return static_cast<float>(REGION_TEMPS::kColdLevelCoolArea);
-		} else if (area == AREA_TYPE::kAreaTypeInterior) {
+		case AREA_TYPE::kAreaTypeInterior:
 			return static_cast<float>(REGION_TEMPS::kColdLevelWarmArea);
-		} else if (area == AREA_TYPE::kAreaTypeWarm) {
+		case AREA_TYPE::kAreaTypeWarm:
 			return static_cast<float>(REGION_TEMPS::kColdLevelWarmArea);
-		} else if (area == AREA_TYPE::kAreaTypeReach) {
+		case AREA_TYPE::kAreaTypeReach:
 			return static_cast<float>(REGION_TEMPS::kColdLevelReachArea);
-		} else if (area == AREA_TYPE::kAreaTypeCool) {
+		case AREA_TYPE::kAreaTypeCool:
 			return static_cast<float>(REGION_TEMPS::kColdLevelCoolArea);
-		} else if (area == AREA_TYPE::kAreaTypeFreezing) {
+		case AREA_TYPE::kAreaTypeFreezing:
 			return static_cast<float>(REGION_TEMPS::kColdLevelFreezingArea);
-		} else {
+		default:
 			return static_cast<float>(REGION_TEMPS::kColdLevelCoolArea);	
 		}
-	}
-
-	float GetWarmthRatingBonus()
-	{
-		auto warmthRating = Utility::GetWarmthRating(RE::PlayerCharacter::GetSingleton());
-		auto totalBonus = std::clamp(warmthRating, 0.0f, Survival_ColdResistMaxValue->value);
-		return MaxWarmthRatingBonusPerc * totalBonus / Survival_ColdResistMaxValue->value;
 	}
 
 	float GetNightPenalty(AREA_TYPE area)
@@ -234,7 +246,6 @@ public:
 
 					auto sunriseBegin = static_cast<float>(climate->timing.sunrise.begin);
 					auto sunriseEnd = static_cast<float>(climate->timing.sunrise.end);
-
 					auto sunsetBegin = static_cast<float>(climate->timing.sunset.begin);
 					auto sunsetEnd = static_cast<float>(climate->timing.sunset.end);
 					bool night = false;
@@ -262,8 +273,14 @@ public:
 				}
 			}
 		}
-
 		return nightPen;
+	}
+
+	float GetWarmthRatingBonus()
+	{
+		auto warmthRating = Utility::GetWarmthRating(RE::PlayerCharacter::GetSingleton());
+		auto totalBonus = std::clamp(warmthRating, 0.0f, Survival_ColdResistMaxValue->value);
+		return MaxWarmthRatingBonusPerc * totalBonus / Survival_ColdResistMaxValue->value;
 	}
 
 	void DisplayAmbientTempTransitionMessage(float previousTemp, float currentTemp)
@@ -302,6 +319,15 @@ public:
 		}
 
 		Survival_TemperatureLevel->value = static_cast<float>(uiSetting);
+	}
+	
+	void SetUIHeat()
+	{
+		if (CurrentNeedValue->value > 0.0f) {
+			Survival_TemperatureLevel->value = static_cast<float>(UI_LEVEL::kNearHeat);
+		} else {
+			Survival_TemperatureLevel->value = static_cast<float>(UI_LEVEL::kNeutral);
+		}
 	}
 
 	float GetMaxStageValue()
@@ -349,5 +375,55 @@ public:
 			NotifyAddEffect(NeedMessage5, NeedMessage5, NeedSpell5);
 			PlaySFX(Survival_FreezingBSD, Survival_FreezingBFemaleSD);
 		}
+	}
+
+	bool FreezingWaterCheck(AREA_TYPE currentArea)
+	{
+		auto player = RE::PlayerCharacter::GetSingleton();
+		auto playerState = player->AsActorState();
+		auto utility = Utility::GetSingleton();
+
+		if (playerState->IsSwimming() && !utility->PlayerHasFlameCloak() &&
+			(currentArea == AREA_TYPE::kAreaTypeFreezing || currentArea == AREA_TYPE::kAreaTypeChillyInterior || player->GetWorldspace() == DLC1HunterHQWorld)) {
+			auto currentVal = Survival_LastWaterFreezingMsgTime->value;
+
+			if (currentVal > 9 || currentVal == 0.0f) {
+				PlaySFX(FXFreezingWaterSoundFX, FXFreezingWaterSoundFXFemale);
+				NotifyAddEffect(Survival_WaterFreezingMessage, nullptr, Survival_FreezingWaterDamage);
+				Survival_LastWaterFreezingMsgTime->value = 0.0f;
+			}
+
+			IncreaseColdLevel(NeedMaxValue->value, NeedStage3->value);  //Dont let cold fall below level 3
+			SMI_CurrentAmbientTemp->value = Survival_ColdLevelInFreezingWater->value;
+
+			Survival_LastWaterFreezingMsgTime->value = std::clamp(currentVal += 1.0f, 0.0f, 10.0f);
+			return true;
+		} else if (player->HasSpell(Survival_FreezingWaterDamage)) {
+			player->RemoveSpell(Survival_FreezingWaterDamage);
+			Survival_LastWaterFreezingMsgTime->value = 0.0f;
+		}
+		return false;
+	}
+
+	bool HeatSourceCheck()
+	{
+		auto TES = RE::TES::GetSingleton();
+		auto player = RE::PlayerCharacter::GetSingleton();
+
+		std::vector<RE::TESObjectREFR*> heatSources;
+
+		bool nearHeat = false;
+		if (TES && !player->IsRunning() || player->AsActorState()->IsSprinting()) {
+			TES->ForEachReferenceInRange(player, 580.0f, [&](RE::TESObjectREFR& b_ref) {
+				if (const auto base = b_ref.GetBaseObject(); base && b_ref.Is3DLoaded()) {
+					if (Survival_WarmUpObjectsList->HasForm(base)) {
+						nearHeat = true;
+						return RE::BSContainer::ForEachResult::kStop;
+					}
+				}
+				return RE::BSContainer::ForEachResult::kContinue;
+			});
+		}
+		return nearHeat;
 	}
 };

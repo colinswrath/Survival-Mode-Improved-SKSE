@@ -21,19 +21,12 @@ std::int32_t SurvivalMode::OnUpdate(std::int64_t a1)
 	return _OnUpdate(a1);
 }
 
-/// <summary>
-/// Main update loop
-/// </summary>
 void SurvivalMode::SurvivalModeLoopUpdate()
 {
 	auto utility = Utility::GetSingleton();
-	utility->Survival_ModeCanBeEnabled->value = 1.0f;
+	utility->Survival_ModeCanBeEnabled->value = 1.0f;	//TODO-Move this elsewhere
 
-	if (utility->PlayerIsInOblivion()) {
-		ShowNotification(utility->Survival_OblivionAreaMessage);
-		StopAllNeeds();
-	} else {
-
+	if (!CheckOblivionStatus()) {
 		if (utility->IsSurvivalEnabled() && !utility->SurvivalToggle()) {
 			StopSurvivalMode();
 		} else if (!utility->IsSurvivalEnabled() && utility->SurvivalToggle()) {
@@ -48,17 +41,18 @@ void SurvivalMode::StartSurvivalMode()
 {
 	AddPlayerSpellPerks();
 	InitializeAllNeeds();
+	Utility::GetSingleton()->Survival_ModeEnabled->value = 1.0f;
+	Utility::GetSingleton()->Survival_ModeEnabledShared->value = 1.0f;
 }
 
 void SurvivalMode::StopSurvivalMode()
 {
 	StopAllNeeds();
 	RemovePlayerSpellPerks();
+	Utility::GetSingleton()->Survival_ModeEnabled->value = 0;
+	Utility::GetSingleton()->Survival_ModeEnabledShared->value = 0;
 }
 
-/// <summary>
-/// Send initialization to all needs
-/// </summary>
 void SurvivalMode::InitializeAllNeeds()
 {
 	logger::info("Initializing all needs");
@@ -67,15 +61,9 @@ void SurvivalMode::InitializeAllNeeds()
 	NeedExhaustion::GetSingleton()->InitializeNeed();
 	NeedCold::GetSingleton()->InitializeNeed();
 
-	Utility::GetSingleton()->Survival_ModeEnabled->value = 1.0f;
-	Utility::GetSingleton()->Survival_ModeEnabledShared->value = 1.0f;
-
 	logger::info("Needs initialized");
 }
 
-/// <summary>
-/// Send update to all needs
-/// </summary>
 void SurvivalMode::SendAllNeedsUpdate()
 {
 	NeedHunger::GetSingleton()->OnUpdatePass();
@@ -83,9 +71,6 @@ void SurvivalMode::SendAllNeedsUpdate()
 	NeedCold::GetSingleton()->OnUpdatePass();
 }
 
-/// <summary>
-/// Send stop to all needs
-/// </summary>
 void SurvivalMode::StopAllNeeds()
 {
 	logger::info("Stopping all needs");
@@ -93,9 +78,6 @@ void SurvivalMode::StopAllNeeds()
 	NeedHunger::GetSingleton()->StopNeed();
 	NeedExhaustion::GetSingleton()->StopNeed();
 	NeedCold::GetSingleton()->StopNeed();
-
-	Utility::GetSingleton()->Survival_ModeEnabled->value = 0;
-	Utility::GetSingleton()->Survival_ModeEnabledShared->value = 0;
 	logger::info("Needs stopped");
 }
 
@@ -150,3 +132,19 @@ void SurvivalMode::RemovePlayerSpellPerks()
 	player->RemoveSpell(utility->Survival_OverencumberedSpell);
 }
 
+bool SurvivalMode::CheckOblivionStatus()
+{
+	auto utility = Utility::GetSingleton();
+
+	bool oblivion = utility->PlayerIsInOblivion();
+	if (oblivion && utility->SMI_WasInOblivion->value == 0.0f) {
+		ShowNotification(utility->Survival_OblivionAreaMessage);
+		StopAllNeeds();
+		utility->SMI_WasInOblivion->value = 1.0f;
+	} else if (!oblivion && utility->SMI_WasInOblivion->value == 1.0f) {
+		InitializeAllNeeds();
+		utility->SMI_WasInOblivion->value = 0.0f;
+	}
+
+	return oblivion;
+}

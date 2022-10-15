@@ -59,17 +59,17 @@ public:
 	/// </summary>
 	void OnUpdatePass()
 	{
-		
 		auto status = Utility::GetSingleton();
 		//TODO- Pause needs if you are:
 		//InCombat
 		//InDialogue (maybe)
 		//InJail
+		//IsRidingDragon
 		//BeastForm, WW or VL
-		if (!status->PlayerIsInCombat()) {
-			UpdateNeed();
+		if (status->PlayerIsInCombat()) {	//Pauses - Dialogue - Jail - Combat
+			SetLastTimeStamp();		//Abstract to NeedsPaused pure virtual so cold can set UI to neutral.
 		} else {
-			SetLastTimeStamp();
+			UpdateNeed();
 		}
 	}
 
@@ -81,15 +81,14 @@ public:
 
 	virtual void StopNeed()
 	{
-		CurrentlyStopped = true;
-		RemoveNeedEffects();
-		RemoveAttributePenalty();
-		CurrentNeedStage->value = -1;
+		if (!CurrentlyStopped) {
+			CurrentlyStopped = true;
+			RemoveNeedEffects();
+			RemoveAttributePenalty();
+			CurrentNeedStage->value = -1;
+		}
 	}
 
-	/// <summary>
-	/// Increment the need value based on the delta and need rate
-	/// </summary>
 	virtual void IncrementNeed(int ticks)
 	{	
 		const std::lock_guard<std::mutex> lock(update_mutex);
@@ -106,7 +105,7 @@ public:
 		ApplyAttributePenalty();
 	}
 
-	virtual void DecrementNeed(float amount, float minValue = 0)
+	virtual void DecreaseNeed(float amount, float minValue = 0)
 	{
 		const std::lock_guard<std::mutex> lock(update_mutex);
 		float newNeedLevel = CurrentNeedValue->value - amount;
@@ -133,10 +132,6 @@ protected:
 
 	virtual void ApplyNeedStageEffects(bool increasing) = 0;
 
-	/// <summary>
-	/// Get delta between time stamps in game seconds. For now, 1 tick = 1 in game minute
-	/// </summary>
-	/// <returns>Number of ticks that have passed since last update</returns>
 	int GetGameTimeTicks()
 	{
 		int ticks = 0;
@@ -154,10 +149,6 @@ protected:
 		return ticks;
 	}
 
-	/// <summary>
-	/// Determine the current need stage.
-	/// If we are in a new stage then update the effects
-	/// </summary>
 	virtual void SetNeedStage(bool increasing)
 	{
 		float currentNeedValue = CurrentNeedValue->value;
@@ -234,9 +225,6 @@ protected:
 		NeedPenaltyUIGlobal->value = newVal;
 	}
 
-	/// <summary>
-	/// Remove all need effects
-	/// </summary>
 	virtual void RemoveNeedEffects()
 	{
 		auto player = RE::PlayerCharacter::GetSingleton();
