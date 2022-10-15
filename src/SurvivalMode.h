@@ -20,4 +20,5 @@ protected:
 	inline static void ShowNotification(RE::BGSMessage* msg);
 	inline static void AddPlayerSpellPerks();
 	inline static void RemovePlayerSpellPerks();
+	inline static bool CheckOblivionStatus();
 };

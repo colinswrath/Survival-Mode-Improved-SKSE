@@ -79,7 +79,7 @@ public:
 	
 	void DecreaseExhaustion(float hoursPassed)
 	{
-		DecrementNeed(hoursPassed * Survival_ExhaustionRestorePerHour->value);
+		DecreaseNeed(hoursPassed * Survival_ExhaustionRestorePerHour->value);
 		WasSleeping = false;
 	}
 

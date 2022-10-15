@@ -18,6 +18,8 @@ public:
 	RE::TESGlobal* Survival_ModeEnabledShared;
 	RE::TESGlobal* Survival_ModeCanBeEnabled;
 
+	RE::TESGlobal* SMI_WasInOblivion;
+
 	RE::SpellItem* Survival_abLowerCarryWeightSpell;
 	RE::SpellItem* Survival_abRacialNord;
 	RE::SpellItem* Survival_abRacialAltmer;
@@ -44,6 +46,8 @@ public:
 	RE::TESCondition* IsInFallForestFreezingArea;
 	RE::TESCondition* IsInPineForestFreezingArea;
 	RE::TESCondition* IsInReachArea;
+
+	RE::Effect* Survival_FireCloakFreezingWaterDesc;
 
 	RE::TESCondition* IsVampireConditions;
 
@@ -111,9 +115,25 @@ public:
 		return RE::PlayerCharacter::GetSingleton()->IsInCombat();
 	}
 
-	bool PlayerIsInFreezingWater()
+	bool PlayerHasFlameCloak()
 	{
+		auto player = RE::PlayerCharacter::GetSingleton();
 
+		auto activeEffects = player->AsMagicTarget()->GetActiveEffectList();
+		RE::EffectSetting* setting = nullptr;
+		for (auto& effect : *activeEffects) {
+			setting = effect ? effect->GetBaseObject() : nullptr;
+			if (setting) {
+				if (setting->data.archetype == RE::EffectSetting::Archetype::kCloak && setting->data.resistVariable == RE::ActorValue::kResistFire) {
+					
+					return true;
+				}
+			}
+		}
+		
+		return false;
+		//RE::ConditionCheckParams params(player->As<RE::TESObjectREFR>(), nullptr);
+		//return HasFlameCloakCondition->IsTrue(params);
 	}
 
 	bool PlayerIsInOblivion()

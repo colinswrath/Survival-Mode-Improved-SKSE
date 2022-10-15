@@ -1,6 +1,7 @@
 #pragma once
 #include "Needs/NeedHunger.h"
 #include "Needs/NeedExhaustion.h"
+#include "Needs/NeedCold.h"
 #include "Utility.h"
 
 namespace Events
@@ -12,16 +13,19 @@ namespace Events
 		Hours = RE::Calendar::GetSingleton()->GetHoursPassed();
 		auto hunger = NeedHunger::GetSingleton();
 		auto exhaustion = NeedExhaustion::GetSingleton();
+		auto cold = NeedCold::GetSingleton();
 
 		if (!hunger->CurrentlyStopped) {
-			NeedHunger::GetSingleton()->WasSleeping = true;
+			hunger->WasSleeping = true;
 		}
 
 		if (!exhaustion->CurrentlyStopped) {
-			NeedExhaustion::GetSingleton()->WasSleeping = true;
+			exhaustion->WasSleeping = true;
 		}
 
-		//TODO-Cold
+		if (!cold->CurrentlyStopped) {
+			cold->WasSleeping = true;
+		}
 	}
 
 	static void ProcessSleepStopEvent()
@@ -56,13 +60,13 @@ namespace Events
 
 			for (auto effect : food->effects) {
 				if (hunger->Survival_FoodRestoreHungerVerySmall == effect->baseEffect) {
-					hunger->DecrementNeed(hunger->Survival_HungerRestoreVerySmallAmount->value);
+					hunger->DecreaseNeed(hunger->Survival_HungerRestoreVerySmallAmount->value);
 				} else if (hunger->Survival_FoodRestoreHungerSmall == effect->baseEffect) {
-					hunger->DecrementNeed(hunger->Survival_HungerRestoreSmallAmount->value);
+					hunger->DecreaseNeed(hunger->Survival_HungerRestoreSmallAmount->value);
 				} else if (hunger->Survival_FoodRestoreHungerMedium == effect->baseEffect) {
-					hunger->DecrementNeed(hunger->Survival_HungerRestoreMediumAmount->value);
+					hunger->DecreaseNeed(hunger->Survival_HungerRestoreMediumAmount->value);
 				} else if (hunger->Survival_FoodRestoreHungerLarge == effect->baseEffect) {
-					hunger->DecrementNeed(hunger->Survival_HungerRestoreLargeAmount->value);		
+					hunger->DecreaseNeed(hunger->Survival_HungerRestoreLargeAmount->value);		
 				}
 			}
 		}
