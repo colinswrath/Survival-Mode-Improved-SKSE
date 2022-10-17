@@ -61,17 +61,12 @@ public:
 	{
 		auto player = Utility::GetPlayer();
 
-		//TODO- Pause needs if you are:
-		//InCombat
-		//InDialogue (maybe)
-		//InJail
-		//IsRidingDragon
-		//BeastForm, WW or VL
 		if (player->IsInCombat() || 
 			Utility::IsPlayerInDialogue() ||
 			Utility::PlayerIsBeastRace() ||
-			Utility::IsOnFlyingMount(player)) {
-			SetLastTimeStamp();		//Abstract to NeedsPaused pure virtual so cold can set UI to neutral.
+			Utility::IsOnFlyingMount(player)||
+			Utility::PlayerIsInJail()) {
+			PauseNeed();
 		} else {
 			UpdateNeed();
 		}
@@ -247,6 +242,11 @@ protected:
 			Utility::ShowNotification(increasingMsg);
 		else
 			Utility::ShowNotification(decreasingMsg);
+	}
+
+	virtual void PauseNeed()
+	{
+		SetLastTimeStamp();
 	}
 
 	virtual void PlaySFX(const char* maleSound, const char* femaleSound)

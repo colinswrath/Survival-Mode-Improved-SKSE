@@ -386,6 +386,12 @@ public:
 		return (coldPerSecond * deltaRealSeconds) * SMI_ColdRate->value; 
 	}
 
+	void PauseNeed() override
+	{
+		NeedBase::PauseNeed();
+		UpdateTemperatureUI(0.0f,0.0f);
+	}
+
 	void ApplyNeedStageEffects(bool increasing) override
 	{
 		RemoveNeedEffects();

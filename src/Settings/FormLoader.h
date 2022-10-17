@@ -273,6 +273,15 @@ public:
 		utility->IsInPineForestFreezingArea = &regionInfoSpell->effects[4]->conditions;
 		utility->IsInReachArea = &regionInfoSpell->effects[5]->conditions;
 
+		auto inJail = new RE::TESConditionItem;
+		inJail->next = nullptr;
+		inJail->data.comparisonValue.f = 0.0f;
+		inJail->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kGetDaysInJail;
+		inJail->data.functionData.params[0] = inJail;
+		inJail->data.flags.opCode = RE::CONDITION_ITEM_DATA::OpCode::kGreaterThan;
+
+		utility->IsInJailCondition = inJail;
+
 	}
 
 	//Cache commonly called addresses to avoid address lib overhead

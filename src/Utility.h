@@ -50,6 +50,7 @@ public:
 	RE::Effect* Survival_FireCloakFreezingWaterDesc;
 
 	RE::TESCondition* IsVampireConditions;
+	RE::TESConditionItem* IsInJailCondition;
 
 	RE::BGSMessage* Survival_OblivionAreaMessage;
 	RE::TESQuest* DA16;
@@ -179,9 +180,11 @@ public:
 		return !IsVampireConditions->IsTrue(GetPlayer(), nullptr);
 	}
 
-	bool PlayerIsInJail()
+	static bool PlayerIsInJail()
 	{
-		//auto player = RE::PlayerCharacter::GetSingleton();
+		auto utility = Utility::GetSingleton();
+		RE::ConditionCheckParams param(utility->GetPlayer(), nullptr);
+		return utility->IsInJailCondition->IsTrue(param);
 	}
 
 	static bool PlayerIsBeastRace()
