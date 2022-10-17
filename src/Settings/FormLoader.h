@@ -32,6 +32,8 @@ public:
 		logger::info("Cold forms are loaded.");
 		LoadMiscForms();
 		logger::info("All forms are loaded.");
+		CacheGameAddresses();
+		logger::info("Cached addresses");
 	}
 
 	void LoadHungerForms()
@@ -229,54 +231,60 @@ public:
 
 	void LoadMiscForms()
 	{
-		auto playerStatus = Utility::GetSingleton();
-		playerStatus->Survival_ModeToggle = RE::TESForm::LookupByEditorID("Survival_ModeToggle")->As<RE::TESGlobal>();
-		playerStatus->Survival_ModeEnabled = RE::TESForm::LookupByEditorID("Survival_ModeEnabled")->As<RE::TESGlobal>();
-		playerStatus->SMI_WasInOblivion = RE::TESForm::LookupByEditorID("SMI_WasInOblivion")->As<RE::TESGlobal>();
+		auto utility = Utility::GetSingleton();
+		utility->Survival_ModeToggle = RE::TESForm::LookupByEditorID("Survival_ModeToggle")->As<RE::TESGlobal>();
+		utility->Survival_ModeEnabled = RE::TESForm::LookupByEditorID("Survival_ModeEnabled")->As<RE::TESGlobal>();
+		utility->SMI_WasInOblivion = RE::TESForm::LookupByEditorID("SMI_WasInOblivion")->As<RE::TESGlobal>();
 
-		playerStatus->Survival_abLowerCarryWeightSpell = RE::TESForm::LookupByEditorID("Survival_abLowerCarryWeightSpell")->As<RE::SpellItem>();
-		playerStatus->Survival_abRacialNord = RE::TESForm::LookupByEditorID("Survival_abRacialNord")->As<RE::SpellItem>();
-		playerStatus->Survival_abRacialAltmer = RE::TESForm::LookupByEditorID("Survival_abRacialAltmer")->As<RE::SpellItem>();
-		playerStatus->Survival_abRacialOrc = RE::TESForm::LookupByEditorID("Survival_abRacialOrc")->As<RE::SpellItem>();
-		playerStatus->Survival_abRacialBosmer = RE::TESForm::LookupByEditorID("Survival_abRacialBosmer")->As<RE::SpellItem>();
-		playerStatus->Survival_abRacialDunmer = RE::TESForm::LookupByEditorID("Survival_abRacialDunmer")->As<RE::SpellItem>();
-		playerStatus->Survival_abRacialKhajiit = RE::TESForm::LookupByEditorID("Survival_abRacialKhajiit")->As<RE::SpellItem>();
-		playerStatus->Survival_abRacialArgonianRawMeat = RE::TESForm::LookupByEditorID("Survival_abRacialArgonianRawMeat")->As<RE::SpellItem>();
-		playerStatus->Survival_abRacialKhajiitRawMeat = RE::TESForm::LookupByEditorID("Survival_abRacialKhajiitRawMeat")->As<RE::SpellItem>();
-		playerStatus->Survival_abWarmthTorch = RE::TESForm::LookupByEditorID("Survival_abWarmthTorch")->As<RE::SpellItem>();
-		playerStatus->Survival_OverencumberedSpell = RE::TESForm::LookupByEditorID("Survival_OverencumberedSpell")->As<RE::SpellItem>();
+		utility->Survival_abLowerCarryWeightSpell = RE::TESForm::LookupByEditorID("Survival_abLowerCarryWeightSpell")->As<RE::SpellItem>();
+		utility->Survival_abRacialNord = RE::TESForm::LookupByEditorID("Survival_abRacialNord")->As<RE::SpellItem>();
+		utility->Survival_abRacialAltmer = RE::TESForm::LookupByEditorID("Survival_abRacialAltmer")->As<RE::SpellItem>();
+		utility->Survival_abRacialOrc = RE::TESForm::LookupByEditorID("Survival_abRacialOrc")->As<RE::SpellItem>();
+		utility->Survival_abRacialBosmer = RE::TESForm::LookupByEditorID("Survival_abRacialBosmer")->As<RE::SpellItem>();
+		utility->Survival_abRacialDunmer = RE::TESForm::LookupByEditorID("Survival_abRacialDunmer")->As<RE::SpellItem>();
+		utility->Survival_abRacialKhajiit = RE::TESForm::LookupByEditorID("Survival_abRacialKhajiit")->As<RE::SpellItem>();
+		utility->Survival_abRacialArgonianRawMeat = RE::TESForm::LookupByEditorID("Survival_abRacialArgonianRawMeat")->As<RE::SpellItem>();
+		utility->Survival_abRacialKhajiitRawMeat = RE::TESForm::LookupByEditorID("Survival_abRacialKhajiitRawMeat")->As<RE::SpellItem>();
+		utility->Survival_abWarmthTorch = RE::TESForm::LookupByEditorID("Survival_abWarmthTorch")->As<RE::SpellItem>();
+		utility->Survival_OverencumberedSpell = RE::TESForm::LookupByEditorID("Survival_OverencumberedSpell")->As<RE::SpellItem>();
 
-		playerStatus->Survival_ModeEnabledShared = RE::TESForm::LookupByEditorID("Survival_ModeEnabledShared")->As<RE::TESGlobal>();
-		playerStatus->Survival_ModeCanBeEnabled = RE::TESForm::LookupByEditorID("Survival_ModeCanBeEnabled")->As<RE::TESGlobal>();
+		utility->Survival_ModeEnabledShared = RE::TESForm::LookupByEditorID("Survival_ModeEnabledShared")->As<RE::TESGlobal>();
+		utility->Survival_ModeCanBeEnabled = RE::TESForm::LookupByEditorID("Survival_ModeCanBeEnabled")->As<RE::TESGlobal>();
 
-		playerStatus->Survival_OblivionAreaMessage = RE::TESForm::LookupByEditorID("Survival_OblivionAreaMessage")->As<RE::BGSMessage>();
-		playerStatus->Survival_OblivionCells = RE::TESForm::LookupByEditorID("Survival_OblivionCells")->As<RE::BGSListForm>();
-		playerStatus->Survival_OblivionLocations = RE::TESForm::LookupByEditorID("Survival_OblivionLocations")->As<RE::BGSListForm>();
-		playerStatus->Survival_OblivionAreas = RE::TESForm::LookupByEditorID("Survival_OblivionAreas")->As<RE::BGSListForm>();
+		utility->Survival_OblivionAreaMessage = RE::TESForm::LookupByEditorID("Survival_OblivionAreaMessage")->As<RE::BGSMessage>();
+		utility->Survival_OblivionCells = RE::TESForm::LookupByEditorID("Survival_OblivionCells")->As<RE::BGSListForm>();
+		utility->Survival_OblivionLocations = RE::TESForm::LookupByEditorID("Survival_OblivionLocations")->As<RE::BGSListForm>();
+		utility->Survival_OblivionAreas = RE::TESForm::LookupByEditorID("Survival_OblivionAreas")->As<RE::BGSListForm>();
 
-		playerStatus->Survival_ColdInteriorCells = RE::TESForm::LookupByEditorID("Survival_ColdInteriorCells")->As<RE::BGSListForm>();
-		playerStatus->Survival_ColdInteriorLocations = RE::TESForm::LookupByEditorID("Survival_ColdInteriorLocations")->As<RE::BGSListForm>();
-		playerStatus->Survival_InteriorAreas = RE::TESForm::LookupByEditorID("Survival_InteriorAreas")->As<RE::BGSListForm>();
+		utility->Survival_ColdInteriorCells = RE::TESForm::LookupByEditorID("Survival_ColdInteriorCells")->As<RE::BGSListForm>();
+		utility->Survival_ColdInteriorLocations = RE::TESForm::LookupByEditorID("Survival_ColdInteriorLocations")->As<RE::BGSListForm>();
+		utility->Survival_InteriorAreas = RE::TESForm::LookupByEditorID("Survival_InteriorAreas")->As<RE::BGSListForm>();
 		
 		RE::SpellItem* isVampireSpell = RE::TESForm::LookupByEditorID("SMI_VampireSpell")->As<RE::SpellItem>();
-		playerStatus->IsVampireConditions = &isVampireSpell->effects[0]->conditions;
-		playerStatus->DA16 = RE::TESForm::LookupByEditorID("DA16")->As<RE::TESQuest>();
+		utility->IsVampireConditions = &isVampireSpell->effects[0]->conditions;
+		utility->DA16 = RE::TESForm::LookupByEditorID("DA16")->As<RE::TESQuest>();
 
 		RE::SpellItem* regionInfoSpell = RE::TESForm::LookupByEditorID("Survival_RegionInfoSpell")->As<RE::SpellItem>();
 
-		playerStatus->IsInWarmArea = &regionInfoSpell->effects[0]->conditions;
-		playerStatus->IsInCoolArea = &regionInfoSpell->effects[1]->conditions;
-		playerStatus->IsInFreezingArea = &regionInfoSpell->effects[2]->conditions;
-		playerStatus->IsInFallForestFreezingArea = &regionInfoSpell->effects[3]->conditions;
-		playerStatus->IsInPineForestFreezingArea = &regionInfoSpell->effects[4]->conditions;
-		playerStatus->IsInReachArea = &regionInfoSpell->effects[5]->conditions;
+		utility->IsInWarmArea = &regionInfoSpell->effects[0]->conditions;
+		utility->IsInCoolArea = &regionInfoSpell->effects[1]->conditions;
+		utility->IsInFreezingArea = &regionInfoSpell->effects[2]->conditions;
+		utility->IsInFallForestFreezingArea = &regionInfoSpell->effects[3]->conditions;
+		utility->IsInPineForestFreezingArea = &regionInfoSpell->effects[4]->conditions;
+		utility->IsInReachArea = &regionInfoSpell->effects[5]->conditions;
 
-		/*auto flameCloak = new RE::TESConditionItem;
-		flameCloak->next = nullptr;
-		flameCloak->data.comparisonValue.f = 1.0f;
-		flameCloak->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kHasMagicEffect;
-		flameCloak->data.functionData.params[0] = fireCloakEffect;
+	}
 
-		playerStatus->HasFlameCloakCondition = flameCloak;*/
+	//Cache commonly called addresses to avoid address lib overhead
+	void CacheGameAddresses()
+	{
+		auto utility = Utility::GetSingleton();
+
+		//Cache player singleton address
+		utility->PlayerSingletonAddress = RELOCATION_ID(517014, 403521).address();
+		utility->UISingletonAddress = RELOCATION_ID(514178, 400327).address();
+		utility->CalendarSingletonAddress = RELOCATION_ID(514287, 400447).address();
+		utility->MenuControlsSingletonAddress = RELOCATION_ID(515124, 401263).address();
+		utility->GetWarmthRatingAddress = RELOCATION_ID(25834, 26394).address();
 	}
 };

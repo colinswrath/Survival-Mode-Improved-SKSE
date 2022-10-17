@@ -59,14 +59,18 @@ public:
 	/// </summary>
 	void OnUpdatePass()
 	{
-		auto status = Utility::GetSingleton();
+		auto player = Utility::GetPlayer();
+
 		//TODO- Pause needs if you are:
 		//InCombat
 		//InDialogue (maybe)
 		//InJail
 		//IsRidingDragon
 		//BeastForm, WW or VL
-		if (status->PlayerIsInCombat()) {	//Pauses - Dialogue - Jail - Combat
+		if (player->IsInCombat() || 
+			Utility::IsPlayerInDialogue() ||
+			Utility::PlayerIsBeastRace() ||
+			Utility::IsOnFlyingMount(player)) {
 			SetLastTimeStamp();		//Abstract to NeedsPaused pure virtual so cold can set UI to neutral.
 		} else {
 			UpdateNeed();
@@ -119,7 +123,7 @@ public:
 		ApplyAttributePenalty();
 	}
 
-	void SetLastTimeStamp(float timeToSet = RE::Calendar::GetSingleton()->GetCurrentGameTime() * 1440)
+	void SetLastTimeStamp(float timeToSet = Utility::GetCalendar()->GetCurrentGameTime() * 1440)
 	{
 		LastUpdateTimeStamp->value = timeToSet;
 	}
@@ -176,7 +180,7 @@ protected:
 
 	virtual void ApplyAttributePenalty()
 	{
-		auto player = RE::PlayerCharacter::GetSingleton();
+		auto player = Utility::GetPlayer();
 		float maxPenAv = GetMaxAttributeAv(player);
 		float penaltyPerc = GetPenaltyPercentAmount();
 		float currentPenaltyMag = player->AsActorValueOwner()->GetActorValue(NeedPenaltyAV);
@@ -197,7 +201,7 @@ protected:
 
 	virtual void RemoveAttributePenalty()
 	{
-		auto player = RE::PlayerCharacter::GetSingleton();
+		auto player = Utility::GetPlayer();
 		float currentPenaltyMag = player->AsActorValueOwner()->GetActorValue(NeedPenaltyAV);
 
 		player->AsActorValueOwner()->SetActorValue(NeedPenaltyAV, 0.0f);
@@ -227,7 +231,7 @@ protected:
 
 	virtual void RemoveNeedEffects()
 	{
-		auto player = RE::PlayerCharacter::GetSingleton();
+		auto player = Utility::GetPlayer();
 		player->RemoveSpell(NeedSpell0);
 		player->RemoveSpell(NeedSpell1);
 		player->RemoveSpell(NeedSpell2);
@@ -238,7 +242,7 @@ protected:
 
 	void NotifyAddEffect(RE::BGSMessage* increasingMsg, RE::BGSMessage* decreasingMsg, RE::SpellItem* spell, bool increasing=true)
 	{
-		RE::PlayerCharacter::GetSingleton()->AddSpell(spell);
+		Utility::GetPlayer()->AddSpell(spell);
 		if (increasing)
 			Utility::ShowNotification(increasingMsg);
 		else
@@ -247,7 +251,7 @@ protected:
 
 	virtual void PlaySFX(const char* maleSound, const char* femaleSound)
 	{	
-		if (RE::PlayerCharacter::GetSingleton()->GetActorBase()->GetSex() == RE::SEX::kFemale) {
+		if (Utility::GetPlayer()->GetActorBase()->GetSex() == RE::SEX::kFemale) {
 			RE::PlaySound(femaleSound);
 		} else {
 			RE::PlaySound(maleSound);
@@ -256,6 +260,6 @@ protected:
 
 	float GetCurrentGameTimeInMinutes()
 	{
-		return RE::Calendar::GetSingleton()->GetCurrentGameTime() * 1440;
+		return Utility::GetCalendar()->GetCurrentGameTime() * 1440;
 	}
 };

@@ -7,7 +7,7 @@
 
 std::int32_t SurvivalMode::OnUpdate(std::int64_t a1)
 {
-	if (!RE::UI::GetSingleton()->GameIsPaused()) {
+	if (!Utility::GetUI()->GameIsPaused()) {
 		
 		if (g_deltaTime > 0) {
 			lastTime += g_deltaTime;
@@ -39,18 +39,20 @@ void SurvivalMode::SurvivalModeLoopUpdate()
 
 void SurvivalMode::StartSurvivalMode()
 {
+	auto utility = Utility::GetSingleton();
 	AddPlayerSpellPerks();
 	InitializeAllNeeds();
-	Utility::GetSingleton()->Survival_ModeEnabled->value = 1.0f;
-	Utility::GetSingleton()->Survival_ModeEnabledShared->value = 1.0f;
+	utility->Survival_ModeEnabled->value = 1.0f;
+	utility->Survival_ModeEnabledShared->value = 1.0f;
 }
 
 void SurvivalMode::StopSurvivalMode()
 {
+	auto utility = Utility::GetSingleton();
 	StopAllNeeds();
 	RemovePlayerSpellPerks();
-	Utility::GetSingleton()->Survival_ModeEnabled->value = 0;
-	Utility::GetSingleton()->Survival_ModeEnabledShared->value = 0;
+	utility->Survival_ModeEnabled->value = 0;
+	utility->Survival_ModeEnabledShared->value = 0;
 }
 
 void SurvivalMode::InitializeAllNeeds()
@@ -98,7 +100,7 @@ bool SurvivalMode::InstallUpdateHook()
 
 void SurvivalMode::AddPlayerSpellPerks() 
 {
-	auto player = RE::PlayerCharacter::GetSingleton();
+	auto player = Utility::GetPlayer();
 	auto utility = Utility::GetSingleton();
 
 	player->AddSpell(utility->Survival_abLowerCarryWeightSpell);
@@ -116,7 +118,7 @@ void SurvivalMode::AddPlayerSpellPerks()
 
 void SurvivalMode::RemovePlayerSpellPerks()
 {
-	auto player = RE::PlayerCharacter::GetSingleton();
+	auto player = Utility::GetPlayer();
 	auto utility = Utility::GetSingleton();
 
 	player->RemoveSpell(utility->Survival_abLowerCarryWeightSpell);

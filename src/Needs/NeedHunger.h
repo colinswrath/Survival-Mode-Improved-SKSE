@@ -50,7 +50,7 @@ public:
 
 	float GetNeedIncrementAmount(int ticks) override 
 	{	
-		auto player = RE::PlayerCharacter::GetSingleton();
+		auto player = Utility::GetPlayer();
 	
 		float amount = 0.0f;
 

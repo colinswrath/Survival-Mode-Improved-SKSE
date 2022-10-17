@@ -58,7 +58,7 @@ public:
 	}
 
 	float GetNeedIncrementAmount(int ticks) override {
-		auto player = RE::PlayerCharacter::GetSingleton();
+		auto player = Utility::GetPlayer();
 		float amount = 0.0f;
 
 		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
@@ -113,7 +113,7 @@ public:
 
 	void RemoveNeedEffects() override
 	{
-		auto player = RE::PlayerCharacter::GetSingleton();
+		auto player = Utility::GetPlayer();
 		player->RemoveSpell(WellRested);
 		player->RemoveSpell(Rested);
 		player->RemoveSpell(NeedSpell1);

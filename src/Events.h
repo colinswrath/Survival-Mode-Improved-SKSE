@@ -10,7 +10,7 @@ namespace Events
 
 	static void ProcessSleepStartEvent()
 	{
-		Hours = RE::Calendar::GetSingleton()->GetHoursPassed();
+		Hours = Utility::GetCalendar()->GetHoursPassed();
 		auto hunger = NeedHunger::GetSingleton();
 		auto exhaustion = NeedExhaustion::GetSingleton();
 		auto cold = NeedCold::GetSingleton();
@@ -33,7 +33,7 @@ namespace Events
 		auto exhaustion = NeedExhaustion::GetSingleton();
 		if (!exhaustion->CurrentlyStopped) {
 			exhaustion->SetLastTimeStamp();
-			Hours = RE::Calendar::GetSingleton()->GetHoursPassed() - Hours;
+			Hours = Utility::GetCalendar()->GetHoursPassed() - Hours;
 			exhaustion->DecreaseExhaustion(Hours);
 		}
 	}
@@ -42,7 +42,7 @@ namespace Events
 	static void ProcessHungerOnEquipEvent(RE::AlchemyItem* food)
 	{
 		auto hunger = NeedHunger::GetSingleton();
-		auto player = RE::PlayerCharacter::GetSingleton();
+		auto player = Utility::GetPlayer();
 
 		if (!hunger->CurrentlyStopped) {
 			if (hunger->Survival_FoodRawMeat->HasForm(food) || food->HasKeyword(hunger->VendorItemFoodRaw)) {
