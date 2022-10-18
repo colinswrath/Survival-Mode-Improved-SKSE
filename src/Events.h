@@ -10,7 +10,7 @@ namespace Events
 
 	static void ProcessSleepStartEvent()
 	{
-		Hours = RE::Calendar::GetSingleton()->GetHoursPassed();
+		Hours = Utility::GetCalendar()->GetHoursPassed();
 		auto hunger = NeedHunger::GetSingleton();
 		auto exhaustion = NeedExhaustion::GetSingleton();
 		auto cold = NeedCold::GetSingleton();
@@ -33,7 +33,7 @@ namespace Events
 		auto exhaustion = NeedExhaustion::GetSingleton();
 		if (!exhaustion->CurrentlyStopped) {
 			exhaustion->SetLastTimeStamp();
-			Hours = RE::Calendar::GetSingleton()->GetHoursPassed() - Hours;
+			Hours = Utility::GetCalendar()->GetHoursPassed() - Hours;
 			exhaustion->DecreaseExhaustion(Hours);
 		}
 	}
@@ -42,7 +42,8 @@ namespace Events
 	static void ProcessHungerOnEquipEvent(RE::AlchemyItem* food)
 	{
 		auto hunger = NeedHunger::GetSingleton();
-		auto player = RE::PlayerCharacter::GetSingleton();
+		auto player = Utility::GetPlayer();
+		auto cold = NeedCold::GetSingleton();
 
 		if (!hunger->CurrentlyStopped) {
 			if (hunger->Survival_FoodRawMeat->HasForm(food) || food->HasKeyword(hunger->VendorItemFoodRaw)) {
@@ -71,6 +72,11 @@ namespace Events
 			}
 		}
 
+		if (!cold->CurrentlyStopped) {
+			if (cold->Survival_FoodRestoreCold->HasForm(food)) {
+				cold->NeedBase::DecreaseNeed(cold->Survival_ColdRestoreMediumAmount->value, cold->NeedStage1->value);
+			}
+		}
 	}
 
 	class OnSleepStartEventHandler : public RE::BSTEventSink<RE::TESSleepStartEvent>
@@ -79,7 +85,7 @@ namespace Events
 		static OnSleepStartEventHandler* GetSingleton()
 		{
 			static OnSleepStartEventHandler singleton;
-			return std::addressof(singleton);
+			return &singleton;
 		}
 
 		RE::BSEventNotifyControl ProcessEvent(const RE::TESSleepStartEvent* a_event, RE::BSTEventSource<RE::TESSleepStartEvent>*) override
@@ -98,9 +104,6 @@ namespace Events
 			RE::ScriptEventSourceHolder* eventHolder = RE::ScriptEventSourceHolder::GetSingleton();
 			eventHolder->AddEventSink(OnSleepStartEventHandler::GetSingleton());
 		}
-
-	private:
-		OnSleepStartEventHandler() = default;
 	};
 
 	class OnSleepStopEventHandler : public RE::BSTEventSink<RE::TESSleepStopEvent>
@@ -109,7 +112,7 @@ namespace Events
 		static OnSleepStopEventHandler* GetSingleton()
 		{
 			static OnSleepStopEventHandler singleton;
-			return std::addressof(singleton);
+			return &singleton;
 		}
 
 		RE::BSEventNotifyControl ProcessEvent(const RE::TESSleepStopEvent* a_event, RE::BSTEventSource<RE::TESSleepStopEvent>*) override
@@ -128,9 +131,6 @@ namespace Events
 			RE::ScriptEventSourceHolder* eventHolder = RE::ScriptEventSourceHolder::GetSingleton();
 			eventHolder->AddEventSink(OnSleepStopEventHandler::GetSingleton());
 		}
-
-	private:
-		OnSleepStopEventHandler() = default;
 	};
 
 	class OnEquipEventHandler : public RE::BSTEventSink<RE::TESEquipEvent>
@@ -139,7 +139,7 @@ namespace Events
 		static OnEquipEventHandler* GetSingleton()
 		{
 			static OnEquipEventHandler singleton;
-			return std::addressof(singleton);
+			return &singleton;
 		}
 
 		RE::BSEventNotifyControl ProcessEvent(const RE::TESEquipEvent* a_event,[[maybe_unused]] RE::BSTEventSource<RE::TESEquipEvent>* a_eventSource) override
@@ -162,9 +162,6 @@ namespace Events
 			RE::ScriptEventSourceHolder* eventHolder = RE::ScriptEventSourceHolder::GetSingleton();
 			eventHolder->AddEventSink(OnEquipEventHandler::GetSingleton());
 		}
-
-	private:
-		OnEquipEventHandler() = default;
 	};
 
 	class OnHitEventHandler : public RE::BSTEventSink<RE::TESHitEvent>
@@ -173,7 +170,7 @@ namespace Events
 		static OnHitEventHandler* GetSingleton()
 		{
 			static OnHitEventHandler singleton;
-			return std::addressof(singleton);
+			return &singleton;
 		}
 
 		RE::BSEventNotifyControl ProcessEvent([[maybe_unused]] const RE::TESHitEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESHitEvent>* a_eventSource) override
@@ -186,9 +183,6 @@ namespace Events
 			RE::ScriptEventSourceHolder* eventHolder = RE::ScriptEventSourceHolder::GetSingleton();
 			eventHolder->AddEventSink(OnHitEventHandler::GetSingleton());
 		}
-
-	private:
-		OnHitEventHandler() = default;
 	};
 
 	inline static void Register()

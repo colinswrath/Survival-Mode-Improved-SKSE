@@ -41,6 +41,7 @@ public:
 	RE::TESGlobal* Survival_ColdResistMaxValue;
 	RE::TESGlobal* Survival_TemperatureLevel;
 	RE::TESGlobal* Survival_ColdRestoreSmallAmount;
+	RE::TESGlobal* Survival_ColdRestoreMediumAmount;
 
 	RE::BGSMessage* Survival_ColdConditionStage0;
 	RE::BGSMessage* Survival_ColdConditionStage1;
@@ -53,6 +54,7 @@ public:
 	RE::BGSListForm* Survival_BlizzardWeather;
 	RE::BGSListForm* SMI_ColdCloudyWeather;
 	RE::BGSListForm* Survival_WarmUpObjectsList;
+	RE::BGSListForm* Survival_FoodRestoreCold;
 
 	RE::TESGlobal* Survival_ColdLevelInFreezingWater;
 	RE::SpellItem* Survival_FreezingWaterDamage;
@@ -68,9 +70,25 @@ public:
 	const char* Survival_FreezingAFemaleSD = "Survival_FreezingAFemaleSD";
 	const char* Survival_FreezingBFemaleSD = "Survival_FreezingBFemaleSD";
 
-	const float MaxWarmthRatingBonusPerc = 0.80f;		//TODO-Make this an ini setting
+	const float MaxWarmthRatingBonusPerc = 0.80f;		//TODO-Make these an ini setting
 	const float ColdMaxStageThreshold = 600.0f;
 	const float ColdToRestoreInWarmArea = 1.5f;
+	
+	float SeasonMults[12] = 
+	{ 
+		1.5f,
+		1.4f, 
+		1.3f, 
+		1.2f, 
+		1.1f, 
+		1.0f, 
+		0.8f, 
+		1.0f, 
+		1.3f, 
+		1.4f, 
+		1.5f, 
+		1.6f 
+	};
 
 	//Night mod - TODO - Make ini setting
 	float WarmAreaNightMod = 25.0f;
@@ -90,6 +108,7 @@ public:
 		auto currentArea = utility->GetCurrentAreaType();
 		bool nearHeat = false;
 
+		//Todo-Abstract heat/freezing water check to survivalMode.cpp and utility
 		if (!FreezingWaterCheck(currentArea)) {
 			nearHeat = HeatSourceCheck();
 			UpdateCurrentAmbientTemp(currentArea);
@@ -99,8 +118,7 @@ public:
 			if (!nearHeat) {
 				IncrementNeed(ticks);
 			} else {
-				DecreaseNeed(Survival_ColdRestoreSmallAmount->value*ticks);
-				SetUIHeat();
+				DecrementNeedHeat(ticks);
 			}
 
 			SetLastTimeStamp(GetCurrentGameTimeInMinutes());
@@ -143,6 +161,19 @@ public:
 		//Damage if max cold
 	}
 
+	void DecrementNeedHeat(int ticks) 
+	{
+		auto decAmount = Survival_ColdRestoreSmallAmount->value * ticks;
+
+		float min = 0.0f;
+		if (SMI_CurrentAmbientTemp->value >= static_cast<float>(REGION_TEMPS::kColdLevelFreezingArea) && !Utility::GetPlayer()->GetParentCell()->IsInteriorCell()) {
+			min = NeedStage1->value;
+		}
+
+		NeedBase::DecreaseNeed(decAmount, min);
+		SetUIHeat(min);
+	}
+
 	void IncreaseColdLevel(float increaseAmount, float max) 
 	{
 		float currentNeedLevel = CurrentNeedValue->value;
@@ -163,7 +194,7 @@ public:
 
 		CurrentNeedValue->value = newNeedLevel;
 		UpdateTemperatureUI(currentNeedLevel, newNeedLevel);
-		SetNeedStage(true);
+		SetNeedStage(false);
 		ApplyAttributePenalty();
 	}
 
@@ -209,32 +240,36 @@ public:
 					return static_cast<float>(WEATHER_TEMPS::kRainyTemp);		
 				}
 			}
-		} 
+		}
+
 		return static_cast<float>(WEATHER_TEMPS::kComfortableTemp);
 	}
 
 	float GetRegionTemperature(AREA_TYPE area)
 	{
+		auto month = Utility::GetCalendar()->GetMonth();
+
 		switch (area) {
 		case AREA_TYPE::kAreaTypeChillyInterior:
 			return static_cast<float>(REGION_TEMPS::kColdLevelCoolArea);
 		case AREA_TYPE::kAreaTypeInterior:
 			return static_cast<float>(REGION_TEMPS::kColdLevelWarmArea);
 		case AREA_TYPE::kAreaTypeWarm:
-			return static_cast<float>(REGION_TEMPS::kColdLevelWarmArea);
+			return static_cast<float>(REGION_TEMPS::kColdLevelWarmArea) * SeasonMults[month];
 		case AREA_TYPE::kAreaTypeReach:
-			return static_cast<float>(REGION_TEMPS::kColdLevelReachArea);
+			return static_cast<float>(REGION_TEMPS::kColdLevelReachArea) * SeasonMults[month];
 		case AREA_TYPE::kAreaTypeCool:
-			return static_cast<float>(REGION_TEMPS::kColdLevelCoolArea);
+			return static_cast<float>(REGION_TEMPS::kColdLevelCoolArea) * SeasonMults[month];
 		case AREA_TYPE::kAreaTypeFreezing:
-			return static_cast<float>(REGION_TEMPS::kColdLevelFreezingArea);
+			return static_cast<float>(REGION_TEMPS::kColdLevelFreezingArea) * SeasonMults[month];
 		default:
-			return static_cast<float>(REGION_TEMPS::kColdLevelCoolArea);	
+			return static_cast<float>(REGION_TEMPS::kColdLevelCoolArea) * SeasonMults[month];	
 		}
 	}
 
 	float GetNightPenalty(AREA_TYPE area)
 	{
+
 		float nightPen = 0.0f;
 		if (area != AREA_TYPE::kAreaTypeInterior && area != AREA_TYPE::kAreaTypeChillyInterior) {
 			auto sky = RE::Sky::GetSingleton();
@@ -278,7 +313,7 @@ public:
 
 	float GetWarmthRatingBonus()
 	{
-		auto warmthRating = Utility::GetWarmthRating(RE::PlayerCharacter::GetSingleton());
+		auto warmthRating = Utility::GetWarmthRating(Utility::GetPlayer());
 		auto totalBonus = std::clamp(warmthRating, 0.0f, Survival_ColdResistMaxValue->value);
 		return MaxWarmthRatingBonusPerc * totalBonus / Survival_ColdResistMaxValue->value;
 	}
@@ -321,9 +356,9 @@ public:
 		Survival_TemperatureLevel->value = static_cast<float>(uiSetting);
 	}
 	
-	void SetUIHeat()
+	void SetUIHeat(float min = 0.0f)
 	{
-		if (CurrentNeedValue->value > 0.0f) {
+		if (CurrentNeedValue->value > min) {
 			Survival_TemperatureLevel->value = static_cast<float>(UI_LEVEL::kNearHeat);
 		} else {
 			Survival_TemperatureLevel->value = static_cast<float>(UI_LEVEL::kNeutral);
@@ -345,12 +380,18 @@ public:
 	float GetColdPerTick()
 	{
 		float coldLevel = SMI_CurrentAmbientTemp->value;
-		auto timeScale = RE::Calendar::GetSingleton()->GetTimescale();  //TODO-Cache the timescale
+		auto timeScale = Utility::GetCalendar()->GetTimescale();  //TODO-Cache the timescale
 
 		float targetRealTimeSecondsToNumb = Survival_ColdTargetGameHoursToNumb->value * 3600 / timeScale;
 		float coldPerSecond = coldLevel / targetRealTimeSecondsToNumb;
 		float deltaRealSeconds = 60 / timeScale;  //With a default time scale (20), 1 tick is 1 in game minute or ~3 irl seconds
 		return (coldPerSecond * deltaRealSeconds) * SMI_ColdRate->value; 
+	}
+
+	void PauseNeed() override
+	{
+		NeedBase::PauseNeed();
+		UpdateTemperatureUI(0.0f,0.0f);
 	}
 
 	void ApplyNeedStageEffects(bool increasing) override
@@ -379,9 +420,9 @@ public:
 
 	bool FreezingWaterCheck(AREA_TYPE currentArea)
 	{
-		auto player = RE::PlayerCharacter::GetSingleton();
-		auto playerState = player->AsActorState();
 		auto utility = Utility::GetSingleton();
+		auto player = Utility::GetPlayer();
+		auto playerState = player->AsActorState();
 
 		if (playerState->IsSwimming() && !utility->PlayerHasFlameCloak() &&
 			(currentArea == AREA_TYPE::kAreaTypeFreezing || currentArea == AREA_TYPE::kAreaTypeChillyInterior || player->GetWorldspace() == DLC1HunterHQWorld)) {
@@ -408,12 +449,13 @@ public:
 	bool HeatSourceCheck()
 	{
 		auto TES = RE::TES::GetSingleton();
-		auto player = RE::PlayerCharacter::GetSingleton();
+		auto player = Utility::GetPlayer();
+		auto playerState = player->AsActorState();
 
 		std::vector<RE::TESObjectREFR*> heatSources;
 
 		bool nearHeat = false;
-		if (TES && !player->IsRunning() || player->AsActorState()->IsSprinting()) {
+		if (TES && !player->IsRunning() && !playerState->IsSprinting() && !playerState->IsSwimming()) {
 			TES->ForEachReferenceInRange(player, 580.0f, [&](RE::TESObjectREFR& b_ref) {
 				if (const auto base = b_ref.GetBaseObject(); base && b_ref.Is3DLoaded()) {
 					if (Survival_WarmUpObjectsList->HasForm(base)) {

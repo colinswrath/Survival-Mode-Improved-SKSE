@@ -50,9 +50,16 @@ public:
 	RE::Effect* Survival_FireCloakFreezingWaterDesc;
 
 	RE::TESCondition* IsVampireConditions;
+	RE::TESConditionItem* IsInJailCondition;
 
 	RE::BGSMessage* Survival_OblivionAreaMessage;
 	RE::TESQuest* DA16;
+
+	uintptr_t PlayerSingletonAddress;
+	uintptr_t UISingletonAddress;
+	uintptr_t CalendarSingletonAddress;
+	uintptr_t MenuControlsSingletonAddress;
+	uintptr_t GetWarmthRatingAddress;
 
 	static Utility* GetSingleton()
 	{
@@ -62,7 +69,7 @@ public:
 
 	AREA_TYPE GetCurrentAreaType()
 	{
-		auto player = RE::PlayerCharacter::GetSingleton();
+		auto player = GetPlayer();
 		auto playerParentCell = player->GetParentCell();
 
 		if (playerParentCell->IsInteriorCell() || Survival_InteriorAreas->HasForm(player->GetWorldspace())) {
@@ -88,6 +95,30 @@ public:
 		}
 	}
 
+	static RE::PlayerCharacter* GetPlayer()
+	{
+		REL::Relocation<RE::NiPointer<RE::PlayerCharacter>*> singleton{ Utility::GetSingleton()->PlayerSingletonAddress };
+		return singleton->get();
+	}
+
+	static RE::UI* GetUI()
+	{
+		REL::Relocation<RE::NiPointer<RE::UI>*> singleton{ Utility::GetSingleton()->UISingletonAddress };
+		return singleton->get();
+	}
+
+	static RE::Calendar* GetCalendar()
+	{
+		REL::Relocation<RE::NiPointer<RE::Calendar>*> singleton{ Utility::GetSingleton()->CalendarSingletonAddress };
+		return singleton->get();
+	}
+
+	static RE::MenuControls* GetMenuControls()
+	{
+		REL::Relocation<RE::NiPointer<RE::MenuControls>*> singleton{ Utility::GetSingleton()->MenuControlsSingletonAddress };
+		return singleton->get();
+	}
+
 	static float GetRandomFloat(float min, float max) 
 	{
 		return SKSE::stl::RNG::GetSingleton()->Generate<float>(min, max);
@@ -95,7 +126,7 @@ public:
 
 	bool IsSurvivalEnabled()
 	{
-		return (bool)Survival_ModeEnabled->value;
+		return Survival_ModeEnabled->value;
 	}
 
 	static void ShowNotification(RE::BGSMessage* msg)
@@ -107,38 +138,30 @@ public:
 
 	bool SurvivalToggle()
 	{
-		return (bool)Survival_ModeToggle->value;
-	}
-
-	bool PlayerIsInCombat()
-	{
-		return RE::PlayerCharacter::GetSingleton()->IsInCombat();
+		return Survival_ModeToggle->value;
 	}
 
 	bool PlayerHasFlameCloak()
 	{
-		auto player = RE::PlayerCharacter::GetSingleton();
+		auto player = GetPlayer();
 
 		auto activeEffects = player->AsMagicTarget()->GetActiveEffectList();
 		RE::EffectSetting* setting = nullptr;
 		for (auto& effect : *activeEffects) {
 			setting = effect ? effect->GetBaseObject() : nullptr;
 			if (setting) {
-				if (setting->data.archetype == RE::EffectSetting::Archetype::kCloak && setting->data.resistVariable == RE::ActorValue::kResistFire) {
-					
+				if (setting->data.archetype == RE::EffectSetting::Archetype::kCloak && setting->data.resistVariable == RE::ActorValue::kResistFire) {			
 					return true;
 				}
 			}
 		}
 		
 		return false;
-		//RE::ConditionCheckParams params(player->As<RE::TESObjectREFR>(), nullptr);
-		//return HasFlameCloakCondition->IsTrue(params);
 	}
 
 	bool PlayerIsInOblivion()
 	{
-		auto player = RE::PlayerCharacter::GetSingleton();
+		auto player = GetPlayer();
 		auto da16Stage = DA16->GetCurrentStageID();
 		if (Survival_OblivionLocations->HasForm(player->GetCurrentLocation()) ||
 			Survival_OblivionAreas->HasForm(player->GetWorldspace()) ||
@@ -150,20 +173,43 @@ public:
 		return false;
 	}
 
-	bool PlayerCanGetWellRested()
+	static bool PlayerCanGetWellRested()
 	{
 		//TODO-Check werewolf as well
+		auto util = Utility::GetSingleton();
 
-		auto player = RE::PlayerCharacter::GetSingleton();
-		return !IsVampireConditions->IsTrue(player, nullptr);
+		return !util->IsVampireConditions->IsTrue(GetPlayer(), nullptr);
+	}
+
+	static bool PlayerIsInJail()
+	{
+		auto utility = Utility::GetSingleton();
+		RE::ConditionCheckParams param(utility->GetPlayer(), nullptr);
+		return utility->IsInJailCondition->IsTrue(param);
+	}
+
+	static bool PlayerIsBeastRace()
+	{
+		auto menuControls = Utility::GetSingleton()->GetMenuControls();
+		return menuControls->InBeastForm();
+	}
+
+	static bool IsPlayerInDialogue()
+	{
+		return Utility::GetSingleton()->GetUI()->IsMenuOpen("Dialogue Menu");
+	}
+
+	static bool IsOnFlyingMount(RE::Actor* a_actor)
+	{
+		using func_t = decltype(&Utility::IsOnFlyingMount);
+		static REL::Relocation<func_t> func{ RELOCATION_ID(36877, 37901) };
+		return func(a_actor);
 	}
 
 	static float GetWarmthRating(RE::Actor* actor)
 	{
 		using func_t = decltype(&Utility::GetWarmthRating);
-		REL::Relocation<func_t> func{ RELOCATION_ID(25834, 26394) };
+		REL::Relocation<func_t> func{ Utility::GetSingleton()->GetWarmthRatingAddress };
 		return func(actor);
 	}
-
-	inline static REL::Relocation<decltype(GetWarmthRating)> _GetWarmthRating;
 };
