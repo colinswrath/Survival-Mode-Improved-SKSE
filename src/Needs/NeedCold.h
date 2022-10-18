@@ -189,7 +189,7 @@ public:
 			min = NeedStage1->value;
 		}
 
-		DecreaseNeed(decAmount, min);
+		NeedBase::DecreaseNeed(decAmount, min);
 		SetUIHeat(min);
 	}
 
