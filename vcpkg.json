@@ -5,7 +5,7 @@
   "homepage": "",
   "license": "MIT",
   "dependencies": [
-	  "simpleini",
-	  "commonlibsse-ng"
+    "commonlibsse-ng-flatrim",
+	  "simpleini"
   ]
 }

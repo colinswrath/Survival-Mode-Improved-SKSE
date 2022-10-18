@@ -150,8 +150,7 @@ public:
 		for (auto& effect : *activeEffects) {
 			setting = effect ? effect->GetBaseObject() : nullptr;
 			if (setting) {
-				if (setting->data.archetype == RE::EffectSetting::Archetype::kCloak && setting->data.resistVariable == RE::ActorValue::kResistFire) {
-					
+				if (setting->data.archetype == RE::EffectSetting::Archetype::kCloak && setting->data.resistVariable == RE::ActorValue::kResistFire) {			
 					return true;
 				}
 			}
@@ -174,10 +173,12 @@ public:
 		return false;
 	}
 
-	bool PlayerCanGetWellRested()
+	static bool PlayerCanGetWellRested()
 	{
 		//TODO-Check werewolf as well
-		return !IsVampireConditions->IsTrue(GetPlayer(), nullptr);
+		auto util = Utility::GetSingleton();
+
+		return !util->IsVampireConditions->IsTrue(GetPlayer(), nullptr);
 	}
 
 	static bool PlayerIsInJail()

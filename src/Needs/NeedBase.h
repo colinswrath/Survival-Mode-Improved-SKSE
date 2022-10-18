@@ -4,6 +4,8 @@
 #include <mutex>
 #include <algorithm>
 
+#undef PlaySound
+
 class NeedBase
 {
 public:
