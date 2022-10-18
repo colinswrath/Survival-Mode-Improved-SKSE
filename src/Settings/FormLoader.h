@@ -214,7 +214,8 @@ public:
 		coldSystem->Survival_AshWeather = RE::TESForm::LookupByEditorID("Survival_AshWeather")->As<RE::BGSListForm>();
 		coldSystem->Survival_BlizzardWeather = RE::TESForm::LookupByEditorID("Survival_BlizzardWeather")->As<RE::BGSListForm>();
 		coldSystem->SMI_ColdCloudyWeather = RE::TESForm::LookupByEditorID("SMI_ColdCloudyWeather")->As<RE::BGSListForm>();
-		coldSystem->Survival_WarmUpObjectsList = RE::TESForm::LookupByEditorID("Survival_WarmUpObjectsList")->As<RE::BGSListForm>();	
+		coldSystem->Survival_WarmUpObjectsList = RE::TESForm::LookupByEditorID("Survival_WarmUpObjectsList")->As<RE::BGSListForm>();
+		coldSystem->Survival_FoodRestoreCold = RE::TESForm::LookupByEditorID("Survival_FoodRestoreCold")->As<RE::BGSListForm>();
 
 		coldSystem->LastUpdateTimeStamp = RE::TESForm::LookupByEditorID("SMI_ColdLastUpdateTimeStamp")->As<RE::TESGlobal>();
 		coldSystem->NeedSleepRateMult = RE::TESForm::LookupByEditorID("Survival_NeedSleepReducedMetabolismMult")->As<RE::TESGlobal>();
@@ -224,6 +225,7 @@ public:
 		coldSystem->Survival_ColdLevelInFreezingWater = RE::TESForm::LookupByEditorID("Survival_ColdLevelInFreezingWater")->As<RE::TESGlobal>();
 		coldSystem->Survival_LastWaterFreezingMsgTime = RE::TESForm::LookupByEditorID("Survival_LastWaterFreezingMsgTime")->As<RE::TESGlobal>();
 		coldSystem->Survival_ColdRestoreSmallAmount = RE::TESForm::LookupByEditorID("Survival_ColdRestoreSmallAmount")->As<RE::TESGlobal>();
+		coldSystem->Survival_ColdRestoreMediumAmount = RE::TESForm::LookupByEditorID("Survival_ColdRestoreMediumAmount")->As<RE::TESGlobal>();
 
 		coldSystem->DLC1HunterHQWorld = RE::TESForm::LookupByEditorID("DLC1HunterHQWorld")->As<RE::TESWorldSpace>();	
 

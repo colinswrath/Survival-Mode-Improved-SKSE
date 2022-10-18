@@ -43,6 +43,7 @@ namespace Events
 	{
 		auto hunger = NeedHunger::GetSingleton();
 		auto player = Utility::GetPlayer();
+		auto cold = NeedCold::GetSingleton();
 
 		if (!hunger->CurrentlyStopped) {
 			if (hunger->Survival_FoodRawMeat->HasForm(food) || food->HasKeyword(hunger->VendorItemFoodRaw)) {
@@ -71,6 +72,11 @@ namespace Events
 			}
 		}
 
+		if (!cold->CurrentlyStopped) {
+			if (cold->Survival_FoodRestoreCold->HasForm(food)) {
+				cold->NeedBase::DecreaseNeed(cold->Survival_ColdRestoreMediumAmount->value, cold->NeedStage1->value);
+			}
+		}
 	}
 
 	class OnSleepStartEventHandler : public RE::BSTEventSink<RE::TESSleepStartEvent>

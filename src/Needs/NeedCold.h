@@ -41,6 +41,7 @@ public:
 	RE::TESGlobal* Survival_ColdResistMaxValue;
 	RE::TESGlobal* Survival_TemperatureLevel;
 	RE::TESGlobal* Survival_ColdRestoreSmallAmount;
+	RE::TESGlobal* Survival_ColdRestoreMediumAmount;
 
 	RE::BGSMessage* Survival_ColdConditionStage0;
 	RE::BGSMessage* Survival_ColdConditionStage1;
@@ -53,6 +54,7 @@ public:
 	RE::BGSListForm* Survival_BlizzardWeather;
 	RE::BGSListForm* SMI_ColdCloudyWeather;
 	RE::BGSListForm* Survival_WarmUpObjectsList;
+	RE::BGSListForm* Survival_FoodRestoreCold;
 
 	RE::TESGlobal* Survival_ColdLevelInFreezingWater;
 	RE::SpellItem* Survival_FreezingWaterDamage;
@@ -168,7 +170,7 @@ public:
 			min = NeedStage1->value;
 		}
 
-		DecreaseNeed(decAmount, min);
+		NeedBase::DecreaseNeed(decAmount, min);
 		SetUIHeat(min);
 	}
 
@@ -192,7 +194,7 @@ public:
 
 		CurrentNeedValue->value = newNeedLevel;
 		UpdateTemperatureUI(currentNeedLevel, newNeedLevel);
-		SetNeedStage(true);
+		SetNeedStage(false);
 		ApplyAttributePenalty();
 	}
 

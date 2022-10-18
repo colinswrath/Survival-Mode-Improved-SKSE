@@ -107,11 +107,8 @@ public:
 	virtual void DecreaseNeed(float amount, float minValue = 0)
 	{
 		const std::lock_guard<std::mutex> lock(update_mutex);
-		float newNeedLevel = CurrentNeedValue->value - amount;
 
-		if (newNeedLevel < minValue) {
-			newNeedLevel = minValue;
-		}
+		float newNeedLevel = std::clamp(CurrentNeedValue->value - amount, minValue, NeedMaxValue->value);
 
 		CurrentNeedValue->value = newNeedLevel;
 		SetNeedStage(false);
