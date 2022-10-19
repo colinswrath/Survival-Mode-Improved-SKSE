@@ -288,7 +288,6 @@ public:
 
 	float GetNightPenalty(AREA_TYPE area)
 	{
-
 		float nightPen = 0.0f;
 		if (area != AREA_TYPE::kAreaTypeInterior && area != AREA_TYPE::kAreaTypeChillyInterior) {
 			auto sky = RE::Sky::GetSingleton();
