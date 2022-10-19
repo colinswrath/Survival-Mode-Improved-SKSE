@@ -20,6 +20,10 @@ public:
 	RE::BGSListForm* Survival_ExhaustionResistRacesMajor;
 	RE::BGSListForm* Survival_ExhaustionResistRacesMinor;
 
+	RE::BGSMessage* Survival_AfflictionAddledMsg;
+	RE::TESGlobal* Survival_AfflictionExhaustionChance;
+	RE::SpellItem* Survival_AfflictionAddled;	
+
 	const char* Survival_ExhaustedASD = "Survival_ExhaustedASD";
 	const char* Survival_ExhaustedBSD = "Survival_ExhaustedBSD";
 	const char* Survival_ExhaustedAFemaleSD = "Survival_ExhaustedAFemaleSD";
@@ -109,6 +113,8 @@ public:
 			NotifyAddEffect(NeedMessage5, NeedMessage5, NeedSpell5);
 			PlaySFX(Survival_ExhaustedBSD, Survival_ExhaustedBFemaleSD);
 		}
+
+		AddledRollCheck();
 	}
 
 	void RemoveNeedEffects() override
@@ -121,5 +127,17 @@ public:
 		player->RemoveSpell(NeedSpell3);
 		player->RemoveSpell(NeedSpell4);
 		player->RemoveSpell(NeedSpell5);
+	}
+
+	void AddledRollCheck()
+	{
+		auto player = Utility::GetPlayer();
+		if (!WasSleeping && (CurrentNeedValue->value >= NeedStage5->value) && player->HasSpell(Survival_AfflictionAddled)) {
+			float rand = Utility::GetRandomFloat(0.0f, 1.0f);
+
+			if (rand <= Survival_AfflictionExhaustionChance->value) {
+				NotifyAddEffect(Survival_AfflictionAddledMsg, nullptr, Survival_AfflictionAddled);
+			}
+		}
 	}
 };

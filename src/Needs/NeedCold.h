@@ -50,6 +50,10 @@ public:
 	RE::BGSMessage* Survival_ColdConditionStage4;
 	RE::BGSMessage* Survival_ColdConditionStage5;
 
+	RE::BGSMessage* Survival_AfflictionFrostbittenMsg;
+	RE::SpellItem* Survival_AfflictionFrostbitten;
+	RE::TESGlobal* Survival_AfflictionColdChance;
+
 	RE::BGSListForm* Survival_AshWeather;
 	RE::BGSListForm* Survival_BlizzardWeather;
 	RE::BGSListForm* SMI_ColdCloudyWeather;
@@ -73,6 +77,7 @@ public:
 	const float MaxWarmthRatingBonusPerc = 0.80f;		//TODO-Make these an ini setting
 	const float ColdMaxStageThreshold = 600.0f;
 	const float ColdToRestoreInWarmArea = 1.5f;
+	const float AmountToChangeColdOnSpellHit = 30.0000;
 	
 	float SeasonMults[12] = 
 	{ 
@@ -159,6 +164,7 @@ public:
 		}
 
 		//Damage if max cold
+		WasSleeping = false;
 	}
 
 	void DecrementNeedHeat(int ticks) 
@@ -206,8 +212,8 @@ public:
 			
 		if (WasSleeping){
 			amount *= NeedSleepRateMult->value;
-			WasSleeping = false;
 		}
+
 		amount *= (1.0f - GetWarmthRatingBonus());
 		return amount;
 	}
@@ -269,7 +275,6 @@ public:
 
 	float GetNightPenalty(AREA_TYPE area)
 	{
-
 		float nightPen = 0.0f;
 		if (area != AREA_TYPE::kAreaTypeInterior && area != AREA_TYPE::kAreaTypeChillyInterior) {
 			auto sky = RE::Sky::GetSingleton();
@@ -416,6 +421,8 @@ public:
 			NotifyAddEffect(NeedMessage5, NeedMessage5, NeedSpell5);
 			PlaySFX(Survival_FreezingBSD, Survival_FreezingBFemaleSD);
 		}
+
+		FrostbiteRollCheck();
 	}
 
 	bool FreezingWaterCheck(AREA_TYPE currentArea)
@@ -446,13 +453,23 @@ public:
 		return false;
 	}
 
+	void FrostbiteRollCheck()
+	{
+		auto player = Utility::GetPlayer();
+		if (!WasSleeping && (CurrentNeedValue->value >= NeedStage5->value) && player->HasSpell(Survival_AfflictionFrostbitten)) {
+			float rand = Utility::GetRandomFloat(0.0f,1.0f);
+
+			if (rand <= Survival_AfflictionColdChance->value) {
+				NotifyAddEffect(Survival_AfflictionFrostbittenMsg, nullptr, Survival_AfflictionFrostbitten);
+			}
+		}
+	}
+
 	bool HeatSourceCheck()
 	{
 		auto TES = RE::TES::GetSingleton();
 		auto player = Utility::GetPlayer();
 		auto playerState = player->AsActorState();
-
-		std::vector<RE::TESObjectREFR*> heatSources;
 
 		bool nearHeat = false;
 		if (TES && !player->IsRunning() && !playerState->IsSprinting() && !playerState->IsSwimming()) {
