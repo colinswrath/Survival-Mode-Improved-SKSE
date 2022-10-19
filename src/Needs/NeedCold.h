@@ -180,19 +180,6 @@ public:
 		SetUIHeat(min);
 	}
 
-	void DecrementNeedHeat(int ticks) 
-	{
-		auto decAmount = Survival_ColdRestoreSmallAmount->value * ticks;
-
-		float min = 0.0f;
-		if (SMI_CurrentAmbientTemp->value >= static_cast<float>(REGION_TEMPS::kColdLevelFreezingArea) && !Utility::GetPlayer()->GetParentCell()->IsInteriorCell()) {
-			min = NeedStage1->value;
-		}
-
-		NeedBase::DecreaseNeed(decAmount, min);
-		SetUIHeat(min);
-	}
-
 	void IncreaseColdLevel(float increaseAmount, float max) 
 	{
 		float currentNeedLevel = CurrentNeedValue->value;
