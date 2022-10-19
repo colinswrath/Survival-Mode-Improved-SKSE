@@ -97,6 +97,10 @@ public:
 		hungerSystem->Survival_FoodPoisoningMsg = RE::TESForm::LookupByEditorID("Survival_FoodPoisoningMsg")->As<RE::BGSMessage>();
 		hungerSystem->Survival_DiseaseFoodPoisoning = RE::TESForm::LookupByEditorID("Survival_DiseaseFoodPoisoning")->As<RE::SpellItem>();
 		
+		hungerSystem->Survival_AfflictionWeakened = RE::TESForm::LookupByEditorID("Survival_AfflictionWeakened")->As<RE::SpellItem>();
+		hungerSystem->Survival_AfflictionHungerChance = RE::TESForm::LookupByEditorID("Survival_AfflictionHungerChance")->As<RE::TESGlobal>();
+		hungerSystem->Survival_AfflictionWeakenedMsg = RE::TESForm::LookupByEditorID("Survival_AfflictionWeakenedMsg")->As<RE::BGSMessage>();
+
 	}
 
 	void LoadFatigueForms()
@@ -154,6 +158,10 @@ public:
 
 		fatigueSystem->Survival_ExhaustionOverEncumberedMult = RE::TESForm::LookupByEditorID("Survival_ExhaustionOverEncumberedMult")->As<RE::TESGlobal>();
 
+		fatigueSystem->Survival_AfflictionAddledMsg = RE::TESForm::LookupByEditorID("Survival_AfflictionAddledMsg")->As<RE::BGSMessage>(); 
+		fatigueSystem->Survival_AfflictionExhaustionChance = RE::TESForm::LookupByEditorID("Survival_AfflictionExhaustionChance")->As<RE::TESGlobal>();
+		fatigueSystem->Survival_AfflictionAddled = RE::TESForm::LookupByEditorID("Survival_AfflictionAddled")->As<RE::SpellItem>();
+
 		//VampireBloodMessage
 	}
 
@@ -177,6 +185,8 @@ public:
 		coldSystem->NeedSpell3 = RE::TESForm::LookupByEditorID("Survival_ColdStage3")->As<RE::SpellItem>();
 		coldSystem->NeedSpell4 = RE::TESForm::LookupByEditorID("Survival_ColdStage4")->As<RE::SpellItem>();
 		coldSystem->NeedSpell5 = RE::TESForm::LookupByEditorID("Survival_ColdStage5")->As<RE::SpellItem>();
+
+		coldSystem->Survival_AfflictionFrostbitten = RE::TESForm::LookupByEditorID("Survival_AfflictionFrostbitten")->As<RE::SpellItem>();
 
 		coldSystem->Survival_FreezingWaterDamage = RE::TESForm::LookupByEditorID("Survival_FreezingWaterDamage")->As<RE::SpellItem>();
 
@@ -205,6 +215,8 @@ public:
 		coldSystem->NeedMessage4Decreasing = RE::TESForm::LookupByEditorID("Survival_Cold4MessageDecreasing")->As<RE::BGSMessage>();
 		coldSystem->NeedMessage5 = RE::TESForm::LookupByEditorID("Survival_Cold5Message")->As<RE::BGSMessage>();
 
+		coldSystem->Survival_AfflictionFrostbittenMsg = RE::TESForm::LookupByEditorID("Survival_AfflictionFrostbittenMsg")->As<RE::BGSMessage>();
+
 		coldSystem->Survival_WaterFreezingMessage = RE::TESForm::LookupByEditorID("Survival_WaterFreezingMessage")->As<RE::BGSMessage>();
 
 		coldSystem->CurrentNeedStage = RE::TESForm::LookupByEditorID("SMI_CurrentColdStage")->As<RE::TESGlobal>();
@@ -226,7 +238,8 @@ public:
 		coldSystem->Survival_LastWaterFreezingMsgTime = RE::TESForm::LookupByEditorID("Survival_LastWaterFreezingMsgTime")->As<RE::TESGlobal>();
 		coldSystem->Survival_ColdRestoreSmallAmount = RE::TESForm::LookupByEditorID("Survival_ColdRestoreSmallAmount")->As<RE::TESGlobal>();
 		coldSystem->Survival_ColdRestoreMediumAmount = RE::TESForm::LookupByEditorID("Survival_ColdRestoreMediumAmount")->As<RE::TESGlobal>();
-
+		coldSystem->Survival_AfflictionColdChance = RE::TESForm::LookupByEditorID("Survival_AfflictionColdChance")->As<RE::TESGlobal>();
+	
 		coldSystem->DLC1HunterHQWorld = RE::TESForm::LookupByEditorID("DLC1HunterHQWorld")->As<RE::TESWorldSpace>();	
 
 	}

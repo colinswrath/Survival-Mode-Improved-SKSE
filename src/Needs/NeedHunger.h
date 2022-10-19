@@ -20,6 +20,10 @@ public:
 	RE::TESGlobal* Survival_HungerRestoreMediumAmount;
 	RE::TESGlobal* Survival_HungerRestoreSmallAmount;
 	RE::TESGlobal* Survival_HungerRestoreVerySmallAmount;
+	
+	RE::TESGlobal* Survival_AfflictionHungerChance;
+	RE::SpellItem* Survival_AfflictionWeakened;
+	RE::BGSMessage* Survival_AfflictionWeakenedMsg;
 
 	RE::BGSListForm* Survival_FoodRawMeat;
 	RE::BGSKeyword* VendorItemFoodRaw;
@@ -44,6 +48,7 @@ public:
 
 		if (ticks > 0) {
 			IncrementNeed(ticks);
+			WasSleeping = false;
 			SetLastTimeStamp(GetCurrentGameTimeInMinutes());
 		}
 	}
@@ -59,7 +64,6 @@ public:
 
 		if (WasSleeping) {
 			amount = amount * NeedSleepRateMult->value;
-			WasSleeping = false;
 		}
 
 		if (Survival_HungerResistRacesMinor->HasForm(player->GetRace())) {
@@ -90,6 +94,20 @@ public:
 		} else if (stage == 5) {
 			NotifyAddEffect(NeedMessage5, NeedMessage5, NeedSpell5);
 			PlaySFX(Survival_HungerDSD, Survival_HungerDSD);
+		}
+
+		 WeakenedRollCheck();
+	}
+
+	void WeakenedRollCheck()
+	{
+		auto player = Utility::GetPlayer();
+		if (!WasSleeping && (CurrentNeedValue->value >= NeedStage5->value) && player->HasSpell(Survival_AfflictionWeakened)) {
+			float rand = Utility::GetRandomFloat(0.0f, 1.0f);
+
+			if (rand <= Survival_AfflictionHungerChance->value) {
+				NotifyAddEffect(Survival_AfflictionWeakenedMsg, nullptr, Survival_AfflictionWeakened);
+			}
 		}
 	}
 };

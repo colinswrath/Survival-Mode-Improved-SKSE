@@ -38,7 +38,6 @@ namespace Events
 		}
 	}
 	
-	//TODO-Add actual decrementing of needs
 	static void ProcessHungerOnEquipEvent(RE::AlchemyItem* food)
 	{
 		auto hunger = NeedHunger::GetSingleton();
@@ -75,6 +74,22 @@ namespace Events
 		if (!cold->CurrentlyStopped) {
 			if (cold->Survival_FoodRestoreCold->HasForm(food)) {
 				cold->NeedBase::DecreaseNeed(cold->Survival_ColdRestoreMediumAmount->value, cold->NeedStage1->value);
+			}
+		}
+	}
+
+	static void ProcessMagicEffectApplyEvent(RE::EffectSetting* effect)
+	{
+		if (effect->GetDangerous()) {
+			auto cold = NeedCold::GetSingleton();
+			if (effect->data.resistVariable == RE::ActorValue::kResistFire) {
+				if (cold->CurrentNeedValue->value > cold->NeedStage2->value) {
+					cold->DecreaseNeed(cold->AmountToChangeColdOnSpellHit, cold->NeedStage2->value);
+				}
+			} else if (effect->data.resistVariable == RE::ActorValue::kResistFrost) {
+				if (cold->CurrentNeedValue->value < cold->NeedStage4->value) {
+					cold->IncreaseColdLevel(cold->AmountToChangeColdOnSpellHit, cold->NeedStage4->value);
+				}
 			}
 		}
 	}
@@ -175,7 +190,11 @@ namespace Events
 
 		RE::BSEventNotifyControl ProcessEvent([[maybe_unused]] const RE::TESHitEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESHitEvent>* a_eventSource) override
 		{
+			if (!a_event || !a_event->target || !a_event->target->IsPlayerRef() || !a_event->cause ) {
+				return RE::BSEventNotifyControl::kContinue;
+			}
 			return RE::BSEventNotifyControl::kContinue;
+			
 		}
 
 		static void Register()
@@ -185,11 +204,51 @@ namespace Events
 		}
 	};
 
+	class OnEffectApplyEventHandler : public RE::BSTEventSink<RE::TESMagicEffectApplyEvent>
+	{
+	public:
+		static OnEffectApplyEventHandler* GetSingleton()
+		{
+			static OnEffectApplyEventHandler singleton;
+			return &singleton;
+		}
+
+		RE::BSEventNotifyControl ProcessEvent([[maybe_unused]] const RE::TESMagicEffectApplyEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESMagicEffectApplyEvent>* a_eventSource) override
+		{
+			if (!a_event || !a_event->target || !a_event->target->IsPlayerRef() || !a_event->caster) {
+				return RE::BSEventNotifyControl::kContinue;
+			}
+
+			auto caster = a_event->caster;
+
+			//TODO-Maybe not wanted
+			if (caster->GetFormID() == a_event->target->GetFormID()) {
+				return RE::BSEventNotifyControl::kContinue;
+			}
+
+			auto effect = RE::TESForm::LookupByID<RE::EffectSetting>(a_event->magicEffect);
+
+			if (!effect) {
+				return RE::BSEventNotifyControl::kContinue;
+			}
+
+			ProcessMagicEffectApplyEvent(effect);
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		static void Register()
+		{
+			RE::ScriptEventSourceHolder* eventHolder = RE::ScriptEventSourceHolder::GetSingleton();
+			eventHolder->AddEventSink(OnEffectApplyEventHandler::GetSingleton());
+		}
+	};
+
 	inline static void Register()
 	{
 		OnSleepStartEventHandler::Register();
 		OnSleepStopEventHandler::Register();
 		OnEquipEventHandler::Register();
 		OnHitEventHandler::Register();
+		OnEffectApplyEventHandler::Register();
 	}
 }
