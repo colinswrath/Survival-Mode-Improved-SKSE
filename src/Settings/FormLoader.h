@@ -158,6 +158,10 @@ public:
 
 		fatigueSystem->Survival_ExhaustionOverEncumberedMult = RE::TESForm::LookupByEditorID("Survival_ExhaustionOverEncumberedMult")->As<RE::TESGlobal>();
 
+		fatigueSystem->Survival_AfflictionAddledMsg = RE::TESForm::LookupByEditorID("Survival_AfflictionAddledMsg")->As<RE::BGSMessage>(); 
+		fatigueSystem->Survival_AfflictionExhaustionChance = RE::TESForm::LookupByEditorID("Survival_AfflictionExhaustionChance")->As<RE::TESGlobal>();
+		fatigueSystem->Survival_AfflictionAddled = RE::TESForm::LookupByEditorID("Survival_AfflictionAddled")->As<RE::SpellItem>();
+
 		//VampireBloodMessage
 	}
 
