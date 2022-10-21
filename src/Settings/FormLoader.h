@@ -284,6 +284,9 @@ public:
 		utility->IsVampireConditions = &isVampireSpell->effects[0]->conditions;
 		utility->DA16 = RE::TESForm::LookupByEditorID("DA16")->As<RE::TESQuest>();
 
+		utility->WerewolfFeedRestoreHealth = RE::TESForm::LookupByEditorID("WerewolfFeedRestoreHealth")->As<RE::EffectSetting>();
+		utility->DA11AbFortifyHealth = RE::TESForm::LookupByEditorID("DA11AbFortifyHealth")->As<RE::EffectSetting>();
+
 		RE::SpellItem* regionInfoSpell = RE::TESForm::LookupByEditorID("Survival_RegionInfoSpell")->As<RE::SpellItem>();
 
 		utility->IsInWarmArea = &regionInfoSpell->effects[0]->conditions;

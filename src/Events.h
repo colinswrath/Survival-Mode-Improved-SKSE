@@ -94,6 +94,7 @@ namespace Events
 				}
 			}
 		}
+
 		auto hunger = NeedHunger::GetSingleton();
 		auto util = Utility::GetSingleton();
 		if (!hunger->CurrentlyStopped) {

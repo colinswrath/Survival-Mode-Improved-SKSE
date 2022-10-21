@@ -429,6 +429,11 @@ public:
 		FrostbiteRollCheck();
 	}
 
+	void RemoveAfflictions() override
+	{
+		Utility::GetPlayer()->RemoveSpell(Survival_AfflictionFrostbitten);
+	}
+
 	bool FreezingWaterCheck(AREA_TYPE currentArea)
 	{
 		auto utility = Utility::GetSingleton();
