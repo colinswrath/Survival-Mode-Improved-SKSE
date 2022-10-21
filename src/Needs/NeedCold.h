@@ -42,6 +42,7 @@ public:
 	RE::TESGlobal* Survival_TemperatureLevel;
 	RE::TESGlobal* Survival_ColdRestoreSmallAmount;
 	RE::TESGlobal* Survival_ColdRestoreMediumAmount;
+	RE::TESGlobal* SMI_VampireColdRate;
 
 	RE::BGSMessage* Survival_ColdConditionStage0;
 	RE::BGSMessage* Survival_ColdConditionStage1;
@@ -132,8 +133,10 @@ public:
 
 	void StopNeed() override
 	{
-		NeedBase::StopNeed();
-		Survival_TemperatureLevel->value = static_cast<float>(UI_LEVEL::kNeutral);
+		if (!CurrentlyStopped) {
+			NeedBase::StopNeed();
+			Survival_TemperatureLevel->value = static_cast<float>(UI_LEVEL::kNeutral);
+		}
 	}
 
 	void UpdateCurrentAmbientTemp(AREA_TYPE currentArea)
@@ -275,7 +278,6 @@ public:
 
 	float GetNightPenalty(AREA_TYPE area)
 	{
-
 		float nightPen = 0.0f;
 		if (area != AREA_TYPE::kAreaTypeInterior && area != AREA_TYPE::kAreaTypeChillyInterior) {
 			auto sky = RE::Sky::GetSingleton();
@@ -387,11 +389,12 @@ public:
 	{
 		float coldLevel = SMI_CurrentAmbientTemp->value;
 		auto timeScale = Utility::GetCalendar()->GetTimescale();  //TODO-Cache the timescale
+		auto rateMult = Utility::PlayerIsVampire() ? SMI_VampireColdRate->value : SMI_ColdRate->value;
 
 		float targetRealTimeSecondsToNumb = Survival_ColdTargetGameHoursToNumb->value * 3600 / timeScale;
 		float coldPerSecond = coldLevel / targetRealTimeSecondsToNumb;
 		float deltaRealSeconds = 60 / timeScale;  //With a default time scale (20), 1 tick is 1 in game minute or ~3 irl seconds
-		return (coldPerSecond * deltaRealSeconds) * SMI_ColdRate->value; 
+		return (coldPerSecond * deltaRealSeconds) * rateMult; 
 	}
 
 	void PauseNeed() override
@@ -424,6 +427,11 @@ public:
 		}
 
 		FrostbiteRollCheck();
+	}
+
+	void RemoveAfflictions() override
+	{
+		Utility::GetPlayer()->RemoveSpell(Survival_AfflictionFrostbitten);
 	}
 
 	bool FreezingWaterCheck(AREA_TYPE currentArea)

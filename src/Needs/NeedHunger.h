@@ -99,6 +99,11 @@ public:
 		 WeakenedRollCheck();
 	}
 
+	void RemoveAfflictions() override
+	{
+		Utility::GetPlayer()->RemoveSpell(Survival_AfflictionWeakened);
+	}
+
 	void WeakenedRollCheck()
 	{
 		auto player = Utility::GetPlayer();

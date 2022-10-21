@@ -16,7 +16,7 @@ public:
 	RE::TESGlobal* Survival_ExhaustionRestorePerHour;
 
 	RE::TESGlobal* Survival_ExhaustionOverEncumberedMult;
-
+	
 	RE::BGSListForm* Survival_ExhaustionResistRacesMajor;
 	RE::BGSListForm* Survival_ExhaustionResistRacesMinor;
 
@@ -39,14 +39,18 @@ public:
 
 	void InitializeNeed() override
 	{
-		NeedBase::InitializeNeed();
-		PlayerSleepQuest->Stop();
+		if (CurrentlyStopped) {
+			NeedBase::InitializeNeed();
+			PlayerSleepQuest->Stop();
+		}
 	}
 
 	void StopNeed() override
 	{
-		NeedBase::StopNeed();
-		PlayerSleepQuest->Start();
+		if (!CurrentlyStopped) {
+			NeedBase::StopNeed();
+			PlayerSleepQuest->Start();
+		}
 	}
 
 	void UpdateNeed() override
@@ -65,8 +69,12 @@ public:
 		auto player = Utility::GetPlayer();
 		float amount = 0.0f;
 
+		bool rateReduction = Utility::PlayerIsVampire() || Utility::PlayerIsWerewolf();
+
+		auto rate = rateReduction ? NeedRate->value * 0.5f : NeedRate->value;
+
 		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
-		amount = (NeedRate->value / exhaustionDivisor) * float(ticks);
+		amount = (rate / exhaustionDivisor) * float(ticks);
 
 		if (Survival_ExhaustionResistRacesMinor->HasForm(player->GetRace())) {
 			amount = amount * (1.0f - Survival_RacialBonusMinor->value);
@@ -127,6 +135,11 @@ public:
 		player->RemoveSpell(NeedSpell3);
 		player->RemoveSpell(NeedSpell4);
 		player->RemoveSpell(NeedSpell5);
+	}
+
+	void RemoveAfflictions() override
+	{
+		Utility::GetPlayer()->RemoveSpell(Survival_AfflictionAddled);
 	}
 
 	void AddledRollCheck()

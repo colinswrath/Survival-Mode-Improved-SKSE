@@ -162,6 +162,7 @@ public:
 		fatigueSystem->Survival_AfflictionExhaustionChance = RE::TESForm::LookupByEditorID("Survival_AfflictionExhaustionChance")->As<RE::TESGlobal>();
 		fatigueSystem->Survival_AfflictionAddled = RE::TESForm::LookupByEditorID("Survival_AfflictionAddled")->As<RE::SpellItem>();
 
+
 		//VampireBloodMessage
 	}
 
@@ -239,6 +240,7 @@ public:
 		coldSystem->Survival_ColdRestoreSmallAmount = RE::TESForm::LookupByEditorID("Survival_ColdRestoreSmallAmount")->As<RE::TESGlobal>();
 		coldSystem->Survival_ColdRestoreMediumAmount = RE::TESForm::LookupByEditorID("Survival_ColdRestoreMediumAmount")->As<RE::TESGlobal>();
 		coldSystem->Survival_AfflictionColdChance = RE::TESForm::LookupByEditorID("Survival_AfflictionColdChance")->As<RE::TESGlobal>();
+		coldSystem->SMI_VampireColdRate = RE::TESForm::LookupByEditorID("SMI_VampireColdRate")->As<RE::TESGlobal>();
 	
 		coldSystem->DLC1HunterHQWorld = RE::TESForm::LookupByEditorID("DLC1HunterHQWorld")->As<RE::TESWorldSpace>();	
 
@@ -275,9 +277,15 @@ public:
 		utility->Survival_ColdInteriorLocations = RE::TESForm::LookupByEditorID("Survival_ColdInteriorLocations")->As<RE::BGSListForm>();
 		utility->Survival_InteriorAreas = RE::TESForm::LookupByEditorID("Survival_InteriorAreas")->As<RE::BGSListForm>();
 		
+		RE::SpellItem* isWerewolfSpell = RE::TESForm::LookupByEditorID("SMI_WerewolfSpell")->As<RE::SpellItem>();
+		utility->IsWerewolfConditions = &isWerewolfSpell->effects[0]->conditions;
+
 		RE::SpellItem* isVampireSpell = RE::TESForm::LookupByEditorID("SMI_VampireSpell")->As<RE::SpellItem>();
 		utility->IsVampireConditions = &isVampireSpell->effects[0]->conditions;
 		utility->DA16 = RE::TESForm::LookupByEditorID("DA16")->As<RE::TESQuest>();
+
+		utility->WerewolfFeedRestoreHealth = RE::TESForm::LookupByEditorID("WerewolfFeedRestoreHealth")->As<RE::EffectSetting>();
+		utility->DA11AbFortifyHealth = RE::TESForm::LookupByEditorID("DA11AbFortifyHealth")->As<RE::EffectSetting>();
 
 		RE::SpellItem* regionInfoSpell = RE::TESForm::LookupByEditorID("Survival_RegionInfoSpell")->As<RE::SpellItem>();
 

@@ -82,14 +82,28 @@ namespace Events
 	{
 		if (effect->GetDangerous()) {
 			auto cold = NeedCold::GetSingleton();
-			if (effect->data.resistVariable == RE::ActorValue::kResistFire) {
-				if (cold->CurrentNeedValue->value > cold->NeedStage2->value) {
-					cold->DecreaseNeed(cold->AmountToChangeColdOnSpellHit, cold->NeedStage2->value);
+			if (!cold->CurrentlyStopped) {
+				if (effect->data.resistVariable == RE::ActorValue::kResistFire) {
+					if (cold->CurrentNeedValue->value > cold->NeedStage2->value) {
+						cold->DecreaseNeed(cold->AmountToChangeColdOnSpellHit, cold->NeedStage2->value);
+					}
+				} else if (effect->data.resistVariable == RE::ActorValue::kResistFrost) {
+					if (cold->CurrentNeedValue->value < cold->NeedStage4->value) {
+						cold->IncreaseColdLevel(cold->AmountToChangeColdOnSpellHit, cold->NeedStage4->value);
+					}
 				}
-			} else if (effect->data.resistVariable == RE::ActorValue::kResistFrost) {
-				if (cold->CurrentNeedValue->value < cold->NeedStage4->value) {
-					cold->IncreaseColdLevel(cold->AmountToChangeColdOnSpellHit, cold->NeedStage4->value);
-				}
+			}
+		}
+
+		auto hunger = NeedHunger::GetSingleton();
+		auto util = Utility::GetSingleton();
+		if (!hunger->CurrentlyStopped) {
+			if (effect == util->WerewolfFeedRestoreHealth) {
+				//WW feed
+				hunger->DecreaseNeed(hunger->Survival_HungerRestoreMediumAmount->value);
+			} else if (effect == util->DA11AbFortifyHealth) {
+				//Cannibal feed
+				hunger->DecreaseNeed(hunger->Survival_HungerRestoreMediumAmount->value);
 			}
 		}
 	}
@@ -218,7 +232,7 @@ namespace Events
 			if (!a_event || !a_event->target || !a_event->target->IsPlayerRef() || !a_event->caster) {
 				return RE::BSEventNotifyControl::kContinue;
 			}
-
+			
 			auto caster = a_event->caster;
 
 			//TODO-Maybe not wanted
