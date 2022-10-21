@@ -76,8 +76,10 @@ public:
 
 	virtual void InitializeNeed()
 	{
-		SetLastTimeStamp();
-		CurrentlyStopped = false;
+		if (CurrentlyStopped) {
+			SetLastTimeStamp();
+			CurrentlyStopped = false;
+		}
 	}
 
 	virtual void StopNeed()
@@ -85,6 +87,7 @@ public:
 		if (!CurrentlyStopped) {
 			CurrentlyStopped = true;
 			RemoveNeedEffects();
+			RemoveAfflictions();
 			RemoveAttributePenalty();
 			CurrentNeedStage->value = -1;
 		}
@@ -125,10 +128,9 @@ public:
 protected:
 
 	virtual void UpdateNeed() = 0;
-
 	virtual float GetNeedIncrementAmount(int ticks) = 0;
-
 	virtual void ApplyNeedStageEffects(bool increasing) = 0;
+	virtual void RemoveAfflictions() = 0;
 
 	int GetGameTimeTicks()
 	{

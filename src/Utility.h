@@ -47,9 +47,11 @@ public:
 	RE::TESCondition* IsInPineForestFreezingArea;
 	RE::TESCondition* IsInReachArea;
 
-	RE::Effect* Survival_FireCloakFreezingWaterDesc;
+	RE::EffectSetting* WerewolfFeedRestoreHealth;
+	RE::EffectSetting* DA11AbFortifyHealth;
 
 	RE::TESCondition* IsVampireConditions;
+	RE::TESCondition* IsWerewolfConditions;
 	RE::TESConditionItem* IsInJailCondition;
 
 	RE::BGSMessage* Survival_OblivionAreaMessage;
@@ -159,6 +161,12 @@ public:
 		return false;
 	}
 
+	static bool PlayerIsWerewolf()
+	{
+		auto util = Utility::GetSingleton();
+		return util->IsWerewolfConditions->IsTrue(util->GetPlayer(), nullptr);
+	}
+
 	bool PlayerIsInOblivion()
 	{
 		auto player = GetPlayer();
@@ -175,10 +183,15 @@ public:
 
 	static bool PlayerCanGetWellRested()
 	{
-		//TODO-Check werewolf as well
-		auto util = Utility::GetSingleton();
+		//Vampire or WW or Lich then false
 
-		return !util->IsVampireConditions->IsTrue(GetPlayer(), nullptr);
+		return !PlayerIsVampire() && !PlayerIsWerewolf();
+	}
+
+	static bool PlayerIsVampire()
+	{
+		auto util = Utility::GetSingleton();
+		return util->IsVampireConditions->IsTrue(GetPlayer(), nullptr);
 	}
 
 	static bool PlayerIsInJail()

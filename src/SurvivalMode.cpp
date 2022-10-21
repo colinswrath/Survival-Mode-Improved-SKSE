@@ -59,18 +59,29 @@ void SurvivalMode::InitializeAllNeeds()
 {
 	logger::info("Initializing all needs");
 
-	NeedHunger::GetSingleton()->InitializeNeed();
-	NeedExhaustion::GetSingleton()->InitializeNeed();
-	NeedCold::GetSingleton()->InitializeNeed();
+	if (Utility::PlayerIsVampire()) {
+		NeedExhaustion::GetSingleton()->InitializeNeed();
+		NeedCold::GetSingleton()->InitializeNeed();
+	} else {
+		NeedHunger::GetSingleton()->InitializeNeed();
+		NeedExhaustion::GetSingleton()->InitializeNeed();
+		NeedCold::GetSingleton()->InitializeNeed();
+	}
 
 	logger::info("Needs initialized");
 }
 
 void SurvivalMode::SendAllNeedsUpdate()
 {
-	NeedHunger::GetSingleton()->OnUpdatePass();
-	NeedExhaustion::GetSingleton()->OnUpdatePass();
-	NeedCold::GetSingleton()->OnUpdatePass();
+	if (Utility::PlayerIsVampire()) {
+		NeedHunger::GetSingleton()->StopNeed();
+		NeedExhaustion::GetSingleton()->OnUpdatePass();
+		NeedCold::GetSingleton()->OnUpdatePass();
+	} else {
+		NeedHunger::GetSingleton()->OnUpdatePass();
+		NeedExhaustion::GetSingleton()->OnUpdatePass();
+		NeedCold::GetSingleton()->OnUpdatePass();
+	}
 }
 
 void SurvivalMode::StopAllNeeds()
@@ -144,8 +155,8 @@ bool SurvivalMode::CheckOblivionStatus()
 		StopAllNeeds();
 		utility->SMI_WasInOblivion->value = 1.0f;
 	} else if (!oblivion && utility->SMI_WasInOblivion->value == 1.0f) {
-		InitializeAllNeeds();
 		utility->SMI_WasInOblivion->value = 0.0f;
+		InitializeAllNeeds();
 	}
 
 	return oblivion;
