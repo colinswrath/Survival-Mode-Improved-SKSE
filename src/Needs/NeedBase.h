@@ -47,7 +47,7 @@ public:
 	RE::BGSMessage* NeedMessage5;
 
 	bool WasSleeping;
-	bool CurrentlyStopped=false;
+	bool CurrentlyStopped=true;
 
 	//Attribute penalty
 	RE::ActorValue ActorValPenaltyAttribute;
@@ -61,13 +61,14 @@ public:
 	/// </summary>
 	void OnUpdatePass()
 	{
-		auto player = Utility::GetPlayer();
+		if (CurrentlyStopped) {
+			InitializeNeed();
+		}
 
-		if (player->IsInCombat() || 
+		if (Utility::GetPlayer()->IsInCombat() || 
 			Utility::IsPlayerInDialogue() ||
 			Utility::PlayerIsBeastRace() ||
-			Utility::IsOnFlyingMount(player)||
-			Utility::PlayerIsInJail()) {
+			Utility::IsOnFlyingMount(Utility::GetPlayer())) {
 			PauseNeed();
 		} else {
 			UpdateNeed();
@@ -76,10 +77,8 @@ public:
 
 	virtual void InitializeNeed()
 	{
-		if (CurrentlyStopped) {
-			SetLastTimeStamp();
-			CurrentlyStopped = false;
-		}
+		SetLastTimeStamp();
+		CurrentlyStopped = false;
 	}
 
 	virtual void StopNeed()
@@ -109,10 +108,9 @@ public:
 		ApplyAttributePenalty();
 	}
 
-	virtual void DecreaseNeed(float amount, float minValue = 0)
+	virtual void DecreaseNeed(float amount, float minValue = 0.0f)
 	{
 		const std::lock_guard<std::mutex> lock(update_mutex);
-
 		float newNeedLevel = std::clamp(CurrentNeedValue->value - amount, minValue, NeedMaxValue->value);
 
 		CurrentNeedValue->value = newNeedLevel;
@@ -176,10 +174,9 @@ protected:
 
 	virtual void ApplyAttributePenalty()
 	{
-		auto player = Utility::GetPlayer();
-		float maxPenAv = GetMaxAttributeAv(player);
+		float maxPenAv = GetMaxAttributeAv();
 		float penaltyPerc = GetPenaltyPercentAmount();
-		float currentPenaltyMag = player->AsActorValueOwner()->GetActorValue(NeedPenaltyAV);
+		float currentPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(NeedPenaltyAV);
 		float newPenaltyMag = maxPenAv * penaltyPerc;
 
 		if (newPenaltyMag > maxPenAv) {
@@ -188,25 +185,24 @@ protected:
 		auto magDelta = currentPenaltyMag - newPenaltyMag;
 
 		//Set tracker av not actual damage
-		player->AsActorValueOwner()->SetActorValue(NeedPenaltyAV, newPenaltyMag);
+		Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(NeedPenaltyAV, newPenaltyMag);
 
 		//Damage or restore AV
-		player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, magDelta);
+		Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, magDelta);
 		SetAttributePenaltyUIGlobal(penaltyPerc);
 	}
 
 	virtual void RemoveAttributePenalty()
 	{
-		auto player = Utility::GetPlayer();
-		float currentPenaltyMag = player->AsActorValueOwner()->GetActorValue(NeedPenaltyAV);
+		float currentPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(NeedPenaltyAV);
 
-		player->AsActorValueOwner()->SetActorValue(NeedPenaltyAV, 0.0f);
-		player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, currentPenaltyMag);
+		Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(NeedPenaltyAV, 0.0f);
+		Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, currentPenaltyMag);
 	}
 
-	float GetMaxAttributeAv(RE::PlayerCharacter* player)
+	float GetMaxAttributeAv()
 	{
-		return (player->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, ActorValPenaltyAttribute) + player->GetActorBase()->GetPermanentActorValue(ActorValPenaltyAttribute));
+		return (Utility::GetPlayer()->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, ActorValPenaltyAttribute) + Utility::GetPlayer()->GetActorBase()->GetPermanentActorValue(ActorValPenaltyAttribute));
 	}
 
 	virtual float GetPenaltyPercentAmount()

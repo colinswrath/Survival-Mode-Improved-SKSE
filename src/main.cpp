@@ -1,6 +1,7 @@
 #include "Hooks.h"
 #include "Events.h"
 #include "Settings/FormLoader.h"
+#include "Serialization.h"
 
 void InitLogger()
 {
@@ -92,6 +93,13 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	auto messaging = SKSE::GetMessagingInterface();
 	if (!messaging->RegisterListener(InitListener)) {
 		return false;
+	}
+
+	if (auto serialization = SKSE::GetSerializationInterface()) {
+		serialization->SetUniqueID(Serialization::ID);
+		serialization->SetSaveCallback(&Serialization::SaveCallback);
+		serialization->SetLoadCallback(&Serialization::LoadCallback);
+		serialization->SetRevertCallback(&Serialization::RevertCallback);
 	}
 	
 	return true;

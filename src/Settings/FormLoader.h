@@ -101,6 +101,9 @@ public:
 		hungerSystem->Survival_AfflictionHungerChance = RE::TESForm::LookupByEditorID("Survival_AfflictionHungerChance")->As<RE::TESGlobal>();
 		hungerSystem->Survival_AfflictionWeakenedMsg = RE::TESForm::LookupByEditorID("Survival_AfflictionWeakenedMsg")->As<RE::BGSMessage>();
 
+		hungerSystem->Survival_DiseaseGutworm = RE::TESForm::LookupByEditorID("Survival_DiseaseGutworm")->As<RE::SpellItem>();
+		hungerSystem->Survival_DiseaseGutworm2 = RE::TESForm::LookupByEditorID("Survival_DiseaseGutworm2")->As<RE::SpellItem>();
+		hungerSystem->Survival_DiseaseGutworm3 = RE::TESForm::LookupByEditorID("Survival_DiseaseGutworm3")->As<RE::SpellItem>();
 	}
 
 	void LoadFatigueForms()
@@ -162,6 +165,8 @@ public:
 		fatigueSystem->Survival_AfflictionExhaustionChance = RE::TESForm::LookupByEditorID("Survival_AfflictionExhaustionChance")->As<RE::TESGlobal>();
 		fatigueSystem->Survival_AfflictionAddled = RE::TESForm::LookupByEditorID("Survival_AfflictionAddled")->As<RE::SpellItem>();
 
+		fatigueSystem->MarriageRested = RE::TESForm::LookupByEditorID("MarriageRested")->As<RE::SpellItem>();
+		fatigueSystem->MarriageRestedMessage = RE::TESForm::LookupByEditorID("MarriageRestedMessage")->As<RE::BGSMessage>();
 
 		//VampireBloodMessage
 	}
@@ -228,7 +233,9 @@ public:
 		coldSystem->Survival_BlizzardWeather = RE::TESForm::LookupByEditorID("Survival_BlizzardWeather")->As<RE::BGSListForm>();
 		coldSystem->SMI_ColdCloudyWeather = RE::TESForm::LookupByEditorID("SMI_ColdCloudyWeather")->As<RE::BGSListForm>();
 		coldSystem->Survival_WarmUpObjectsList = RE::TESForm::LookupByEditorID("Survival_WarmUpObjectsList")->As<RE::BGSListForm>();
-		coldSystem->Survival_FoodRestoreCold = RE::TESForm::LookupByEditorID("Survival_FoodRestoreCold")->As<RE::BGSListForm>();
+
+
+		coldSystem->Survival_FoodRestoreCold = RE::TESForm::LookupByEditorID("Survival_FoodRestoreCold")->As<RE::EffectSetting>();
 
 		coldSystem->LastUpdateTimeStamp = RE::TESForm::LookupByEditorID("SMI_ColdLastUpdateTimeStamp")->As<RE::TESGlobal>();
 		coldSystem->NeedSleepRateMult = RE::TESForm::LookupByEditorID("Survival_NeedSleepReducedMetabolismMult")->As<RE::TESGlobal>();
@@ -251,7 +258,6 @@ public:
 		auto utility = Utility::GetSingleton();
 		utility->Survival_ModeToggle = RE::TESForm::LookupByEditorID("Survival_ModeToggle")->As<RE::TESGlobal>();
 		utility->Survival_ModeEnabled = RE::TESForm::LookupByEditorID("Survival_ModeEnabled")->As<RE::TESGlobal>();
-		utility->SMI_WasInOblivion = RE::TESForm::LookupByEditorID("SMI_WasInOblivion")->As<RE::TESGlobal>();
 
 		utility->Survival_abLowerCarryWeightSpell = RE::TESForm::LookupByEditorID("Survival_abLowerCarryWeightSpell")->As<RE::SpellItem>();
 		utility->Survival_abRacialNord = RE::TESForm::LookupByEditorID("Survival_abRacialNord")->As<RE::SpellItem>();
@@ -286,8 +292,12 @@ public:
 
 		utility->WerewolfFeedRestoreHealth = RE::TESForm::LookupByEditorID("WerewolfFeedRestoreHealth")->As<RE::EffectSetting>();
 		utility->DA11AbFortifyHealth = RE::TESForm::LookupByEditorID("DA11AbFortifyHealth")->As<RE::EffectSetting>();
-
+		utility->RelationshipMarriageFIN = RE::TESForm::LookupByEditorID("RelationshipMarriageFIN")->As<RE::TESQuest>();
+		utility->BYOHRelationshipAdoption = RE::TESForm::LookupByEditorID("BYOHRelationshipAdoption")->As<RE::TESQuest>();
 		RE::SpellItem* regionInfoSpell = RE::TESForm::LookupByEditorID("Survival_RegionInfoSpell")->As<RE::SpellItem>();
+
+		utility->LocTypeInn = RE::TESForm::LookupByEditorID("LocTypeInn")->As<RE::BGSKeyword>();
+		utility->LocTypePlayerHouse = RE::TESForm::LookupByEditorID("LocTypePlayerHouse")->As<RE::BGSKeyword>();
 
 		utility->IsInWarmArea = &regionInfoSpell->effects[0]->conditions;
 		utility->IsInCoolArea = &regionInfoSpell->effects[1]->conditions;
@@ -300,11 +310,16 @@ public:
 		inJail->next = nullptr;
 		inJail->data.comparisonValue.f = 0.0f;
 		inJail->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kGetDaysInJail;
-		inJail->data.functionData.params[0] = inJail;
 		inJail->data.flags.opCode = RE::CONDITION_ITEM_DATA::OpCode::kGreaterThan;
 
 		utility->IsInJailCondition = inJail;
 
+		/*auto locAlias = new RE::TESConditionItem;
+		locAlias->next = nullptr;
+		locAlias->data.comparisonValue.f = 1.0f;
+		locAlias->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kGetInCurrentLocAlias;
+
+		utility->AdoptionHomeLocationCond;*/
 	}
 
 	//Cache commonly called addresses to avoid address lib overhead

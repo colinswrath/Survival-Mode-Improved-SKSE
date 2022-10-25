@@ -30,7 +30,6 @@ enum class UI_LEVEL
 	kFreezing = 4
 };
 
-//TODO-Remove logs in the future, they are for testing
 class NeedCold : public NeedBase
 {
 public:
@@ -59,7 +58,7 @@ public:
 	RE::BGSListForm* Survival_BlizzardWeather;
 	RE::BGSListForm* SMI_ColdCloudyWeather;
 	RE::BGSListForm* Survival_WarmUpObjectsList;
-	RE::BGSListForm* Survival_FoodRestoreCold;
+	RE::EffectSetting* Survival_FoodRestoreCold;
 
 	RE::TESGlobal* Survival_ColdLevelInFreezingWater;
 	RE::SpellItem* Survival_FreezingWaterDamage;
@@ -161,12 +160,14 @@ public:
 		float maxLevel = GetMaxStageValue();
 
 		if (currentNeedLevel > maxLevel) {
-			DecreaseNeed((ColdToRestoreInWarmArea * ticks), maxLevel);
+			DecreaseNeed((ColdToRestoreInWarmArea * static_cast<float>(ticks)), maxLevel);
+		} else if (currentNeedLevel == maxLevel) {
+			IncreaseColdLevel(0.0f, NeedMaxValue->value);
 		} else {
 			IncreaseColdLevel(incAmount, NeedMaxValue->value);
 		}
 
-		//Damage if max cold
+		MaxColdCheck();
 		WasSleeping = false;
 	}
 
@@ -202,6 +203,7 @@ public:
 		float newNeedLevel = std::clamp(currentNeedLevel - decreaseAmount, min, NeedMaxValue->value);
 
 		CurrentNeedValue->value = newNeedLevel;
+
 		UpdateTemperatureUI(currentNeedLevel, newNeedLevel);
 		SetNeedStage(false);
 		ApplyAttributePenalty();
@@ -450,7 +452,7 @@ public:
 				Survival_LastWaterFreezingMsgTime->value = 0.0f;
 			}
 
-			IncreaseColdLevel(NeedMaxValue->value, NeedStage3->value);  //Dont let cold fall below level 3
+			IncreaseColdLevel(NeedMaxValue->value, NeedStage3->value);
 			SMI_CurrentAmbientTemp->value = Survival_ColdLevelInFreezingWater->value;
 
 			Survival_LastWaterFreezingMsgTime->value = std::clamp(currentVal += 1.0f, 0.0f, 10.0f);
@@ -460,6 +462,13 @@ public:
 			Survival_LastWaterFreezingMsgTime->value = 0.0f;
 		}
 		return false;
+	}
+
+	void MaxColdCheck()
+	{
+		if (CurrentNeedValue->value == NeedMaxValue->value && (!Utility::PlayerIsVampire() && !Utility::PlayerIsWerewolf())) {
+			Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,RE::ActorValue::kHealth,Utility::GetRandomFloat(-100,-10));
+		}
 	}
 
 	void FrostbiteRollCheck()
@@ -483,10 +492,12 @@ public:
 		bool nearHeat = false;
 		if (TES && !player->IsRunning() && !playerState->IsSprinting() && !playerState->IsSwimming()) {
 			TES->ForEachReferenceInRange(player, 580.0f, [&](RE::TESObjectREFR& b_ref) {
-				if (const auto base = b_ref.GetBaseObject(); base && b_ref.Is3DLoaded()) {
-					if (Survival_WarmUpObjectsList->HasForm(base)) {
-						nearHeat = true;
-						return RE::BSContainer::ForEachResult::kStop;
+				if (!b_ref.IsDisabled()) {
+					if (const auto base = b_ref.GetBaseObject(); base && b_ref.Is3DLoaded()) {
+						if (Survival_WarmUpObjectsList->HasForm(base)) {
+							nearHeat = true;
+							return RE::BSContainer::ForEachResult::kStop;
+						}
 					}
 				}
 				return RE::BSContainer::ForEachResult::kContinue;

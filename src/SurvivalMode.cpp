@@ -12,6 +12,7 @@ std::int32_t SurvivalMode::OnUpdate(std::int64_t a1)
 		if (g_deltaTime > 0) {
 			lastTime += g_deltaTime;
 			if (lastTime >= 1.0f) {
+				count += 1;
 				SurvivalModeLoopUpdate();
 				lastTime = 0;
 			}
@@ -26,7 +27,7 @@ void SurvivalMode::SurvivalModeLoopUpdate()
 	auto utility = Utility::GetSingleton();
 	utility->Survival_ModeCanBeEnabled->value = 1.0f;	//TODO-Move this elsewhere
 
-	if (!CheckOblivionStatus()) {
+	if (!CheckOblivionStatus() && !CheckJailStatus()) {
 		if (utility->IsSurvivalEnabled() && !utility->SurvivalToggle()) {
 			StopSurvivalMode();
 		} else if (!utility->IsSurvivalEnabled() && utility->SurvivalToggle()) {
@@ -41,7 +42,7 @@ void SurvivalMode::StartSurvivalMode()
 {
 	auto utility = Utility::GetSingleton();
 	AddPlayerSpellPerks();
-	InitializeAllNeeds();
+	SendAllNeedsUpdate();
 	utility->Survival_ModeEnabled->value = 1.0f;
 	utility->Survival_ModeEnabledShared->value = 1.0f;
 }
@@ -53,22 +54,6 @@ void SurvivalMode::StopSurvivalMode()
 	RemovePlayerSpellPerks();
 	utility->Survival_ModeEnabled->value = 0;
 	utility->Survival_ModeEnabledShared->value = 0;
-}
-
-void SurvivalMode::InitializeAllNeeds()
-{
-	logger::info("Initializing all needs");
-
-	if (Utility::PlayerIsVampire()) {
-		NeedExhaustion::GetSingleton()->InitializeNeed();
-		NeedCold::GetSingleton()->InitializeNeed();
-	} else {
-		NeedHunger::GetSingleton()->InitializeNeed();
-		NeedExhaustion::GetSingleton()->InitializeNeed();
-		NeedCold::GetSingleton()->InitializeNeed();
-	}
-
-	logger::info("Needs initialized");
 }
 
 void SurvivalMode::SendAllNeedsUpdate()
@@ -150,14 +135,23 @@ bool SurvivalMode::CheckOblivionStatus()
 	auto utility = Utility::GetSingleton();
 
 	bool oblivion = utility->PlayerIsInOblivion();
-	if (oblivion && utility->SMI_WasInOblivion->value == 0.0f) {
+	if (oblivion && !utility->WasInOblivion) {
 		ShowNotification(utility->Survival_OblivionAreaMessage);
 		StopAllNeeds();
-		utility->SMI_WasInOblivion->value = 1.0f;
-	} else if (!oblivion && utility->SMI_WasInOblivion->value == 1.0f) {
-		utility->SMI_WasInOblivion->value = 0.0f;
-		InitializeAllNeeds();
+		utility->WasInOblivion = true;
+	} else if (!oblivion && utility->WasInOblivion) {
+		utility->WasInOblivion = false;
 	}
 
 	return oblivion;
+}
+
+bool SurvivalMode::CheckJailStatus()
+{
+	bool jail = Utility::PlayerIsInJail();
+	if (jail) {
+		StopAllNeeds();
+	} 
+
+	return jail;
 }

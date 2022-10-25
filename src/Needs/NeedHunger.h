@@ -32,6 +32,10 @@ public:
 	RE::BGSMessage* Survival_FoodPoisoningMsg;
 	RE::SpellItem* Survival_DiseaseFoodPoisoning;
 
+	RE::SpellItem* Survival_DiseaseGutworm;
+	RE::SpellItem* Survival_DiseaseGutworm2;
+	RE::SpellItem* Survival_DiseaseGutworm3;
+
 	RE::BGSListForm* Survival_HungerResistRacesMinor;
 
 	const float hungerDivisor = 60.0f;
@@ -99,6 +103,17 @@ public:
 		 WeakenedRollCheck();
 	}
 
+	void DecreaseNeed(float amount, float minValue = 0) override
+	{
+		const std::lock_guard<std::mutex> lock(update_mutex);
+
+		float newNeedLevel = std::clamp(CurrentNeedValue->value - amount, minValue, NeedMaxValue->value);
+
+		CurrentNeedValue->value = newNeedLevel * GetGutwormMult();
+		SetNeedStage(false);
+		ApplyAttributePenalty();
+	}
+
 	void RemoveAfflictions() override
 	{
 		Utility::GetPlayer()->RemoveSpell(Survival_AfflictionWeakened);
@@ -113,6 +128,20 @@ public:
 			if (rand <= Survival_AfflictionHungerChance->value) {
 				NotifyAddEffect(Survival_AfflictionWeakenedMsg, nullptr, Survival_AfflictionWeakened);
 			}
+		}
+	}
+
+	float GetGutwormMult()
+	{
+		auto player = Utility::GetPlayer();
+		if (player->HasSpell(Survival_DiseaseGutworm)) {
+			return 0.75f;
+		} else if (player->HasSpell(Survival_DiseaseGutworm2)) {
+			return 0.5f;
+		} else if (player->HasSpell(Survival_DiseaseGutworm3)) {
+			return 0.25f;
+		} else {
+			return 1.0f;
 		}
 	}
 };

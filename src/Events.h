@@ -31,7 +31,9 @@ namespace Events
 	static void ProcessSleepStopEvent()
 	{
 		auto exhaustion = NeedExhaustion::GetSingleton();
+
 		if (!exhaustion->CurrentlyStopped) {
+
 			exhaustion->SetLastTimeStamp();
 			Hours = Utility::GetCalendar()->GetHoursPassed() - Hours;
 			exhaustion->DecreaseExhaustion(Hours);
@@ -42,7 +44,6 @@ namespace Events
 	{
 		auto hunger = NeedHunger::GetSingleton();
 		auto player = Utility::GetPlayer();
-		auto cold = NeedCold::GetSingleton();
 
 		if (!hunger->CurrentlyStopped) {
 			if (hunger->Survival_FoodRawMeat->HasForm(food) || food->HasKeyword(hunger->VendorItemFoodRaw)) {
@@ -70,19 +71,13 @@ namespace Events
 				}
 			}
 		}
-
-		if (!cold->CurrentlyStopped) {
-			if (cold->Survival_FoodRestoreCold->HasForm(food)) {
-				cold->NeedBase::DecreaseNeed(cold->Survival_ColdRestoreMediumAmount->value, cold->NeedStage1->value);
-			}
-		}
 	}
 
 	static void ProcessMagicEffectApplyEvent(RE::EffectSetting* effect)
 	{
-		if (effect->GetDangerous()) {
-			auto cold = NeedCold::GetSingleton();
-			if (!cold->CurrentlyStopped) {
+		auto cold = NeedCold::GetSingleton();
+		if (!cold->CurrentlyStopped) {
+			if (effect->GetDangerous()) {
 				if (effect->data.resistVariable == RE::ActorValue::kResistFire) {
 					if (cold->CurrentNeedValue->value > cold->NeedStage2->value) {
 						cold->DecreaseNeed(cold->AmountToChangeColdOnSpellHit, cold->NeedStage2->value);
@@ -91,6 +86,10 @@ namespace Events
 					if (cold->CurrentNeedValue->value < cold->NeedStage4->value) {
 						cold->IncreaseColdLevel(cold->AmountToChangeColdOnSpellHit, cold->NeedStage4->value);
 					}
+				}
+			} else {
+				if (cold->Survival_FoodRestoreCold == effect) {
+					cold->NeedBase::DecreaseNeed(cold->Survival_ColdRestoreMediumAmount->value, cold->NeedStage1->value);
 				}
 			}
 		}
@@ -165,6 +164,8 @@ namespace Events
 	class OnEquipEventHandler : public RE::BSTEventSink<RE::TESEquipEvent>
 	{
 	public:
+		std::mutex equip_mutex;
+
 		static OnEquipEventHandler* GetSingleton()
 		{
 			static OnEquipEventHandler singleton;
@@ -176,6 +177,8 @@ namespace Events
 			if (!a_event || !a_event->actor || !a_event->actor->IsPlayerRef()) {
 				return RE::BSEventNotifyControl::kContinue;
 			}
+
+			const std::lock_guard<std::mutex> lock(equip_mutex);
 
 			auto alchemyItem = RE::TESForm::LookupByID<RE::AlchemyItem>(a_event->baseObject);
 
@@ -221,6 +224,8 @@ namespace Events
 	class OnEffectApplyEventHandler : public RE::BSTEventSink<RE::TESMagicEffectApplyEvent>
 	{
 	public:
+		std::mutex effet_apply_mutex;
+
 		static OnEffectApplyEventHandler* GetSingleton()
 		{
 			static OnEffectApplyEventHandler singleton;
@@ -229,16 +234,11 @@ namespace Events
 
 		RE::BSEventNotifyControl ProcessEvent([[maybe_unused]] const RE::TESMagicEffectApplyEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESMagicEffectApplyEvent>* a_eventSource) override
 		{
-			if (!a_event || !a_event->target || !a_event->target->IsPlayerRef() || !a_event->caster) {
+			if (!a_event || !a_event->target || !a_event->target->IsPlayerRef()) {
 				return RE::BSEventNotifyControl::kContinue;
 			}
-			
-			auto caster = a_event->caster;
 
-			//TODO-Maybe not wanted
-			if (caster->GetFormID() == a_event->target->GetFormID()) {
-				return RE::BSEventNotifyControl::kContinue;
-			}
+			const std::lock_guard<std::mutex> lock(effet_apply_mutex);
 
 			auto effect = RE::TESForm::LookupByID<RE::EffectSetting>(a_event->magicEffect);
 
