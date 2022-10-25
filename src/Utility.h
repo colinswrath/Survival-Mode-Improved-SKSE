@@ -18,8 +18,6 @@ public:
 	RE::TESGlobal* Survival_ModeEnabledShared;
 	RE::TESGlobal* Survival_ModeCanBeEnabled;
 
-	RE::TESGlobal* SMI_WasInOblivion;
-
 	RE::SpellItem* Survival_abLowerCarryWeightSpell;
 	RE::SpellItem* Survival_abRacialNord;
 	RE::SpellItem* Survival_abRacialAltmer;
@@ -54,14 +52,24 @@ public:
 	RE::TESCondition* IsWerewolfConditions;
 	RE::TESConditionItem* IsInJailCondition;
 
+	RE::TESConditionItem* AdoptionHomeLocationCond;
+
 	RE::BGSMessage* Survival_OblivionAreaMessage;
 	RE::TESQuest* DA16;
+	RE::TESQuest* RelationshipMarriageFIN;
+
+	RE::TESQuest* BYOHRelationshipAdoption;
+	
+	RE::BGSKeyword* LocTypeInn;
+	RE::BGSKeyword* LocTypePlayerHouse;
 
 	uintptr_t PlayerSingletonAddress;
 	uintptr_t UISingletonAddress;
 	uintptr_t CalendarSingletonAddress;
 	uintptr_t MenuControlsSingletonAddress;
 	uintptr_t GetWarmthRatingAddress;
+
+	bool WasInOblivion = false;
 
 	static Utility* GetSingleton()
 	{
@@ -197,8 +205,108 @@ public:
 	static bool PlayerIsInJail()
 	{
 		auto utility = Utility::GetSingleton();
-		RE::ConditionCheckParams param(utility->GetPlayer(), nullptr);
-		return utility->IsInJailCondition->IsTrue(param);
+		RE::ConditionCheckParams param(Utility::GetPlayer(), nullptr);
+		bool inJail = utility->IsInJailCondition->IsTrue(param);
+		return inJail;
+
+	}
+
+	static bool PlayerIsNearSpouse()
+	{
+		auto relMarriageQuest = Utility::GetSingleton()->RelationshipMarriageFIN;
+		auto interestString = RE::BSFixedString("LoveInterest");
+
+		auto aliases = relMarriageQuest->aliases;
+		RE::BGSBaseAlias* loveInterestBase = nullptr;
+
+		for (auto alias : aliases) {
+			if (alias && alias->aliasName == interestString) {
+				loveInterestBase = alias;
+				break;
+			}
+		}
+
+		if (!loveInterestBase) {
+			return false;
+		}
+
+		const auto loveInterestRef = skyrim_cast<RE::BGSRefAlias*>(loveInterestBase);
+
+		if (!loveInterestRef) {
+			return false;
+		}
+
+		if (relMarriageQuest->IsRunning() && relMarriageQuest->currentStage >= 10 && (Utility::GetPlayer()->GetCurrentLocation() == loveInterestRef->GetActorReference()->GetCurrentLocation())) {
+			return true;
+		}
+		return false;
+	}
+
+	static bool PlayerIsNearAdopted()
+	{
+		auto util = Utility::GetSingleton();
+		auto adoptionQuest = util->BYOHRelationshipAdoption;
+
+		auto child1String = RE::BSFixedString("Child1");
+		auto child2String = RE::BSFixedString("Child2");
+
+		auto aliases = adoptionQuest->aliases;
+
+		RE::BGSBaseAlias* child1Base = nullptr;
+		RE::BGSBaseAlias* child2Base = nullptr;
+		RE::Actor* child1Actor = nullptr;
+		RE::Actor* child2Actor = nullptr;
+		bool child1Near = false;
+		bool child2Near = false;
+
+		for (auto alias : aliases) {
+			if (alias && alias->aliasName == child1String) {
+				child1Base = alias;
+			} else if (alias && alias->aliasName == child2String) {
+				child2Base = alias;
+			}
+		}
+
+		if (!child1Base || child1Base == nullptr) {
+			return false;
+		}
+
+		const auto child1Ref = skyrim_cast<RE::BGSRefAlias*>(child1Base);
+
+		if (child1Ref) {
+			child1Actor = child1Ref->GetActorReference();
+			if (child1Actor) {
+				child1Near = Utility::GetPlayer()->GetCurrentLocation() == child1Actor->GetCurrentLocation();
+			}
+		}
+
+		if (child2Base && child2Base != nullptr) {
+			const auto child2Ref = skyrim_cast<RE::BGSRefAlias*>(child2Base);
+
+			if (child2Ref) {
+				child2Actor = child2Ref->GetActorReference();
+				if (child2Actor) {
+					child2Near = Utility::GetPlayer()->GetCurrentLocation() == child2Actor->GetCurrentLocation();
+				}
+			}
+		}
+
+		if (adoptionQuest->IsRunning() && (child1Near || child2Near)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	static bool PlayerIsInHouseOrInn()
+	{
+		auto loc = Utility::GetPlayer()->GetCurrentLocation();
+		auto util = Utility::GetSingleton();
+
+		if (loc->HasKeyword(util->LocTypeInn) || loc->HasKeyword(util->LocTypePlayerHouse)) {
+			return true;
+		}
+		return false;
 	}
 
 	static bool PlayerIsBeastRace()

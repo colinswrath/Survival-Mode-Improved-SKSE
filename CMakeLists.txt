@@ -100,6 +100,7 @@ set(SOURCES
 	src/Needs/NeedExhaustion.h
 	src/Needs/NeedCold.h
 	src/Settings/FormLoader.h
+	src/Serialization.h
 )
 
 source_group(

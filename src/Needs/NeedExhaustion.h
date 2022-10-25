@@ -24,6 +24,14 @@ public:
 	RE::TESGlobal* Survival_AfflictionExhaustionChance;
 	RE::SpellItem* Survival_AfflictionAddled;	
 
+	RE::SpellItem* MarriageRested;	
+	RE::BGSMessage* MarriageRestedMessage;
+
+	RE::SpellItem* BYOHAdoptionSleepAbilityMale;	
+	RE::SpellItem* BYOHAdoptionSleepAbilityFemale;	
+	RE::BGSMessage* BYOHAdoptionRestedMessageMale;
+	RE::BGSMessage* BYOHAdoptionRestedMessageFemale;
+
 	const char* Survival_ExhaustedASD = "Survival_ExhaustedASD";
 	const char* Survival_ExhaustedBSD = "Survival_ExhaustedBSD";
 	const char* Survival_ExhaustedAFemaleSD = "Survival_ExhaustedAFemaleSD";
@@ -39,10 +47,8 @@ public:
 
 	void InitializeNeed() override
 	{
-		if (CurrentlyStopped) {
-			NeedBase::InitializeNeed();
-			PlayerSleepQuest->Stop();
-		}
+		NeedBase::InitializeNeed();
+		PlayerSleepQuest->Stop();
 	}
 
 	void StopNeed() override
@@ -69,9 +75,7 @@ public:
 		auto player = Utility::GetPlayer();
 		float amount = 0.0f;
 
-		bool rateReduction = Utility::PlayerIsVampire() || Utility::PlayerIsWerewolf();
-
-		auto rate = rateReduction ? NeedRate->value * 0.5f : NeedRate->value;
+		auto rate = NeedRate->value;
 
 		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
 		amount = (rate / exhaustionDivisor) * float(ticks);
@@ -92,6 +96,7 @@ public:
 	void DecreaseExhaustion(float hoursPassed)
 	{
 		DecreaseNeed(hoursPassed * Survival_ExhaustionRestorePerHour->value);
+		CheckAdoptionBonus();
 		WasSleeping = false;
 	}
 
@@ -99,14 +104,15 @@ public:
 	{
 		RemoveNeedEffects();
 		float stage = CurrentNeedStage->value;
-		
-		if (stage == 0) {
-			if (Utility::PlayerCanGetWellRested()) {
+		if (stage == 0 && Utility::PlayerCanGetWellRested()) {
+			if (Utility::PlayerIsNearSpouse()) {  //Todo-need to see if you are near spouse
+				NotifyAddEffect(MarriageRestedMessage, MarriageRestedMessage, MarriageRested);
+			} else if (Utility::PlayerIsInHouseOrInn()) {  //Check inn, house
 				NotifyAddEffect(WellRestedMessage, WellRestedMessage, WellRested);
 			} else {
-				NotifyAddEffect(RestedMessage, RestedMessage, Rested);	
-			}
-		} else if (stage == 1) {
+				NotifyAddEffect(RestedMessage, RestedMessage, Rested);			
+			}	
+		} else if (stage <= 1) {
 			NotifyAddEffect(NeedMessage1, NeedMessage1Decreasing, NeedSpell1, increasing);
 		} else if (stage == 2) {
 			NotifyAddEffect(NeedMessage2, NeedMessage2Decreasing, NeedSpell2, increasing);
@@ -123,6 +129,27 @@ public:
 		}
 
 		AddledRollCheck();
+	}
+
+	void CheckAdoptionBonus()
+	{
+		RemoveAdoptionBonus();
+		if (Utility::PlayerIsNearAdopted()) {
+			if (Utility::GetPlayer()->GetActorBase()->GetSex() == RE::SEX::kFemale) {
+				NotifyAddEffect(BYOHAdoptionRestedMessageFemale,nullptr,BYOHAdoptionSleepAbilityFemale);
+			} else {
+				NotifyAddEffect(BYOHAdoptionRestedMessageMale, nullptr, BYOHAdoptionSleepAbilityMale);	
+			}
+		}
+	}
+
+	void RemoveAdoptionBonus()
+	{
+		if (Utility::GetPlayer()->HasSpell(BYOHAdoptionSleepAbilityFemale)) {
+			Utility::GetPlayer()->RemoveSpell(BYOHAdoptionSleepAbilityFemale);
+		} else if (Utility::GetPlayer()->HasSpell(BYOHAdoptionSleepAbilityMale)) {
+			Utility::GetPlayer()->RemoveSpell(BYOHAdoptionSleepAbilityMale);
+		}
 	}
 
 	void RemoveNeedEffects() override
@@ -149,7 +176,7 @@ public:
 			float rand = Utility::GetRandomFloat(0.0f, 1.0f);
 
 			if (rand <= Survival_AfflictionExhaustionChance->value) {
-				NotifyAddEffect(Survival_AfflictionAddledMsg, nullptr, Survival_AfflictionAddled);
+				NotifyAddEffect(Survival_AfflictionAddledMsg, Survival_AfflictionAddledMsg, Survival_AfflictionAddled);
 			}
 		}
 	}
