@@ -42,6 +42,7 @@ public:
 	RE::TESGlobal* Survival_ColdRestoreSmallAmount;
 	RE::TESGlobal* Survival_ColdRestoreMediumAmount;
 	RE::TESGlobal* SMI_VampireColdRate;
+	RE::TESGlobal* Survival_HelpShown_Cold;
 
 	RE::BGSMessage* Survival_ColdConditionStage0;
 	RE::BGSMessage* Survival_ColdConditionStage1;
@@ -49,6 +50,8 @@ public:
 	RE::BGSMessage* Survival_ColdConditionStage3;
 	RE::BGSMessage* Survival_ColdConditionStage4;
 	RE::BGSMessage* Survival_ColdConditionStage5;
+
+	RE::BGSMessage* Survival_HelpColdHigh;
 
 	RE::BGSMessage* Survival_AfflictionFrostbittenMsg;
 	RE::SpellItem* Survival_AfflictionFrostbitten;
@@ -111,9 +114,9 @@ public:
 		int ticks = GetGameTimeTicks();
 		auto utility = Utility::GetSingleton();
 		auto currentArea = utility->GetCurrentAreaType();
+
 		bool nearHeat = false;
 
-		//Todo-Abstract heat/freezing water check to survivalMode.cpp and utility
 		if (!FreezingWaterCheck(currentArea)) {
 			nearHeat = HeatSourceCheck();
 			UpdateCurrentAmbientTemp(currentArea);
@@ -121,7 +124,11 @@ public:
 		
 		if (ticks > 0) {
 			if (!nearHeat) {
+				logger::info("Incrementing");
+
 				IncrementNeed(ticks);
+				logger::info("Incremented");
+
 			} else {
 				DecrementNeedHeat(ticks);
 			}
@@ -152,7 +159,7 @@ public:
 	//In this case its more of an "update" than a definite increment 
 	void IncrementNeed(int ticks) override
 	{
-		const std::lock_guard<std::mutex> lock(update_mutex);
+		//const std::lock_guard<std::mutex> lock(update_mutex);
 		float currentNeedLevel = CurrentNeedValue->value;
 
 		float incAmount = GetNeedIncrementAmount(ticks);
@@ -426,6 +433,11 @@ public:
 		} else if (stage == 5) {
 			NotifyAddEffect(NeedMessage5, NeedMessage5, NeedSpell5);
 			PlaySFX(Survival_FreezingBSD, Survival_FreezingBFemaleSD);
+		}
+
+		if (stage >= 2 && Survival_HelpShown_Cold->value == 0.0f) {
+			Utility::ShowNotification(Survival_HelpColdHigh);
+			Survival_HelpShown_Cold->value = 1.0f;
 		}
 
 		FrostbiteRollCheck();

@@ -6,7 +6,6 @@ static float lastTime;
 class SurvivalMode
 {
 public:
-	inline static int count;
 	static bool InstallUpdateHook();
 	inline static std::int32_t OnUpdate(std::int64_t a1);
 	inline static REL::Relocation<decltype(OnUpdate)> _OnUpdate;

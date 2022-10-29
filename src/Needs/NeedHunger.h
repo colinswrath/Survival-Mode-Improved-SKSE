@@ -20,10 +20,12 @@ public:
 	RE::TESGlobal* Survival_HungerRestoreMediumAmount;
 	RE::TESGlobal* Survival_HungerRestoreSmallAmount;
 	RE::TESGlobal* Survival_HungerRestoreVerySmallAmount;
+	RE::TESGlobal* Survival_HelpShown_Hunger;
 	
 	RE::TESGlobal* Survival_AfflictionHungerChance;
 	RE::SpellItem* Survival_AfflictionWeakened;
 	RE::BGSMessage* Survival_AfflictionWeakenedMsg;
+	RE::BGSMessage* Survival_HelpHungerHigh;
 
 	RE::BGSListForm* Survival_FoodRawMeat;
 	RE::BGSKeyword* VendorItemFoodRaw;
@@ -100,6 +102,11 @@ public:
 			PlaySFX(Survival_HungerDSD, Survival_HungerDSD);
 		}
 
+		if (stage >= 2 && Survival_HelpShown_Hunger->value == 0.0f) {
+			Utility::ShowNotification(Survival_HelpHungerHigh);
+			Survival_HelpShown_Hunger->value = 1.0f;
+		}
+
 		 WeakenedRollCheck();
 	}
 
@@ -108,7 +115,7 @@ public:
 		const std::lock_guard<std::mutex> lock(update_mutex);
 
 		float newNeedLevel = std::clamp(CurrentNeedValue->value - amount, minValue, NeedMaxValue->value);
-
+		logger::info("Current need checked");
 		CurrentNeedValue->value = newNeedLevel * GetGutwormMult();
 		SetNeedStage(false);
 		ApplyAttributePenalty();
