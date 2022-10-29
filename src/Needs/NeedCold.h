@@ -124,11 +124,7 @@ public:
 		
 		if (ticks > 0) {
 			if (!nearHeat) {
-				logger::info("Incrementing");
-
 				IncrementNeed(ticks);
-				logger::info("Incremented");
-
 			} else {
 				DecrementNeedHeat(ticks);
 			}
