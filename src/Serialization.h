@@ -3,6 +3,7 @@
 #include "Needs/NeedHunger.h"
 #include "Needs/NeedCold.h"
 #include "Needs/NeedExhaustion.h"
+#include "Utility.h"
 
 namespace Serialization
 {
@@ -10,12 +11,23 @@ namespace Serialization
 	static constexpr std::uint32_t ID = 'SMIF';
 	static constexpr std::uint32_t SerializationType = 'SMIV';
 
+	
 	/// <summary>
-	/// Checks to run when reloading a save
+	/// Checks to run when reloading a save or new game
 	/// </summary>
 	inline void LoadChecks()
 	{
 		auto exhaustion = NeedExhaustion::GetSingleton();
+
+		auto util = Utility::GetSingleton();
+
+		if (!util->HelpManualPC->HasForm(util->Survival_HelpSurvivalModeLong)) {
+			util->HelpManualPC->AddForm(util->Survival_HelpSurvivalModeLong);
+		}
+
+		if (!util->HelpManualXBox->HasForm(util->Survival_HelpSurvivalModeLongXbox)) {
+			util->HelpManualXBox->AddForm(util->Survival_HelpSurvivalModeLongXbox);
+		}
 
 		if (!exhaustion->CurrentlyStopped) {
 			exhaustion->PlayerSleepQuest->Stop();
@@ -33,7 +45,7 @@ namespace Serialization
 			logger::error("Failed to open damage values record");
 			return;
 		} else {
-			//Save stuff
+
 			std::vector<float> smiValues = {
 				static_cast<float>(hunger->CurrentlyStopped),
 				static_cast<float>(fatigue->CurrentlyStopped),
@@ -102,8 +114,6 @@ namespace Serialization
 		fatigue->CurrentlyStopped = smiValues[1];
 		cold->CurrentlyStopped = smiValues[2];
 		utility->WasInOblivion = smiValues[3];
-
-		LoadChecks();
 	}
 
 	inline void RevertCallback([[maybe_unused]] SKSE::SerializationInterface* a_skse)

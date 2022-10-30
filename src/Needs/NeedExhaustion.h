@@ -10,18 +10,21 @@ public:
 
 	RE::BGSMessage* WellRestedMessage;
 	RE::BGSMessage* RestedMessage;
+	RE::BGSMessage* BYOHAdoptionRestedMessageMale;
+	RE::BGSMessage* BYOHAdoptionRestedMessageFemale;
+	RE::BGSMessage* Survival_HelpExhaustionHigh;
 
 	RE::TESQuest* PlayerSleepQuest;
 	
 	RE::TESGlobal* Survival_ExhaustionRestorePerHour;
-
 	RE::TESGlobal* Survival_ExhaustionOverEncumberedMult;
-	
+	RE::TESGlobal* Survival_AfflictionExhaustionChance;
+	RE::TESGlobal* Survival_HelpShown_Exhaustion;
+
 	RE::BGSListForm* Survival_ExhaustionResistRacesMajor;
 	RE::BGSListForm* Survival_ExhaustionResistRacesMinor;
 
 	RE::BGSMessage* Survival_AfflictionAddledMsg;
-	RE::TESGlobal* Survival_AfflictionExhaustionChance;
 	RE::SpellItem* Survival_AfflictionAddled;	
 
 	RE::SpellItem* MarriageRested;	
@@ -29,8 +32,6 @@ public:
 
 	RE::SpellItem* BYOHAdoptionSleepAbilityMale;	
 	RE::SpellItem* BYOHAdoptionSleepAbilityFemale;	
-	RE::BGSMessage* BYOHAdoptionRestedMessageMale;
-	RE::BGSMessage* BYOHAdoptionRestedMessageFemale;
 
 	const char* Survival_ExhaustedASD = "Survival_ExhaustedASD";
 	const char* Survival_ExhaustedBSD = "Survival_ExhaustedBSD";
@@ -126,6 +127,11 @@ public:
 		} else if (stage == 5) {
 			NotifyAddEffect(NeedMessage5, NeedMessage5, NeedSpell5);
 			PlaySFX(Survival_ExhaustedBSD, Survival_ExhaustedBFemaleSD);
+		}
+
+		if (stage >= 2 && Survival_HelpShown_Exhaustion->value == 0.0f) {
+			Utility::ShowNotification(Survival_HelpExhaustionHigh);
+			Survival_HelpShown_Exhaustion->value = 1.0f;
 		}
 
 		AddledRollCheck();

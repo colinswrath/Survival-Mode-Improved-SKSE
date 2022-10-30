@@ -30,6 +30,8 @@ public:
 	RE::SpellItem* Survival_abWarmthTorch;
 	RE::SpellItem* Survival_OverencumberedSpell;
 
+	RE::SpellItem* Survival_OblivionDisplaySpell;
+
 	RE::BGSListForm* Survival_OblivionCells;
 	RE::BGSListForm* Survival_OblivionLocations;
 	RE::BGSListForm* Survival_OblivionAreas;
@@ -38,12 +40,20 @@ public:
 	RE::BGSListForm* Survival_ColdInteriorLocations;
 	RE::BGSListForm* Survival_ColdInteriorCells;
 
+	RE::BGSListForm* HelpManualPC;
+	RE::BGSListForm* HelpManualXBox;
+
 	RE::TESCondition* IsInWarmArea;
 	RE::TESCondition* IsInCoolArea;
 	RE::TESCondition* IsInFreezingArea;
 	RE::TESCondition* IsInFallForestFreezingArea;
 	RE::TESCondition* IsInPineForestFreezingArea;
 	RE::TESCondition* IsInReachArea;
+
+	RE::TESCondition* WTIsInWarmArea;
+	RE::TESCondition* WTIsInCoolArea;
+	RE::TESCondition* WTIsInFreezingArea;
+
 
 	RE::EffectSetting* WerewolfFeedRestoreHealth;
 	RE::EffectSetting* DA11AbFortifyHealth;
@@ -55,6 +65,12 @@ public:
 	RE::TESConditionItem* AdoptionHomeLocationCond;
 
 	RE::BGSMessage* Survival_OblivionAreaMessage;
+
+	RE::BGSMessage* Survival_HelpSurvivalModeLong;
+	RE::BGSMessage* Survival_HelpSurvivalModeLongXbox;
+
+	RE::BGSPerk* Survival_TempleBlessingCostPerk;
+
 	RE::TESQuest* DA16;
 	RE::TESQuest* RelationshipMarriageFIN;
 
@@ -92,11 +108,11 @@ public:
 			return AREA_TYPE::kAreaTypeFreezing;
 		} else if (IsInFallForestFreezingArea->IsTrue(player, nullptr)) {
 			return AREA_TYPE::kAreaTypeFreezing;
-		} else if (IsInWarmArea->IsTrue(player, nullptr)) {
+		} else if (IsInWarmArea->IsTrue(player, nullptr) || (WTIsInWarmArea && WTIsInWarmArea->IsTrue(player, nullptr))) {
 			return AREA_TYPE::kAreaTypeWarm;
-		} else if (IsInCoolArea->IsTrue(player, nullptr)) {
+		} else if (IsInCoolArea->IsTrue(player, nullptr) || (WTIsInCoolArea && WTIsInCoolArea->IsTrue(player, nullptr))) {
 			return AREA_TYPE::kAreaTypeCool;
-		} else if (IsInFreezingArea->IsTrue(player, nullptr)) {
+		} else if (IsInFreezingArea->IsTrue(player, nullptr) || (WTIsInFreezingArea && WTIsInFreezingArea->IsTrue(player, nullptr))) {
 			return AREA_TYPE::kAreaTypeFreezing;
 		} else if (IsInReachArea->IsTrue(player, nullptr)) {
 			return AREA_TYPE::kAreaTypeReach;

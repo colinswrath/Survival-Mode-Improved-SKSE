@@ -58,8 +58,11 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface * 
 void InitListener(SKSE::MessagingInterface::Message* a_msg)
 {
 	switch (a_msg->type) {
-	case SKSE::MessagingInterface::kNewGame:			//TODO - Might not be needed
-		FormLoader::GetSingleton()->LoadAllForms();
+	case SKSE::MessagingInterface::kNewGame:
+		Serialization::LoadChecks();
+		break;
+	case SKSE::MessagingInterface::kPostLoadGame:
+		Serialization::LoadChecks();
 		break;
 	case SKSE::MessagingInterface::kDataLoaded:
 		FormLoader::GetSingleton()->LoadAllForms();

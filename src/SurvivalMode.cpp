@@ -12,7 +12,6 @@ std::int32_t SurvivalMode::OnUpdate(std::int64_t a1)
 		if (g_deltaTime > 0) {
 			lastTime += g_deltaTime;
 			if (lastTime >= 1.0f) {
-				count += 1;
 				SurvivalModeLoopUpdate();
 				lastTime = 0;
 			}
@@ -96,6 +95,8 @@ bool SurvivalMode::InstallUpdateHook()
 
 void SurvivalMode::AddPlayerSpellPerks() 
 {
+	logger::info("Adding perks");
+
 	auto player = Utility::GetPlayer();
 	auto utility = Utility::GetSingleton();
 
@@ -110,6 +111,9 @@ void SurvivalMode::AddPlayerSpellPerks()
 	player->AddSpell(utility->Survival_abRacialKhajiitRawMeat);
 	player->AddSpell(utility->Survival_abWarmthTorch);
 	player->AddSpell(utility->Survival_OverencumberedSpell);
+
+	player->AddPerk(utility->Survival_TempleBlessingCostPerk);
+	logger::info("Perks added");
 }
 
 void SurvivalMode::RemovePlayerSpellPerks()
@@ -128,6 +132,9 @@ void SurvivalMode::RemovePlayerSpellPerks()
 	player->RemoveSpell(utility->Survival_abRacialKhajiitRawMeat);
 	player->RemoveSpell(utility->Survival_abWarmthTorch);
 	player->RemoveSpell(utility->Survival_OverencumberedSpell);
+	player->RemoveSpell(utility->Survival_OblivionDisplaySpell);
+
+	player->RemovePerk(utility->Survival_TempleBlessingCostPerk);
 }
 
 bool SurvivalMode::CheckOblivionStatus()
@@ -136,10 +143,12 @@ bool SurvivalMode::CheckOblivionStatus()
 
 	bool oblivion = utility->PlayerIsInOblivion();
 	if (oblivion && !utility->WasInOblivion) {
+		Utility::GetPlayer()->AddSpell(utility->Survival_OblivionDisplaySpell);
 		ShowNotification(utility->Survival_OblivionAreaMessage);
 		StopAllNeeds();
 		utility->WasInOblivion = true;
 	} else if (!oblivion && utility->WasInOblivion) {
+		Utility::GetPlayer()->RemoveSpell(utility->Survival_OblivionDisplaySpell);
 		utility->WasInOblivion = false;
 	}
 
