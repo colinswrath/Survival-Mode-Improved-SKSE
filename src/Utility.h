@@ -362,7 +362,7 @@ public:
 		return func(actor);
 	}
 
-	static float DoCombatSpellApply(RE::Actor* actor, RE::SpellItem* spell, RE::TESObjectREFR* target)
+	static void DoCombatSpellApply(RE::Actor* actor, RE::SpellItem* spell, RE::TESObjectREFR* target)
 	{
 		using func_t = decltype(&Utility::DoCombatSpellApply);
 		REL::Relocation<func_t> func{ Utility::GetSingleton()->DoCombatSpellApplyAddress };
