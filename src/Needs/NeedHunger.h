@@ -34,10 +34,6 @@ public:
 	RE::BGSMessage* Survival_FoodPoisoningMsg;
 	RE::SpellItem* Survival_DiseaseFoodPoisoning;
 
-	RE::SpellItem* Survival_DiseaseGutworm;
-	RE::SpellItem* Survival_DiseaseGutworm2;
-	RE::SpellItem* Survival_DiseaseGutworm3;
-
 	RE::BGSListForm* Survival_HungerResistRacesMinor;
 
 	const float hungerDivisor = 60.0f;
@@ -141,11 +137,12 @@ public:
 	float GetGutwormMult()
 	{
 		auto player = Utility::GetPlayer();
-		if (player->HasSpell(Survival_DiseaseGutworm)) {
+		auto util = Utility::GetSingleton();
+		if (player->HasSpell(util->Survival_DiseaseGutworm)) {
 			return 0.75f;
-		} else if (player->HasSpell(Survival_DiseaseGutworm2)) {
+		} else if (player->HasSpell(util->Survival_DiseaseGutworm2)) {
 			return 0.5f;
-		} else if (player->HasSpell(Survival_DiseaseGutworm3)) {
+		} else if (player->HasSpell(util->Survival_DiseaseGutworm3)) {
 			return 0.25f;
 		} else {
 			return 1.0f;
