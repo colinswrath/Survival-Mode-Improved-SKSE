@@ -73,6 +73,22 @@ namespace Events
 		}
 	}
 
+	static void ProcessOnHitEvent(RE::Actor* hitCause)
+	{
+		auto race = hitCause->GetRace();
+		auto util = Utility::GetSingleton();
+
+		if (race) {
+			if (util->Survival_BrownRotCarryingRaces->HasForm(race)) {
+				Utility::DoCombatSpellApply(Utility::GetPlayer(), util->Survival_DiseaseBrownRot, Utility::GetPlayer());
+			} else if (util->Survival_GreensporeCarryingRaces->HasForm(race)) {
+				Utility::DoCombatSpellApply(Utility::GetPlayer(), util->Survival_DiseaseGreenspore, Utility::GetPlayer());
+			} else if (util->Survival_GutwormCarryingRaces->HasForm(race)) {
+				Utility::DoCombatSpellApply(Utility::GetPlayer(), util->Survival_DiseaseGutworm, Utility::GetPlayer());
+			} 
+		}
+	}
+
 	static void ProcessMagicEffectApplyEvent(RE::EffectSetting* effect)
 	{
 		auto cold = NeedCold::GetSingleton();
@@ -199,6 +215,8 @@ namespace Events
 	class OnHitEventHandler : public RE::BSTEventSink<RE::TESHitEvent>
 	{
 	public:
+		std::mutex on_hit_mutex;
+
 		static OnHitEventHandler* GetSingleton()
 		{
 			static OnHitEventHandler singleton;
@@ -210,8 +228,17 @@ namespace Events
 			if (!a_event || !a_event->target || !a_event->target->IsPlayerRef() || !a_event->cause ) {
 				return RE::BSEventNotifyControl::kContinue;
 			}
-			return RE::BSEventNotifyControl::kContinue;
-			
+
+			const std::lock_guard<std::mutex> lock(on_hit_mutex);
+
+			auto source = RE::TESForm::LookupByID<RE::TESObjectWEAP>(a_event->source);
+			if (source && source->IsMelee()) {
+				auto causeActor = a_event->cause->As<RE::Actor>();
+				if (causeActor) {
+					ProcessOnHitEvent(causeActor);
+				}
+			}
+			return RE::BSEventNotifyControl::kContinue;	
 		}
 
 		static void Register()

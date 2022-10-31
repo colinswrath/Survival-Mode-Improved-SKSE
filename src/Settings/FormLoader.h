@@ -115,10 +115,6 @@ public:
 		hungerSystem->Survival_AfflictionHungerChance = dataHandler->LookupForm(RE::FormID(0x8E5), smEslPluginName)->As<RE::TESGlobal>();
 		hungerSystem->Survival_AfflictionWeakenedMsg = dataHandler->LookupForm(RE::FormID(0x933), smEslPluginName)->As<RE::BGSMessage>();
 
-		hungerSystem->Survival_DiseaseGutworm = dataHandler->LookupForm(RE::FormID(0x915), smEslPluginName)->As<RE::SpellItem>();
-		hungerSystem->Survival_DiseaseGutworm2 = dataHandler->LookupForm(RE::FormID(0x989), smEslPluginName)->As<RE::SpellItem>();
-		hungerSystem->Survival_DiseaseGutworm3 = dataHandler->LookupForm(RE::FormID(0x98A), smEslPluginName)->As<RE::SpellItem>();
-
 		hungerSystem->Survival_HelpShown_Hunger = dataHandler->LookupForm(RE::FormID(0x8E2), smEslPluginName)->As<RE::TESGlobal>();
 		hungerSystem->Survival_HelpHungerHigh = dataHandler->LookupForm(RE::FormID(0x945), smEslPluginName)->As<RE::BGSMessage>();
 	}
@@ -186,7 +182,7 @@ public:
 		fatigueSystem->Survival_HelpShown_Exhaustion = dataHandler->LookupForm(RE::FormID(0x8E1), smEslPluginName)->As<RE::TESGlobal>();
 	}
 
-	void LoadColdForms([[maybe_unused]] RE::TESDataHandler* dataHandler)
+	void LoadColdForms(RE::TESDataHandler* dataHandler)
 	{
 		auto coldSystem = NeedCold::GetSingleton();
 
@@ -318,6 +314,16 @@ public:
 		utility->Survival_HelpSurvivalModeLong = dataHandler->LookupForm(RE::FormID(0x9C1), smEslPluginName)->As<RE::BGSMessage>();
 		utility->Survival_HelpSurvivalModeLongXbox = dataHandler->LookupForm(RE::FormID(0x9EB), smEslPluginName)->As<RE::BGSMessage>();
 
+		utility->Survival_DiseaseGutworm = dataHandler->LookupForm(RE::FormID(0x915), smEslPluginName)->As<RE::SpellItem>();
+		utility->Survival_DiseaseGutworm2 = dataHandler->LookupForm(RE::FormID(0x989), smEslPluginName)->As<RE::SpellItem>();
+		utility->Survival_DiseaseGutworm3 = dataHandler->LookupForm(RE::FormID(0x98A), smEslPluginName)->As<RE::SpellItem>();
+		utility->Survival_DiseaseGreenspore = dataHandler->LookupForm(RE::FormID(0x912), smEslPluginName)->As<RE::SpellItem>();
+		utility->Survival_DiseaseBrownRot = dataHandler->LookupForm(RE::FormID(0x914), smEslPluginName)->As<RE::SpellItem>();
+
+		utility->Survival_GutwormCarryingRaces = dataHandler->LookupForm(RE::FormID(0x9A9), smEslPluginName)->As<RE::BGSListForm>();
+		utility->Survival_GreensporeCarryingRaces = dataHandler->LookupForm(RE::FormID(0x9A5), smEslPluginName)->As<RE::BGSListForm>();
+		utility->Survival_BrownRotCarryingRaces = dataHandler->LookupForm(RE::FormID(0x9A4), smEslPluginName)->As<RE::BGSListForm>();
+
 		utility->IsInWarmArea = &regionInfoSpell->effects[0]->conditions;
 		utility->IsInCoolArea = &regionInfoSpell->effects[1]->conditions;
 		utility->IsInFreezingArea = &regionInfoSpell->effects[2]->conditions;
@@ -434,5 +440,6 @@ public:
 		utility->CalendarSingletonAddress = RELOCATION_ID(514287, 400447).address();
 		utility->MenuControlsSingletonAddress = RELOCATION_ID(515124, 401263).address();
 		utility->GetWarmthRatingAddress = RELOCATION_ID(25834, 26394).address();
+		utility->DoCombatSpellApplyAddress = RELOCATION_ID(37666, 38620).address();
 	}
 };

@@ -30,6 +30,17 @@ public:
 	RE::SpellItem* Survival_abWarmthTorch;
 	RE::SpellItem* Survival_OverencumberedSpell;
 
+	RE::SpellItem* Survival_DiseaseBrownRot;
+	RE::SpellItem* Survival_DiseaseGreenspore;
+	
+	RE::SpellItem* Survival_DiseaseGutworm;
+	RE::SpellItem* Survival_DiseaseGutworm2;
+	RE::SpellItem* Survival_DiseaseGutworm3;
+
+	RE::BGSListForm* Survival_BrownRotCarryingRaces;
+	RE::BGSListForm* Survival_GreensporeCarryingRaces;
+	RE::BGSListForm* Survival_GutwormCarryingRaces;
+
 	RE::SpellItem* Survival_OblivionDisplaySpell;
 
 	RE::BGSListForm* Survival_OblivionCells;
@@ -84,6 +95,7 @@ public:
 	uintptr_t CalendarSingletonAddress;
 	uintptr_t MenuControlsSingletonAddress;
 	uintptr_t GetWarmthRatingAddress;
+	uintptr_t DoCombatSpellApplyAddress;
 
 	bool WasInOblivion = false;
 
@@ -348,5 +360,12 @@ public:
 		using func_t = decltype(&Utility::GetWarmthRating);
 		REL::Relocation<func_t> func{ Utility::GetSingleton()->GetWarmthRatingAddress };
 		return func(actor);
+	}
+
+	static void DoCombatSpellApply(RE::Actor* actor, RE::SpellItem* spell, RE::TESObjectREFR* target)
+	{
+		using func_t = decltype(&Utility::DoCombatSpellApply);
+		REL::Relocation<func_t> func{ Utility::GetSingleton()->DoCombatSpellApplyAddress };
+		return func(actor, spell, target);
 	}
 };
