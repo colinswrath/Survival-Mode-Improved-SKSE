@@ -225,7 +225,7 @@ namespace Events
 
 		RE::BSEventNotifyControl ProcessEvent([[maybe_unused]] const RE::TESHitEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESHitEvent>* a_eventSource) override
 		{
-			if (!a_event || !a_event->target || !a_event->target->IsPlayerRef() || !a_event->cause ) {
+			if (!a_event || !a_event->target || !a_event->target->IsPlayerRef() || !a_event->cause) {
 				return RE::BSEventNotifyControl::kContinue;
 			}
 
@@ -238,7 +238,7 @@ namespace Events
 					ProcessOnHitEvent(causeActor);
 				}
 			}
-			return RE::BSEventNotifyControl::kContinue;	
+			return RE::BSEventNotifyControl::kContinue;
 		}
 
 		static void Register()
@@ -259,7 +259,7 @@ namespace Events
 			return &singleton;
 		}
 
-		RE::BSEventNotifyControl ProcessEvent([[maybe_unused]] const RE::TESMagicEffectApplyEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESMagicEffectApplyEvent>* a_eventSource) override
+		RE::BSEventNotifyControl ProcessEvent(const RE::TESMagicEffectApplyEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESMagicEffectApplyEvent>* a_eventSource) override
 		{
 			if (!a_event || !a_event->target || !a_event->target->IsPlayerRef()) {
 				return RE::BSEventNotifyControl::kContinue;
@@ -284,6 +284,41 @@ namespace Events
 		}
 	};
 
+	class OnMenuOpenCloseEventHandler : public RE::BSTEventSink<RE::MenuOpenCloseEvent>
+	{
+	public:
+
+		static OnMenuOpenCloseEventHandler* GetSingleton()
+		{
+			static OnMenuOpenCloseEventHandler singleton;
+			return &singleton;
+		}
+
+		RE::BSEventNotifyControl ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource) override
+		{
+			if (!a_event || !a_eventSource) {
+				return RE::BSEventNotifyControl::kContinue;
+			}
+
+			if(a_event->menuName == RE::MapMenu::MENU_NAME) {
+				if (a_event->opening && Utility::IsFastTravelEnabled() && Utility::DisableFTCheck()) {
+					Utility::EnableFastTravel(false);
+				} else if (!a_event->opening) {
+					Utility::EnableFastTravel(true);	
+				}
+			}
+			
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		static void Register()
+		{
+			if (const auto ui = Utility::GetUI()) {
+				ui->AddEventSink<RE::MenuOpenCloseEvent>(OnMenuOpenCloseEventHandler::GetSingleton());
+			}
+		}
+	};
+
 	inline static void Register()
 	{
 		OnSleepStartEventHandler::Register();
@@ -291,5 +326,6 @@ namespace Events
 		OnEquipEventHandler::Register();
 		OnHitEventHandler::Register();
 		OnEffectApplyEventHandler::Register();
+		OnMenuOpenCloseEventHandler::Register();
 	}
 }
