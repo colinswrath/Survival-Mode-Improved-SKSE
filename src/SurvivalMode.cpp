@@ -93,6 +93,21 @@ bool SurvivalMode::InstallUpdateHook()
 	return true;
 }
 
+bool SurvivalMode::InstallFtMessageHook()
+{
+	auto& trampoline = SKSE::GetTrampoline();
+	_OverwriteFastTravelMessage = trampoline.write_call<5>(Hooks::Fast_Travel_Message_Hook.address(), OverwriteFastTravelMessage);
+	logger::info("Installed ft message hook");
+	return true;
+}
+
+void SurvivalMode::OverwriteFastTravelMessage(const char* a_notification, const char* a_soundToPlay, bool a_cancelIfAlreadyQueued)
+{
+	if (!Utility::GetUI()->IsMenuOpen(RE::MapMenu::MENU_NAME) || !Utility::DisableFTCheck()) {
+		_OverwriteFastTravelMessage(a_notification, a_soundToPlay, a_cancelIfAlreadyQueued);
+	}
+}
+
 void SurvivalMode::AddPlayerSpellPerks() 
 {
 	logger::info("Adding perks");

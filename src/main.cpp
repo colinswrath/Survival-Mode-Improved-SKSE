@@ -89,10 +89,10 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	logger::info("loading SMI");
 
 	SKSE::Init(a_skse);
-	SKSE::AllocTrampoline(14);
+	FormLoader::GetSingleton()->CacheGameAddresses();
+	SKSE::AllocTrampoline(42);
 	Hooks::Install();
 	Events::Register();
-
 	auto messaging = SKSE::GetMessagingInterface();
 	if (!messaging->RegisterListener(InitListener)) {
 		return false;

@@ -65,7 +65,6 @@ public:
 	RE::TESCondition* WTIsInCoolArea;
 	RE::TESCondition* WTIsInFreezingArea;
 
-
 	RE::EffectSetting* WerewolfFeedRestoreHealth;
 	RE::EffectSetting* DA11AbFortifyHealth;
 
@@ -96,6 +95,8 @@ public:
 	uintptr_t MenuControlsSingletonAddress;
 	uintptr_t GetWarmthRatingAddress;
 	uintptr_t DoCombatSpellApplyAddress;
+	uintptr_t EnableFtAddress;
+	uintptr_t IsFtEnabledAddress;
 
 	bool WasInOblivion = false;
 
@@ -217,6 +218,19 @@ public:
 		return false;
 	}
 
+	static bool DisableFTCheck()
+	{
+		if(!Utility::IsOnFlyingMount(Utility::GetPlayer()))
+		{
+			auto enabled = Utility::GetSingleton()->Survival_ModeEnabled->value;
+			if (enabled && enabled == 1.0f) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	static bool PlayerCanGetWellRested()
 	{
 		//Vampire or WW or Lich then false
@@ -318,7 +332,7 @@ public:
 				}
 			}
 		}
-
+		
 		if (adoptionQuest->IsRunning() && (child1Near || child2Near)) {
 			return true;
 		}
@@ -345,7 +359,7 @@ public:
 
 	static bool IsPlayerInDialogue()
 	{
-		return Utility::GetSingleton()->GetUI()->IsMenuOpen("Dialogue Menu");
+		return Utility::GetSingleton()->GetUI()->IsMenuOpen(RE::DialogueMenu::MENU_NAME);
 	}
 
 	static bool IsOnFlyingMount(RE::Actor* a_actor)
@@ -367,5 +381,19 @@ public:
 		using func_t = decltype(&Utility::DoCombatSpellApply);
 		REL::Relocation<func_t> func{ Utility::GetSingleton()->DoCombatSpellApplyAddress };
 		return func(actor, spell, target);
+	}
+
+	static void EnableFastTravel(bool a_enable)
+	{
+		using func_t = decltype(&Utility::EnableFastTravel);
+		REL::Relocation<func_t> func{ Utility::GetSingleton()->EnableFtAddress };
+		return func(a_enable);
+	}
+
+	static bool IsFastTravelEnabled()
+	{
+		using func_t = decltype(&Utility::IsFastTravelEnabled);
+		REL::Relocation<func_t> func{ Utility::GetSingleton()->IsFtEnabledAddress };
+		return func();
 	}
 };

@@ -7,12 +7,17 @@ class SurvivalMode
 {
 public:
 	static bool InstallUpdateHook();
-	inline static std::int32_t OnUpdate(std::int64_t a1);
-	inline static REL::Relocation<decltype(OnUpdate)> _OnUpdate;
+	static bool InstallFtMessageHook();
 	inline static void StartSurvivalMode();
 	inline static void StopSurvivalMode();
 
 protected:
+	inline static std::int32_t OnUpdate(std::int64_t a1);
+	inline static REL::Relocation<decltype(OnUpdate)> _OnUpdate;
+
+	inline static void OverwriteFastTravelMessage(const char* a_notification, const char* a_soundToPlay = 0, bool a_cancelIfAlreadyQueued = true);
+	inline static REL::Relocation<decltype(OverwriteFastTravelMessage)> _OverwriteFastTravelMessage;
+
 	inline static void SurvivalModeLoopUpdate();
 	inline static void SendAllNeedsUpdate();
 	inline static void StopAllNeeds();
