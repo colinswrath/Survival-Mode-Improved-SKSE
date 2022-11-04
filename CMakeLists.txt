@@ -101,6 +101,7 @@ set(SOURCES
 	src/Needs/NeedCold.h
 	src/Settings/FormLoader.h
 	src/Serialization.h
+	src/Settings/Settings.h
 )
 
 source_group(
