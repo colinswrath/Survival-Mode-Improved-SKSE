@@ -2,6 +2,7 @@
 #include "Events.h"
 #include "Settings/FormLoader.h"
 #include "Serialization.h"
+#include "Settings/Settings.h"
 
 void InitLogger()
 {
@@ -66,6 +67,7 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 		break;
 	case SKSE::MessagingInterface::kDataLoaded:
 		FormLoader::GetSingleton()->LoadAllForms();
+		Settings::LoadSettings();
 		break;
 	}
 }
@@ -93,6 +95,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	SKSE::AllocTrampoline(42);
 	Hooks::Install();
 	Events::Register();
+
 	auto messaging = SKSE::GetMessagingInterface();
 	if (!messaging->RegisterListener(InitListener)) {
 		return false;

@@ -82,21 +82,10 @@ public:
 	const float ColdToRestoreInWarmArea = 1.5f;
 	const float AmountToChangeColdOnSpellHit = 30.0000;
 	
-	float SeasonMults[12] = 
-	{ 
-		1.5f,
-		1.4f, 
-		1.3f, 
-		1.2f, 
-		1.1f, 
-		1.0f, 
-		0.8f, 
-		1.0f, 
-		1.3f, 
-		1.4f, 
-		1.5f, 
-		1.6f 
-	};
+	float SeasonWarmMults[12];
+	float SeasonCoolMults[12];
+	float SeasonReachMults[12];
+	float SeasonFreezingMults[12];
 
 	//Night mod - TODO - Make ini setting
 	float WarmAreaNightMod = 25.0f;
@@ -265,19 +254,19 @@ public:
 
 		switch (area) {
 		case AREA_TYPE::kAreaTypeChillyInterior:
-			return static_cast<float>(REGION_TEMPS::kColdLevelCoolArea);
+			return std::floor(static_cast<float>(REGION_TEMPS::kColdLevelCoolArea));
 		case AREA_TYPE::kAreaTypeInterior:
-			return static_cast<float>(REGION_TEMPS::kColdLevelWarmArea);
+			return std::floor(static_cast<float>(REGION_TEMPS::kColdLevelWarmArea));
 		case AREA_TYPE::kAreaTypeWarm:
-			return static_cast<float>(REGION_TEMPS::kColdLevelWarmArea) * SeasonMults[month];
+			return std::floor(static_cast<float>(REGION_TEMPS::kColdLevelWarmArea) * SeasonWarmMults[month]);
 		case AREA_TYPE::kAreaTypeReach:
-			return static_cast<float>(REGION_TEMPS::kColdLevelReachArea) * SeasonMults[month];
+			return std::floor(static_cast<float>(REGION_TEMPS::kColdLevelReachArea) * SeasonReachMults[month]);
 		case AREA_TYPE::kAreaTypeCool:
-			return static_cast<float>(REGION_TEMPS::kColdLevelCoolArea) * SeasonMults[month];
+			return std::floor(static_cast<float>(REGION_TEMPS::kColdLevelCoolArea) * SeasonCoolMults[month]);
 		case AREA_TYPE::kAreaTypeFreezing:
-			return static_cast<float>(REGION_TEMPS::kColdLevelFreezingArea) * SeasonMults[month];
+			return std::floor(static_cast<float>(REGION_TEMPS::kColdLevelFreezingArea) * SeasonFreezingMults[month]);
 		default:
-			return static_cast<float>(REGION_TEMPS::kColdLevelCoolArea) * SeasonMults[month];	
+			return std::floor(static_cast<float>(REGION_TEMPS::kColdLevelCoolArea) * SeasonCoolMults[month]);	
 		}
 	}
 
