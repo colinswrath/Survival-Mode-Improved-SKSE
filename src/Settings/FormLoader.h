@@ -321,6 +321,7 @@ public:
 		utility->Survival_GutwormCarryingRaces = dataHandler->LookupForm(RE::FormID(0x9A9), smEslPluginName)->As<RE::BGSListForm>();
 		utility->Survival_GreensporeCarryingRaces = dataHandler->LookupForm(RE::FormID(0x9A5), smEslPluginName)->As<RE::BGSListForm>();
 		utility->Survival_BrownRotCarryingRaces = dataHandler->LookupForm(RE::FormID(0x9A4), smEslPluginName)->As<RE::BGSListForm>();
+		utility->Survival_SurvivalDiseases = dataHandler->LookupForm(RE::FormID(0x9A6), smEslPluginName)->As<RE::BGSListForm>();
 
 		utility->IsInWarmArea = &regionInfoSpell->effects[0]->conditions;
 		utility->IsInCoolArea = &regionInfoSpell->effects[1]->conditions;

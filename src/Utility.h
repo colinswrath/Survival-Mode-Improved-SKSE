@@ -50,6 +50,7 @@ public:
 	RE::BGSListForm* Survival_InteriorAreas;
 	RE::BGSListForm* Survival_ColdInteriorLocations;
 	RE::BGSListForm* Survival_ColdInteriorCells;
+	RE::BGSListForm* Survival_SurvivalDiseases;
 
 	RE::BGSListForm* HelpManualPC;
 	RE::BGSListForm* HelpManualXBox;
@@ -168,11 +169,15 @@ public:
 		return Survival_ModeEnabled->value;
 	}
 
-	static void ShowNotification(RE::BGSMessage* msg)
+	static void ShowNotification(RE::BGSMessage* msg, bool messageBox=false)
 	{
 		RE::BSString messageDesc;
 		msg->GetDescription(messageDesc, msg);
-		RE::DebugNotification(messageDesc.c_str());
+		if (messageBox) {
+			RE::DebugMessageBox(messageDesc.c_str());
+		} else {
+			RE::DebugNotification(messageDesc.c_str());
+		}
 	}
 
 	bool SurvivalToggle()
@@ -216,6 +221,17 @@ public:
 		}
 
 		return false;
+	}
+
+	static void RemoveSurvivalDiseases()
+	{
+		auto util = Utility::GetSingleton();
+		util->Survival_SurvivalDiseases->ForEachForm([&](RE::TESForm& a_form) {
+			if (auto disease = a_form.As<RE::SpellItem>()) {
+				Utility::GetPlayer()->RemoveSpell(disease);
+			}
+			return RE::BSContainer::ForEachResult::kContinue;
+		});
 	}
 
 	static bool DisableFTCheck()

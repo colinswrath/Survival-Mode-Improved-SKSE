@@ -136,6 +136,8 @@ void SurvivalMode::RemovePlayerSpellPerks()
 	auto player = Utility::GetPlayer();
 	auto utility = Utility::GetSingleton();
 
+	Utility::RemoveSurvivalDiseases();
+
 	player->RemoveSpell(utility->Survival_abLowerCarryWeightSpell);
 	player->RemoveSpell(utility->Survival_abRacialNord);
 	player->RemoveSpell(utility->Survival_abRacialAltmer);

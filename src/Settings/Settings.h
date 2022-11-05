@@ -21,7 +21,6 @@ public:
 		CSimpleIniA ini;
 		ini.SetUnicode();
 		ini.LoadFile(R"(.\Data\SKSE\Plugins\SurvivalModeImproved.ini)");
-
 		const auto dataHandler = RE::TESDataHandler::GetSingleton();
 
 		logger::info("Loading season mults");
