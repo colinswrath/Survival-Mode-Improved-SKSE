@@ -12,7 +12,7 @@ public:
 	inline static void StopSurvivalMode();
 
 protected:
-	inline static std::int32_t OnUpdate(std::int64_t a1);
+	inline static std::int32_t OnUpdate();
 	inline static REL::Relocation<decltype(OnUpdate)> _OnUpdate;
 
 	inline static void OverwriteFastTravelMessage(const char* a_notification, const char* a_soundToPlay = 0, bool a_cancelIfAlreadyQueued = true);

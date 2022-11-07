@@ -5,8 +5,8 @@
 #include "Needs/NeedCold.h"
 #include "Utility.h"
 
-std::int32_t SurvivalMode::OnUpdate(std::int64_t a1)
-{
+std::int32_t SurvivalMode::OnUpdate()
+{ 
 	if (!Utility::GetUI()->GameIsPaused()) {
 		
 		if (g_deltaTime > 0) {
@@ -18,7 +18,7 @@ std::int32_t SurvivalMode::OnUpdate(std::int64_t a1)
 		}
 	}
 
-	return _OnUpdate(a1);
+	return _OnUpdate();
 }
 
 void SurvivalMode::SurvivalModeLoopUpdate()
