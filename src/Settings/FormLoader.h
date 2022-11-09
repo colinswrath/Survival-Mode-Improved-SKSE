@@ -19,6 +19,7 @@ public:
 	const std::string_view campfirePluginName = "Campfire.esm";
 	const std::string_view campsitePluginName = "Campsite.esp";
 	const std::string_view obsidianPluginName = "ObsidianWeathers.esp";
+	const std::string_view undeathPluginName = "Undeath.esp";
 	const std::string_view wyrmstoothRegionPatch = "SurvivalModeImproved_Wyrmstooth.esp";
 
 	static FormLoader* GetSingleton()
@@ -349,47 +350,48 @@ public:
 	void LoadCompatibilityForms(RE::TESDataHandler* dataHandler)
 	{
 		auto warmupList = NeedCold::GetSingleton()->Survival_WarmUpObjectsList;
+		auto util = Utility::GetSingleton();
 		if (dataHandler->LookupLoadedModByName(campsitePluginName)) {
 			auto campfire = dataHandler->LookupForm(RE::FormID(0x5902), campsitePluginName);
 
-			if (!warmupList->HasForm(campfire)) {
+			if (campfire && !warmupList->HasForm(campfire)) {
 				warmupList->AddForm(campfire);
 			}
 		}
 			
 		if (dataHandler->LookupLoadedModByName(campfirePluginName)) {
 			auto cracklingDw = dataHandler->LookupForm(RE::FormID(0x40013), campfirePluginName);
-			if (!warmupList->HasForm(cracklingDw))
+			if (cracklingDw && !warmupList->HasForm(cracklingDw))
 				warmupList->AddForm(cracklingDw);
 			auto cracklingFw = dataHandler->LookupForm(RE::FormID(0x328B9), campfirePluginName);
-			if (!warmupList->HasForm(cracklingFw))
+			if (cracklingFw && !warmupList->HasForm(cracklingFw))
 				warmupList->AddForm(cracklingFw);
 			auto flickBooks = dataHandler->LookupForm(RE::FormID(0x328A8), campfirePluginName);
-			if (!warmupList->HasForm(flickBooks))
+			if (flickBooks && !warmupList->HasForm(flickBooks))
 				warmupList->AddForm(flickBooks);
 			auto flickBranch = dataHandler->LookupForm(RE::FormID(0x328A6), campfirePluginName);
-			if (!warmupList->HasForm(flickBranch))
+			if (flickBranch && !warmupList->HasForm(flickBranch))
 				warmupList->AddForm(flickBranch);
 			auto flickKind = dataHandler->LookupForm(RE::FormID(0x5C8D8), campfirePluginName);
-			if (!warmupList->HasForm(flickKind))
+			if (flickKind && !warmupList->HasForm(flickKind))
 				warmupList->AddForm(flickKind);
 			auto roarDw = dataHandler->LookupForm(RE::FormID(0x33E67), campfirePluginName);
-			if (!warmupList->HasForm(roarDw))
+			if (roarDw && !warmupList->HasForm(roarDw))
 				warmupList->AddForm(roarDw);
 			auto roarFw = dataHandler->LookupForm(RE::FormID(0x33E69), campfirePluginName);
-			if (!warmupList->HasForm(roarFw))
+			if (roarFw && !warmupList->HasForm(roarFw))
 				warmupList->AddForm(roarFw);
 			auto roarWFw = dataHandler->LookupForm(RE::FormID(0x6ABB2), campfirePluginName);
-			if (!warmupList->HasForm(roarWFw))
+			if (roarWFw && !warmupList->HasForm(roarWFw))
 				warmupList->AddForm(roarWFw);
 			auto fragKind = dataHandler->LookupForm(RE::FormID(0x5C8D6), campfirePluginName);
-			if (!warmupList->HasForm(fragKind))
+			if (fragKind && !warmupList->HasForm(fragKind))
 				warmupList->AddForm(fragKind);
 			auto fragBooks = dataHandler->LookupForm(RE::FormID(0x32334), campfirePluginName);
-			if (!warmupList->HasForm(fragBooks))
+			if (fragBooks && !warmupList->HasForm(fragBooks))
 				warmupList->AddForm(fragBooks);
 			auto fragBranch = dataHandler->LookupForm(RE::FormID(0x32333), campfirePluginName);
-			if (!warmupList->HasForm(fragBranch))
+			if (fragBranch && !warmupList->HasForm(fragBranch))
 				warmupList->AddForm(fragBranch);		
 		}
 
@@ -397,35 +399,42 @@ public:
 
 			auto cloudy = NeedCold::GetSingleton()->SMI_ColdCloudyWeather; 
 			auto w1 = dataHandler->LookupForm(RE::FormID(0x0010E1E3), skyrimPluginName);
-			if (!cloudy->HasForm(w1))
+			if (w1 && !cloudy->HasForm(w1))
 				cloudy->AddForm(w1);	
 			auto w2 = dataHandler->LookupForm(RE::FormID(0x0010A235), skyrimPluginName);
-			if (!cloudy->HasForm(w2))
+			if (w2 && !cloudy->HasForm(w2))
 				cloudy->AddForm(w2);	
 			auto w3 = dataHandler->LookupForm(RE::FormID(0x0010E1E5), skyrimPluginName);
-			if (!cloudy->HasForm(w3))
+			if (w3 && !cloudy->HasForm(w3))
 				cloudy->AddForm(w3);	
 			auto w4 = dataHandler->LookupForm(RE::FormID(0x0010E1E8), skyrimPluginName);
-			if (!cloudy->HasForm(w4))
+			if (w4 && !cloudy->HasForm(w4))
 				cloudy->AddForm(w4);	
 			auto w5 = dataHandler->LookupForm(RE::FormID(0x0010E1EF), skyrimPluginName);
-			if (!cloudy->HasForm(w5))
+			if (w5 && !cloudy->HasForm(w5))
 				cloudy->AddForm(w5);	
 			auto w6 = dataHandler->LookupForm(RE::FormID(0x0010A233), skyrimPluginName);
-			if (!cloudy->HasForm(w6))
+			if (w6 && !cloudy->HasForm(w6))
 				cloudy->AddForm(w6);	
 			auto w7 = dataHandler->LookupForm(RE::FormID(0x0010A232), skyrimPluginName);
-			if (!cloudy->HasForm(w7))
+			if (w7 && !cloudy->HasForm(w7))
 				cloudy->AddForm(w7);	
 			auto w8 = dataHandler->LookupForm(RE::FormID(0x00104AB4), skyrimPluginName);
-			if (!cloudy->HasForm(w8))
+			if (w8 && !cloudy->HasForm(w8))
 				cloudy->AddForm(w8);	
 			auto w9 = dataHandler->LookupForm(RE::FormID(0x00010E0B), dgPluginName);
-			if (!cloudy->HasForm(w9))
+			if (w9 && !cloudy->HasForm(w9))
 				cloudy->AddForm(w9);	
 			auto w10 = dataHandler->LookupForm(RE::FormID(0x00010E0E), dgPluginName);
-			if (!cloudy->HasForm(w10))
+			if (w10 && !cloudy->HasForm(w10))
 				cloudy->AddForm(w10);	
+		}
+
+		if (dataHandler->LookupLoadedModByName(undeathPluginName)) {
+			auto lichPerk = dataHandler->LookupForm(RE::FormID(0x3326D5), undeathPluginName);
+			if (lichPerk) {
+				util->Undeath_LichPerk = lichPerk->As<RE::BGSPerk>();
+			}
 		}
 	}
 

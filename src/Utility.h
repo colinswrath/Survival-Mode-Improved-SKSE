@@ -81,6 +81,7 @@ public:
 	RE::BGSMessage* Survival_HelpSurvivalModeLongXbox;
 
 	RE::BGSPerk* Survival_TempleBlessingCostPerk;
+	RE::BGSPerk* Undeath_LichPerk;
 
 	RE::TESQuest* DA16;
 	RE::TESQuest* RelationshipMarriageFIN;
@@ -249,8 +250,6 @@ public:
 
 	static bool PlayerCanGetWellRested()
 	{
-		//Vampire or WW or Lich then false
-
 		return !PlayerIsVampire() && !PlayerIsWerewolf();
 	}
 
@@ -258,6 +257,16 @@ public:
 	{
 		auto util = Utility::GetSingleton();
 		return util->IsVampireConditions->IsTrue(GetPlayer(), nullptr);
+	}
+
+	static bool PlayerIsLich()
+	{
+		auto util = Utility::GetSingleton();
+		if (util->Undeath_LichPerk) {
+			return GetPlayer()->HasPerk(util->Undeath_LichPerk);
+		} else {
+			return false;
+		}
 	}
 
 	static bool PlayerIsInJail()

@@ -61,6 +61,10 @@ void SurvivalMode::SendAllNeedsUpdate()
 		NeedHunger::GetSingleton()->StopNeed();
 		NeedExhaustion::GetSingleton()->OnUpdatePass();
 		NeedCold::GetSingleton()->OnUpdatePass();
+	} else if (Utility::PlayerIsLich()) {
+		NeedHunger::GetSingleton()->StopNeed();
+		NeedExhaustion::GetSingleton()->StopNeed();
+		NeedCold::GetSingleton()->StopNeed();
 	} else {
 		NeedHunger::GetSingleton()->OnUpdatePass();
 		NeedExhaustion::GetSingleton()->OnUpdatePass();
