@@ -130,7 +130,7 @@ public:
 		}
 
 		if (stage >= 2 && Survival_HelpShown_Exhaustion->value == 0.0f) {
-			Utility::ShowNotification(Survival_HelpExhaustionHigh);
+			Utility::ShowNotification(Survival_HelpExhaustionHigh, true);
 			Survival_HelpShown_Exhaustion->value = 1.0f;
 		}
 

@@ -63,8 +63,7 @@ public:
 			InitializeNeed();
 		}
 
-		if (Utility::GetPlayer()->IsInCombat() || 
-			Utility::IsPlayerInDialogue() ||
+		if (Utility::IsPlayerInDialogue() ||
 			Utility::PlayerIsBeastRace() ||
 			Utility::IsOnFlyingMount(Utility::GetPlayer())) {
 			PauseNeed();

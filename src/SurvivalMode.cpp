@@ -5,8 +5,8 @@
 #include "Needs/NeedCold.h"
 #include "Utility.h"
 
-std::int32_t SurvivalMode::OnUpdate(std::int64_t a1)
-{
+std::int32_t SurvivalMode::OnUpdate()
+{ 
 	if (!Utility::GetUI()->GameIsPaused()) {
 		
 		if (g_deltaTime > 0) {
@@ -18,13 +18,13 @@ std::int32_t SurvivalMode::OnUpdate(std::int64_t a1)
 		}
 	}
 
-	return _OnUpdate(a1);
+	return _OnUpdate();
 }
 
 void SurvivalMode::SurvivalModeLoopUpdate()
 {
 	auto utility = Utility::GetSingleton();
-	utility->Survival_ModeCanBeEnabled->value = 1.0f;	//TODO-Move this elsewhere
+	utility->Survival_ModeCanBeEnabled->value = 1.0f;
 
 	if (!CheckOblivionStatus() && !CheckJailStatus()) {
 		if (utility->IsSurvivalEnabled() && !utility->SurvivalToggle()) {
@@ -61,6 +61,10 @@ void SurvivalMode::SendAllNeedsUpdate()
 		NeedHunger::GetSingleton()->StopNeed();
 		NeedExhaustion::GetSingleton()->OnUpdatePass();
 		NeedCold::GetSingleton()->OnUpdatePass();
+	} else if (Utility::PlayerIsLich()) {
+		NeedHunger::GetSingleton()->StopNeed();
+		NeedExhaustion::GetSingleton()->StopNeed();
+		NeedCold::GetSingleton()->StopNeed();
 	} else {
 		NeedHunger::GetSingleton()->OnUpdatePass();
 		NeedExhaustion::GetSingleton()->OnUpdatePass();
@@ -135,6 +139,8 @@ void SurvivalMode::RemovePlayerSpellPerks()
 {
 	auto player = Utility::GetPlayer();
 	auto utility = Utility::GetSingleton();
+
+	Utility::RemoveSurvivalDiseases();
 
 	player->RemoveSpell(utility->Survival_abLowerCarryWeightSpell);
 	player->RemoveSpell(utility->Survival_abRacialNord);

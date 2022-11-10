@@ -99,7 +99,7 @@ public:
 		}
 
 		if (stage >= 2 && Survival_HelpShown_Hunger->value == 0.0f) {
-			Utility::ShowNotification(Survival_HelpHungerHigh);
+			Utility::ShowNotification(Survival_HelpHungerHigh, true);
 			Survival_HelpShown_Hunger->value = 1.0f;
 		}
 

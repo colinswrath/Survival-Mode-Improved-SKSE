@@ -421,7 +421,7 @@ public:
 		}
 
 		if (stage >= 2 && Survival_HelpShown_Cold->value == 0.0f) {
-			Utility::ShowNotification(Survival_HelpColdHigh);
+			Utility::ShowNotification(Survival_HelpColdHigh, true);
 			Survival_HelpShown_Cold->value = 1.0f;
 		}
 
