@@ -56,7 +56,8 @@ namespace Events
 					if (result <= chance) {
 						Utility::ShowNotification(hunger->Survival_FoodPoisoningMsg);
 					}
-				} 
+				}
+
 			}
 
 			for (auto effect : food->effects) {
@@ -70,6 +71,7 @@ namespace Events
 					hunger->DecreaseNeed(hunger->Survival_HungerRestoreLargeAmount->value);		
 				}
 			}
+
 		}
 	}
 
@@ -251,7 +253,6 @@ namespace Events
 	class OnEffectApplyEventHandler : public RE::BSTEventSink<RE::TESMagicEffectApplyEvent>
 	{
 	public:
-		std::mutex effet_apply_mutex;
 
 		static OnEffectApplyEventHandler* GetSingleton()
 		{
@@ -264,8 +265,6 @@ namespace Events
 			if (!a_event || !a_event->target || !a_event->target->IsPlayerRef()) {
 				return RE::BSEventNotifyControl::kContinue;
 			}
-
-			const std::lock_guard<std::mutex> lock(effet_apply_mutex);
 
 			auto effect = RE::TESForm::LookupByID<RE::EffectSetting>(a_event->magicEffect);
 
