@@ -58,16 +58,17 @@ namespace Events
 					}
 				}
 
-				for (auto effect : food->effects) {
-					if (hunger->Survival_FoodRestoreHungerVerySmall == effect->baseEffect) {
-						hunger->DecreaseNeed(hunger->Survival_HungerRestoreVerySmallAmount->value);
-					} else if (hunger->Survival_FoodRestoreHungerSmall == effect->baseEffect) {
-						hunger->DecreaseNeed(hunger->Survival_HungerRestoreSmallAmount->value);
-					} else if (hunger->Survival_FoodRestoreHungerMedium == effect->baseEffect) {
-						hunger->DecreaseNeed(hunger->Survival_HungerRestoreMediumAmount->value);
-					} else if (hunger->Survival_FoodRestoreHungerLarge == effect->baseEffect) {
-						hunger->DecreaseNeed(hunger->Survival_HungerRestoreLargeAmount->value);		
-					}
+			}
+
+			for (auto effect : food->effects) {
+				if (hunger->Survival_FoodRestoreHungerVerySmall == effect->baseEffect) {
+					hunger->DecreaseNeed(hunger->Survival_HungerRestoreVerySmallAmount->value);
+				} else if (hunger->Survival_FoodRestoreHungerSmall == effect->baseEffect) {
+					hunger->DecreaseNeed(hunger->Survival_HungerRestoreSmallAmount->value);
+				} else if (hunger->Survival_FoodRestoreHungerMedium == effect->baseEffect) {
+					hunger->DecreaseNeed(hunger->Survival_HungerRestoreMediumAmount->value);
+				} else if (hunger->Survival_FoodRestoreHungerLarge == effect->baseEffect) {
+					hunger->DecreaseNeed(hunger->Survival_HungerRestoreLargeAmount->value);		
 				}
 			}
 
