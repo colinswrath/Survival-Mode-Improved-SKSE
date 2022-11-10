@@ -24,7 +24,7 @@ std::int32_t SurvivalMode::OnUpdate()
 void SurvivalMode::SurvivalModeLoopUpdate()
 {
 	auto utility = Utility::GetSingleton();
-	utility->Survival_ModeCanBeEnabled->value = 1.0f;	//TODO-Move this elsewhere
+	utility->Survival_ModeCanBeEnabled->value = 1.0f;
 
 	if (!CheckOblivionStatus() && !CheckJailStatus()) {
 		if (utility->IsSurvivalEnabled() && !utility->SurvivalToggle()) {

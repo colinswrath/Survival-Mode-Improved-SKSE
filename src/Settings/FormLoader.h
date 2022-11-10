@@ -12,6 +12,7 @@ class FormLoader
 public:
 	const std::string_view smiPluginName = "SurvivalModeImproved.esp";
 	const std::string_view smEslPluginName = "ccqdrsse001-survivalmode.esl";
+	const std::string_view causePluginName = "ccbgssse067-daedinv.esm";
 	const std::string_view updatePluginName = "Update.esm";
 	const std::string_view skyrimPluginName = "Skyrim.esm";
 	const std::string_view dgPluginName = "Dawnguard.esm";
@@ -434,6 +435,19 @@ public:
 			auto lichPerk = dataHandler->LookupForm(RE::FormID(0x3326D5), undeathPluginName);
 			if (lichPerk) {
 				util->Undeath_LichPerk = lichPerk->As<RE::BGSPerk>();
+			}
+		}
+
+		if (dataHandler->LookupLoadedModByName(causePluginName)) {
+			auto deadLandsWorldspace = dataHandler->LookupForm(RE::FormID(0xE1592), causePluginName);
+			auto deadLandsLoc = dataHandler->LookupForm(RE::FormID(0x33F39), causePluginName);
+
+			if (deadLandsWorldspace && !util->Survival_OblivionAreas->HasForm(deadLandsWorldspace)) {
+				util->Survival_OblivionAreas->AddForm(deadLandsWorldspace);
+			}
+
+			if (deadLandsLoc && !util->Survival_OblivionAreas->HasForm(deadLandsLoc)) {
+				util->Survival_OblivionLocations->AddForm(deadLandsLoc);
 			}
 		}
 	}
