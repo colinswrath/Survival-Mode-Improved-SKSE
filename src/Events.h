@@ -299,7 +299,7 @@ namespace Events
 				return RE::BSEventNotifyControl::kContinue;
 			}
 
-			if(a_event->menuName == RE::MapMenu::MENU_NAME) {
+			if(a_event->menuName == RE::MapMenu::MENU_NAME && Utility::GetSingleton()->DisableFastTravel) {
 				if (a_event->opening && Utility::IsFastTravelEnabled() && Utility::DisableFTCheck()) {
 					Utility::EnableFastTravel(false);
 				} else if (!a_event->opening) {

@@ -17,11 +17,21 @@ public:
 	{
 		logger::info("Loading settings");
 		auto settings = Settings::GetSingleton();
+		auto util = Utility::GetSingleton();
 
 		CSimpleIniA ini;
 		ini.SetUnicode();
 		ini.LoadFile(R"(.\Data\SKSE\Plugins\SurvivalModeImproved.ini)");
 		const auto dataHandler = RE::TESDataHandler::GetSingleton();
+
+		logger::info("Loading general settings");
+		util->DisableFastTravel = ini.GetBoolValue("General", "bDisableFastTravel", true);
+		
+		if (ini.GetBoolValue("General", "bAutoEnableSMOnNewGame", true)) {
+			if (util->Survival_ModeCanBeEnabled->value == 0.0f) {	//This will only be 0 in the event you havent started SMI yet
+				util->Survival_ModeToggle->value = 1.0f;
+			}
+		}
 
 		logger::info("Loading season mults");
 

@@ -19,6 +19,7 @@ public:
 	RE::TESGlobal* Survival_ModeCanBeEnabled;
 
 	RE::SpellItem* Survival_abLowerCarryWeightSpell;
+	RE::SpellItem* Survival_abLowerRegenSpell;
 	RE::SpellItem* Survival_abRacialNord;
 	RE::SpellItem* Survival_abRacialAltmer;
 	RE::SpellItem* Survival_abRacialOrc;
@@ -101,6 +102,7 @@ public:
 	uintptr_t IsFtEnabledAddress;
 
 	bool WasInOblivion = false;
+	bool DisableFastTravel = true;
 
 	static Utility* GetSingleton()
 	{

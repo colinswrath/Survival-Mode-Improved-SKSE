@@ -107,7 +107,7 @@ bool SurvivalMode::InstallFtMessageHook()
 
 void SurvivalMode::OverwriteFastTravelMessage(const char* a_notification, const char* a_soundToPlay, bool a_cancelIfAlreadyQueued)
 {
-	if (!Utility::GetUI()->IsMenuOpen(RE::MapMenu::MENU_NAME) || !Utility::DisableFTCheck()) {
+	if (!Utility::GetUI()->IsMenuOpen(RE::MapMenu::MENU_NAME) || !Utility::DisableFTCheck() || !Utility::GetSingleton()->DisableFastTravel) {
 		_OverwriteFastTravelMessage(a_notification, a_soundToPlay, a_cancelIfAlreadyQueued);
 	}
 }
