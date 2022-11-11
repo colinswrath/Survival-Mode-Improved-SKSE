@@ -120,6 +120,7 @@ void SurvivalMode::AddPlayerSpellPerks()
 	auto utility = Utility::GetSingleton();
 
 	player->AddSpell(utility->Survival_abLowerCarryWeightSpell);
+	player->AddSpell(utility->Survival_abLowerRegenSpell);
 	player->AddSpell(utility->Survival_abRacialNord);
 	player->AddSpell(utility->Survival_abRacialAltmer);
 	player->AddSpell(utility->Survival_abRacialOrc);
@@ -143,6 +144,7 @@ void SurvivalMode::RemovePlayerSpellPerks()
 	Utility::RemoveSurvivalDiseases();
 
 	player->RemoveSpell(utility->Survival_abLowerCarryWeightSpell);
+	player->RemoveSpell(utility->Survival_abLowerRegenSpell);
 	player->RemoveSpell(utility->Survival_abRacialNord);
 	player->RemoveSpell(utility->Survival_abRacialAltmer);
 	player->RemoveSpell(utility->Survival_abRacialOrc);
