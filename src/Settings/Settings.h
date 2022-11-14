@@ -26,12 +26,7 @@ public:
 
 		logger::info("Loading general settings");
 		util->DisableFastTravel = ini.GetBoolValue("General", "bDisableFastTravel", true);
-		
-		if (ini.GetBoolValue("General", "bAutoEnableSMOnNewGame", true)) {
-			if (util->Survival_ModeCanBeEnabled->value == 0.0f) {	//This will only be 0 in the event you havent started SMI yet
-				util->Survival_ModeToggle->value = 1.0f;
-			}
-		}
+		util->AutoStart = ini.GetBoolValue("General", "bAutoEnableSMOnNewGame", true);
 
 		logger::info("Loading season mults");
 
@@ -99,7 +94,13 @@ public:
 		cold->SeasonFreezingMults[10] = std::stof((ini.GetValue(currentHeader, "fSunsDuskFreezingMult", "")));
 		cold->SeasonFreezingMults[11] = std::stof((ini.GetValue(currentHeader, "fEveningStarFreezingMult", "")));
 
+		logger::info("Loading cold settings");
+		cold->BlizzardWindspeedThreshold = std::stof((ini.GetValue("Cold Settings", "fBlizzardWindSpeedThreshold", "150.0")));
+		cold->ColdToRestoreInWarmArea = std::stof((ini.GetValue("Cold Settings", "fColdToRestoreInWarmArea", "1.5")));
+		cold->AmbientWarmthWidgetColdLevelThreshold = std::stof((ini.GetValue("Cold Settings", "fAmbientWarmthWidgetColdLevelThreshold", "200.0")));
+		cold->AmountToChangeColdOnSpellHit = std::stof((ini.GetValue("Cold Settings", "fFrostSpellColdLevelDamage", "30.0")));
+		cold->MaxWarmthRatingBonusPerc = std::clamp(std::stof((ini.GetValue("Cold Settings", "fMaxWarmthRatingBonus", "0.8"))), 0.0f, 1.0f);
+
 		logger::info("Settings loaded");		
 	}
-
 };

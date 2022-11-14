@@ -26,15 +26,15 @@ void SurvivalMode::SurvivalModeLoopUpdate()
 	auto utility = Utility::GetSingleton();
 	utility->Survival_ModeCanBeEnabled->value = 1.0f;
 
-	if (!CheckOblivionStatus() && !CheckJailStatus()) {
 		if (utility->IsSurvivalEnabled() && !utility->SurvivalToggle()) {
 			StopSurvivalMode();
-		} else if (!utility->IsSurvivalEnabled() && utility->SurvivalToggle()) {
-			StartSurvivalMode();	
-		} else if (utility->IsSurvivalEnabled()) {
-			SendAllNeedsUpdate();
+		} else if (!CheckOblivionStatus() && !CheckJailStatus()) {
+			if (!utility->IsSurvivalEnabled() && utility->SurvivalToggle()) {
+				StartSurvivalMode();
+			} else if (utility->IsSurvivalEnabled()) {
+				SendAllNeedsUpdate();
+			}
 		}
-	}
 }
 
 void SurvivalMode::StartSurvivalMode()

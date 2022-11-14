@@ -98,6 +98,7 @@ public:
 	{
 		DecreaseNeed(hoursPassed * Survival_ExhaustionRestorePerHour->value);
 		CheckAdoptionBonus();
+
 		WasSleeping = false;
 	}
 

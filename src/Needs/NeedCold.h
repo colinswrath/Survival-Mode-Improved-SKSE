@@ -77,20 +77,22 @@ public:
 	const char* Survival_FreezingAFemaleSD = "Survival_FreezingAFemaleSD";
 	const char* Survival_FreezingBFemaleSD = "Survival_FreezingBFemaleSD";
 
-	const float MaxWarmthRatingBonusPerc = 0.80f;		//TODO-Make these an ini setting
+	float MaxWarmthRatingBonusPerc = 0.80f;
 	const float ColdMaxStageThreshold = 600.0f;
-	const float ColdToRestoreInWarmArea = 1.5f;
-	const float AmountToChangeColdOnSpellHit = 30.0000;
+	float ColdToRestoreInWarmArea = 1.5f;
+	float AmountToChangeColdOnSpellHit = 30.0000;
 	
 	float SeasonWarmMults[12];
 	float SeasonCoolMults[12];
 	float SeasonReachMults[12];
 	float SeasonFreezingMults[12];
 
-	//Night mod - TODO - Make ini setting
 	float WarmAreaNightMod = 25.0f;
 	float CoolAreaNightMod = 50.0f;
 	float FreezingAreaNightMod = 100.0f;
+	float AmbientWarmthWidgetColdLevelThreshold = 200.0f;
+
+	float BlizzardWindspeedThreshold = 150;
 
 	static NeedCold* GetSingleton()
 	{
@@ -221,26 +223,48 @@ public:
 		auto currentWeather = sky->currentWeather;
 	
 		if (currentWeather) {
-			if (area != AREA_TYPE::kAreaTypeInterior) {
-				bool coldCloudy = SMI_ColdCloudyWeather->HasForm(currentWeather);
-				if (coldCloudy && (area == AREA_TYPE::kAreaTypeFreezing)) {
-					return static_cast<float>(WEATHER_TEMPS::kSnowTemp);	
-				} else if (coldCloudy) {
-					return static_cast<float>(WEATHER_TEMPS::kColdCloudySnowTemp);
+
+			auto precipData = currentWeather->precipitationData;
+			auto windSpeed = static_cast<uint8_t>(currentWeather->data.windSpeed);
+		
+			bool snowParticle = false;
+			bool rainParticle = false;
+
+			if (precipData) {
+				auto particleType = precipData->data[static_cast<size_t>(RE::BGSShaderParticleGeometryData::DataID::kParticleType)].i;
+
+				switch (particleType) {
+				case 0:
+					rainParticle = true;
+					break;
+				case 1:
+					snowParticle = true;
+					break;
 				}
+			}
 
-				if (currentWeather->data.flags.any(RE::TESWeather::WeatherDataFlag::kSnow)) {
-
-					if (Survival_AshWeather->HasForm(currentWeather)) {
-						return static_cast<float>(WEATHER_TEMPS::kComfortableTemp);
-					} else if (Survival_BlizzardWeather->HasForm(currentWeather)) {
-						return static_cast<float>(WEATHER_TEMPS::kBlizzardTemp);
-					} else {
-						return static_cast<float>(WEATHER_TEMPS::kSnowTemp);
+			if (currentWeather) {
+				if (area != AREA_TYPE::kAreaTypeInterior) {
+					bool coldCloudy = SMI_ColdCloudyWeather->HasForm(currentWeather);
+					if (coldCloudy && (area == AREA_TYPE::kAreaTypeFreezing)) {
+						return static_cast<float>(WEATHER_TEMPS::kSnowTemp);	
+					} else if (coldCloudy) {
+						return static_cast<float>(WEATHER_TEMPS::kColdCloudySnowTemp);
 					}
 
-				} else if (currentWeather->data.flags.any(RE::TESWeather::WeatherDataFlag::kRainy)) {
-					return static_cast<float>(WEATHER_TEMPS::kRainyTemp);		
+					if (currentWeather->data.flags.any(RE::TESWeather::WeatherDataFlag::kSnow) || snowParticle) {
+
+						if (Survival_AshWeather->HasForm(currentWeather)) {
+							return static_cast<float>(WEATHER_TEMPS::kComfortableTemp);
+						} else if (Survival_BlizzardWeather->HasForm(currentWeather) || windSpeed >= BlizzardWindspeedThreshold) {
+							return static_cast<float>(WEATHER_TEMPS::kBlizzardTemp);
+						} else {
+							return static_cast<float>(WEATHER_TEMPS::kSnowTemp);
+						}
+
+					} else if (currentWeather->data.flags.any(RE::TESWeather::WeatherDataFlag::kRainy) || rainParticle) {
+						return static_cast<float>(WEATHER_TEMPS::kRainyTemp);		
+					}
 				}
 			}
 		}
@@ -343,10 +367,10 @@ public:
 		UI_LEVEL uiSetting;
 		if (oldColdVal == newColdVal) {
 			uiSetting = UI_LEVEL::kNeutral;
-		} else if (oldColdVal > newColdVal) {
+		} else if ((oldColdVal > newColdVal) && (SMI_CurrentAmbientTemp->value < AmbientWarmthWidgetColdLevelThreshold)) {
 			uiSetting = UI_LEVEL::kWarm;
 		} else {
-			if (SMI_CurrentAmbientTemp->value >= NeedStage5->value) {
+			if (SMI_CurrentAmbientTemp->value >= NeedStage4->value) {
 				uiSetting = UI_LEVEL::kFreezing;
 			} else if (SMI_CurrentAmbientTemp->value >= NeedStage3->value) {
 				uiSetting = UI_LEVEL::kCold;
@@ -369,20 +393,24 @@ public:
 
 	float GetMaxStageValue()
 	{
+		float maxVal = 0.0f;
 		if (SMI_CurrentAmbientTemp->value >= ColdMaxStageThreshold) {
-			return NeedMaxValue->value;
+			maxVal = NeedMaxValue->value;
 		} else {
-			return SMI_CurrentAmbientTemp->value;
+			maxVal = SMI_CurrentAmbientTemp->value;
 		}
 
-		//if(conditions.isBeastRace == 1 && currentColdLevel > needStage4Value)
-		//needStage4Value as Float
+		if (Utility::PlayerIsBeastRace() == 1 && SMI_CurrentAmbientTemp->value >= NeedStage4->value) {
+			maxVal = NeedStage4->value;
+		}
+
+		return maxVal;
 	}
 
 	float GetColdPerTick()
 	{
 		float coldLevel = SMI_CurrentAmbientTemp->value;
-		auto timeScale = Utility::GetCalendar()->GetTimescale();  //TODO-Cache the timescale
+		auto timeScale = Utility::GetCalendar()->GetTimescale();
 		auto rateMult = Utility::PlayerIsVampire() ? SMI_VampireColdRate->value : SMI_ColdRate->value;
 
 		float targetRealTimeSecondsToNumb = Survival_ColdTargetGameHoursToNumb->value * 3600 / timeScale;

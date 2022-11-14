@@ -35,6 +35,7 @@ namespace Events
 		if (!exhaustion->CurrentlyStopped) {
 
 			exhaustion->SetLastTimeStamp();
+
 			Hours = Utility::GetCalendar()->GetHoursPassed() - Hours;
 			exhaustion->DecreaseExhaustion(Hours);
 		}
