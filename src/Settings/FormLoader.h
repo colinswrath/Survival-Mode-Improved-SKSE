@@ -258,13 +258,14 @@ public:
 		coldSystem->Survival_HelpColdHigh = dataHandler->LookupForm(RE::FormID(0x944), smEslPluginName)->As<RE::BGSMessage>();
 	}
 
-	void LoadMiscForms([[maybe_unused]]RE::TESDataHandler* dataHandler)
+	void LoadMiscForms(RE::TESDataHandler* dataHandler)
 	{
 		auto utility = Utility::GetSingleton();
 		utility->Survival_ModeToggle = dataHandler->LookupForm(RE::FormID(0x828), smEslPluginName)->As<RE::TESGlobal>();
 		utility->Survival_ModeEnabled = dataHandler->LookupForm(RE::FormID(0x826), smEslPluginName)->As<RE::TESGlobal>();
 
 		utility->Survival_abLowerCarryWeightSpell = dataHandler->LookupForm(RE::FormID(0x887), smEslPluginName)->As<RE::SpellItem>();
+		utility->Survival_abLowerRegenSpell = dataHandler->LookupForm(RE::FormID(0x982), smEslPluginName)->As<RE::SpellItem>();
 		utility->Survival_abRacialNord = dataHandler->LookupForm(RE::FormID(0x88B), smEslPluginName)->As<RE::SpellItem>();
 		utility->Survival_abRacialAltmer = dataHandler->LookupForm(RE::FormID(0x874), smEslPluginName)->As<RE::SpellItem>();
 		utility->Survival_abRacialOrc = dataHandler->LookupForm(RE::FormID(0x873), smEslPluginName)->As<RE::SpellItem>();

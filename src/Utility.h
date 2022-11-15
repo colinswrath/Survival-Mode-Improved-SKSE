@@ -19,6 +19,7 @@ public:
 	RE::TESGlobal* Survival_ModeCanBeEnabled;
 
 	RE::SpellItem* Survival_abLowerCarryWeightSpell;
+	RE::SpellItem* Survival_abLowerRegenSpell;
 	RE::SpellItem* Survival_abRacialNord;
 	RE::SpellItem* Survival_abRacialAltmer;
 	RE::SpellItem* Survival_abRacialOrc;
@@ -101,6 +102,8 @@ public:
 	uintptr_t IsFtEnabledAddress;
 
 	bool WasInOblivion = false;
+	bool DisableFastTravel = true;
+	bool AutoStart = true;
 
 	static Utility* GetSingleton()
 	{
@@ -306,6 +309,7 @@ public:
 		if (relMarriageQuest->IsRunning() && relMarriageQuest->currentStage >= 10 && (Utility::GetPlayer()->GetCurrentLocation() == loveInterestRef->GetActorReference()->GetCurrentLocation())) {
 			return true;
 		}
+
 		return false;
 	}
 
@@ -370,9 +374,10 @@ public:
 		auto loc = Utility::GetPlayer()->GetCurrentLocation();
 		auto util = Utility::GetSingleton();
 
-		if (loc->HasKeyword(util->LocTypeInn) || loc->HasKeyword(util->LocTypePlayerHouse)) {
+		if (loc && (loc->HasKeyword(util->LocTypeInn) || loc->HasKeyword(util->LocTypePlayerHouse))) {
 			return true;
 		}
+
 		return false;
 	}
 

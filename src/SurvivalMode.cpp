@@ -26,15 +26,15 @@ void SurvivalMode::SurvivalModeLoopUpdate()
 	auto utility = Utility::GetSingleton();
 	utility->Survival_ModeCanBeEnabled->value = 1.0f;
 
-	if (!CheckOblivionStatus() && !CheckJailStatus()) {
 		if (utility->IsSurvivalEnabled() && !utility->SurvivalToggle()) {
 			StopSurvivalMode();
-		} else if (!utility->IsSurvivalEnabled() && utility->SurvivalToggle()) {
-			StartSurvivalMode();	
-		} else if (utility->IsSurvivalEnabled()) {
-			SendAllNeedsUpdate();
+		} else if (!CheckOblivionStatus() && !CheckJailStatus()) {
+			if (!utility->IsSurvivalEnabled() && utility->SurvivalToggle()) {
+				StartSurvivalMode();
+			} else if (utility->IsSurvivalEnabled()) {
+				SendAllNeedsUpdate();
+			}
 		}
-	}
 }
 
 void SurvivalMode::StartSurvivalMode()
@@ -107,7 +107,7 @@ bool SurvivalMode::InstallFtMessageHook()
 
 void SurvivalMode::OverwriteFastTravelMessage(const char* a_notification, const char* a_soundToPlay, bool a_cancelIfAlreadyQueued)
 {
-	if (!Utility::GetUI()->IsMenuOpen(RE::MapMenu::MENU_NAME) || !Utility::DisableFTCheck()) {
+	if (!Utility::GetUI()->IsMenuOpen(RE::MapMenu::MENU_NAME) || !Utility::DisableFTCheck() || !Utility::GetSingleton()->DisableFastTravel) {
 		_OverwriteFastTravelMessage(a_notification, a_soundToPlay, a_cancelIfAlreadyQueued);
 	}
 }
@@ -120,6 +120,7 @@ void SurvivalMode::AddPlayerSpellPerks()
 	auto utility = Utility::GetSingleton();
 
 	player->AddSpell(utility->Survival_abLowerCarryWeightSpell);
+	player->AddSpell(utility->Survival_abLowerRegenSpell);
 	player->AddSpell(utility->Survival_abRacialNord);
 	player->AddSpell(utility->Survival_abRacialAltmer);
 	player->AddSpell(utility->Survival_abRacialOrc);
@@ -143,6 +144,7 @@ void SurvivalMode::RemovePlayerSpellPerks()
 	Utility::RemoveSurvivalDiseases();
 
 	player->RemoveSpell(utility->Survival_abLowerCarryWeightSpell);
+	player->RemoveSpell(utility->Survival_abLowerRegenSpell);
 	player->RemoveSpell(utility->Survival_abRacialNord);
 	player->RemoveSpell(utility->Survival_abRacialAltmer);
 	player->RemoveSpell(utility->Survival_abRacialOrc);

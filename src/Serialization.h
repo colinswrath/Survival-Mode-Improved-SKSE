@@ -21,6 +21,12 @@ namespace Serialization
 
 		auto util = Utility::GetSingleton();
 
+		if (util->AutoStart) {
+			if (util->Survival_ModeCanBeEnabled->value == 0.0f) {  //This will only be 0 in the event you havent started SMI yet
+				util->Survival_ModeToggle->value = 1.0f;
+			}
+		}
+
 		if (!util->HelpManualPC->HasForm(util->Survival_HelpSurvivalModeLong)) {
 			util->HelpManualPC->AddForm(util->Survival_HelpSurvivalModeLong);
 		}

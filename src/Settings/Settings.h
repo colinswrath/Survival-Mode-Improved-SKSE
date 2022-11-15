@@ -17,11 +17,16 @@ public:
 	{
 		logger::info("Loading settings");
 		auto settings = Settings::GetSingleton();
+		auto util = Utility::GetSingleton();
 
 		CSimpleIniA ini;
 		ini.SetUnicode();
 		ini.LoadFile(R"(.\Data\SKSE\Plugins\SurvivalModeImproved.ini)");
 		const auto dataHandler = RE::TESDataHandler::GetSingleton();
+
+		logger::info("Loading general settings");
+		util->DisableFastTravel = ini.GetBoolValue("General", "bDisableFastTravel", true);
+		util->AutoStart = ini.GetBoolValue("General", "bAutoEnableSMOnNewGame", true);
 
 		logger::info("Loading season mults");
 
@@ -89,7 +94,13 @@ public:
 		cold->SeasonFreezingMults[10] = std::stof((ini.GetValue(currentHeader, "fSunsDuskFreezingMult", "")));
 		cold->SeasonFreezingMults[11] = std::stof((ini.GetValue(currentHeader, "fEveningStarFreezingMult", "")));
 
+		logger::info("Loading cold settings");
+		cold->BlizzardWindspeedThreshold = std::stof((ini.GetValue("Cold Settings", "fBlizzardWindSpeedThreshold", "150.0")));
+		cold->ColdToRestoreInWarmArea = std::stof((ini.GetValue("Cold Settings", "fColdToRestoreInWarmArea", "1.5")));
+		cold->AmbientWarmthWidgetColdLevelThreshold = std::stof((ini.GetValue("Cold Settings", "fAmbientWarmthWidgetColdLevelThreshold", "200.0")));
+		cold->AmountToChangeColdOnSpellHit = std::stof((ini.GetValue("Cold Settings", "fFrostSpellColdLevelDamage", "30.0")));
+		cold->MaxWarmthRatingBonusPerc = std::clamp(std::stof((ini.GetValue("Cold Settings", "fMaxWarmthRatingBonus", "0.8"))), 0.0f, 1.0f);
+
 		logger::info("Settings loaded");		
 	}
-
 };
