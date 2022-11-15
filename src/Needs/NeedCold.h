@@ -367,8 +367,12 @@ public:
 		UI_LEVEL uiSetting;
 		if (oldColdVal == newColdVal) {
 			uiSetting = UI_LEVEL::kNeutral;
-		} else if ((oldColdVal > newColdVal) && (SMI_CurrentAmbientTemp->value < AmbientWarmthWidgetColdLevelThreshold)) {
-			uiSetting = UI_LEVEL::kWarm;
+		} else if (oldColdVal > newColdVal) {
+			if (SMI_CurrentAmbientTemp->value < AmbientWarmthWidgetColdLevelThreshold) {
+				uiSetting = UI_LEVEL::kWarm;
+			} else {
+				uiSetting = UI_LEVEL::kNeutral;	
+			}
 		} else {
 			if (SMI_CurrentAmbientTemp->value >= NeedStage4->value) {
 				uiSetting = UI_LEVEL::kFreezing;
