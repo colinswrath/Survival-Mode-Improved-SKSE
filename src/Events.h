@@ -28,6 +28,25 @@ namespace Events
 		}
 	}
 
+	static void ProcessFastTravelEndEvent()
+	{
+		auto hunger = NeedHunger::GetSingleton();
+		auto exhaustion = NeedExhaustion::GetSingleton();
+		auto cold = NeedCold::GetSingleton();
+
+		if (!hunger->CurrentlyStopped) {
+			hunger->FastTravelled = true;
+		}
+
+		if (!exhaustion->CurrentlyStopped) {
+			exhaustion->FastTravelled = true;
+		}
+
+		if (!cold->CurrentlyStopped) {
+			cold->FastTravelled = true;
+		}
+	}
+
 	static void ProcessSleepStopEvent()
 	{
 		auto exhaustion = NeedExhaustion::GetSingleton();
@@ -125,6 +144,33 @@ namespace Events
 			}
 		}
 	}
+
+	class OnFastTravelEndEventHandler : public RE::BSTEventSink<RE::TESFastTravelEndEvent>
+	{
+	public:
+		static OnFastTravelEndEventHandler* GetSingleton()
+		{
+			static OnFastTravelEndEventHandler singleton;
+			return &singleton;
+		}
+
+		RE::BSEventNotifyControl ProcessEvent(const RE::TESFastTravelEndEvent* a_event, RE::BSTEventSource<RE::TESFastTravelEndEvent>*) override
+		{
+			if (!a_event) {
+				return RE::BSEventNotifyControl::kContinue;
+			}
+
+			ProcessFastTravelEndEvent();
+
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		static void Register()
+		{
+			RE::ScriptEventSourceHolder* eventHolder = RE::ScriptEventSourceHolder::GetSingleton();
+			eventHolder->AddEventSink(OnFastTravelEndEventHandler::GetSingleton());
+		}
+	};
 
 	class OnSleepStartEventHandler : public RE::BSTEventSink<RE::TESSleepStartEvent>
 	{
@@ -327,5 +373,6 @@ namespace Events
 		OnHitEventHandler::Register();
 		OnEffectApplyEventHandler::Register();
 		OnMenuOpenCloseEventHandler::Register();
+		OnFastTravelEndEventHandler::Register();
 	}
 }
