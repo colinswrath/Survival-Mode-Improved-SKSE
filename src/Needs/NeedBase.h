@@ -45,6 +45,7 @@ public:
 	RE::BGSMessage* NeedMessage5;
 
 	bool WasSleeping;
+	bool FastTravelled;
 	bool CurrentlyStopped=true;
 
 	//Attribute penalty

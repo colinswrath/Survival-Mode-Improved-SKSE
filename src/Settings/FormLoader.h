@@ -180,6 +180,11 @@ public:
 
 		fatigueSystem->Survival_HelpExhaustionHigh = dataHandler->LookupForm(RE::FormID(0x943), smEslPluginName)->As<RE::BGSMessage>();
 		fatigueSystem->Survival_HelpShown_Exhaustion = dataHandler->LookupForm(RE::FormID(0x8E1), smEslPluginName)->As<RE::TESGlobal>();
+
+		fatigueSystem->BYOHAdoptionRestedMessageMale = dataHandler->LookupForm(RE::FormID(0x2F55), hfPluginName)->As<RE::BGSMessage>();
+		fatigueSystem->BYOHAdoptionRestedMessageFemale = dataHandler->LookupForm(RE::FormID(0x4293), hfPluginName)->As<RE::BGSMessage>();
+		fatigueSystem->BYOHAdoptionSleepAbilityMale = dataHandler->LookupForm(RE::FormID(0x2F54), hfPluginName)->As<RE::SpellItem>();
+		fatigueSystem->BYOHAdoptionSleepAbilityFemale = dataHandler->LookupForm(RE::FormID(0x4292), hfPluginName)->As<RE::SpellItem>();
 	}
 
 	void LoadColdForms(RE::TESDataHandler* dataHandler)
