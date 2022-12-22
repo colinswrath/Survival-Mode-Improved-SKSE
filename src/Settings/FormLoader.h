@@ -331,12 +331,15 @@ public:
 		utility->Survival_BrownRotCarryingRaces = dataHandler->LookupForm(RE::FormID(0x9A4), smEslPluginName)->As<RE::BGSListForm>();
 		utility->Survival_SurvivalDiseases = dataHandler->LookupForm(RE::FormID(0x9A6), smEslPluginName)->As<RE::BGSListForm>();
 
+		utility->UnboundQuest = dataHandler->LookupForm(RE::FormID(0x3372B), skyrimPluginName)->As<RE::TESQuest>();
+
 		utility->IsInWarmArea = &regionInfoSpell->effects[0]->conditions;
 		utility->IsInCoolArea = &regionInfoSpell->effects[1]->conditions;
 		utility->IsInFreezingArea = &regionInfoSpell->effects[2]->conditions;
 		utility->IsInFallForestFreezingArea = &regionInfoSpell->effects[3]->conditions;
 		utility->IsInPineForestFreezingArea = &regionInfoSpell->effects[4]->conditions;
 		utility->IsInReachArea = &regionInfoSpell->effects[5]->conditions;
+
 
 		if (dataHandler->LookupLoadedModByName(wyrmstoothRegionPatch)) {
 			utility->WTIsInWarmArea = &regionInfoSpell->effects[6]->conditions;
