@@ -86,7 +86,7 @@ public:
 
 	RE::TESQuest* DA16;
 	RE::TESQuest* RelationshipMarriageFIN;
-
+	RE::TESQuest* UnboundQuest;
 	RE::TESQuest* BYOHRelationshipAdoption;
 	
 	RE::BGSKeyword* LocTypeInn;

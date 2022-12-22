@@ -37,6 +37,7 @@ public:
 	RE::BGSListForm* Survival_HungerResistRacesMinor;
 
 	const float hungerDivisor = 60.0f;
+	float fastTravelMult = 0.25f;
 
 	static NeedHunger* GetSingleton()
 	{
@@ -51,6 +52,7 @@ public:
 		if (ticks > 0) {
 			IncrementNeed(ticks);
 			WasSleeping = false;
+			FastTravelled = false;
 			SetLastTimeStamp(GetCurrentGameTimeInMinutes());
 		}
 	}
@@ -63,6 +65,10 @@ public:
 
 		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
 		amount = (NeedRate->value / hungerDivisor) * float(ticks);
+
+		if (FastTravelled) {
+			amount = amount * fastTravelMult;
+		}
 
 		if (WasSleeping) {
 			amount = amount * NeedSleepRateMult->value;
@@ -111,7 +117,6 @@ public:
 		const std::lock_guard<std::mutex> lock(update_mutex);
 
 		float newNeedLevel = std::clamp(CurrentNeedValue->value - amount, minValue, NeedMaxValue->value);
-		logger::info("Current need checked");
 		CurrentNeedValue->value = newNeedLevel * GetGutwormMult();
 		SetNeedStage(false);
 		ApplyAttributePenalty();

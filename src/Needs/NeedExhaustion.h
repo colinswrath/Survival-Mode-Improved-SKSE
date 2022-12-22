@@ -39,6 +39,7 @@ public:
 	const char* Survival_ExhaustedBFemaleSD = "Survival_ExhaustedBFemaleSD";
 
 	const float exhaustionDivisor = 60.0f;
+	float fastTravelMult = 0.25f;
 
 	static NeedExhaustion* GetSingleton()
 	{
@@ -70,6 +71,7 @@ public:
 
 			SetLastTimeStamp(GetCurrentGameTimeInMinutes());
 		}
+		FastTravelled = false;
 	}
 
 	float GetNeedIncrementAmount(int ticks) override {
@@ -80,6 +82,10 @@ public:
 
 		//Rate is divided by 60 in order to retain old SMI balance around 1 hour updates
 		amount = (rate / exhaustionDivisor) * float(ticks);
+
+		if (FastTravelled) {
+			amount = amount * fastTravelMult;
+		}
 
 		if (Survival_ExhaustionResistRacesMinor->HasForm(player->GetRace())) {
 			amount = amount * (1.0f - Survival_RacialBonusMinor->value);

@@ -146,7 +146,7 @@ public:
 	//In this case its more of an "update" than a definite increment 
 	void IncrementNeed(int ticks) override
 	{
-		//const std::lock_guard<std::mutex> lock(update_mutex);
+
 		float currentNeedLevel = CurrentNeedValue->value;
 
 		float incAmount = GetNeedIncrementAmount(ticks);
@@ -156,13 +156,14 @@ public:
 		if (currentNeedLevel > maxLevel) {
 			DecreaseNeed((ColdToRestoreInWarmArea * static_cast<float>(ticks)), maxLevel);
 		} else if (currentNeedLevel == maxLevel) {
-			IncreaseColdLevel(0.0f, NeedMaxValue->value);
+			IncreaseColdLevel(0.0f, maxLevel);
 		} else {
-			IncreaseColdLevel(incAmount, NeedMaxValue->value);
+			IncreaseColdLevel(incAmount, maxLevel);
 		}
 
 		MaxColdCheck();
 		WasSleeping = false;
+		FastTravelled = false;
 	}
 
 	void DecrementNeedHeat(int ticks) 
@@ -223,7 +224,6 @@ public:
 		auto currentWeather = sky->currentWeather;
 	
 		if (currentWeather) {
-
 			auto precipData = currentWeather->precipitationData;
 			auto windSpeed = static_cast<uint8_t>(currentWeather->data.windSpeed);
 		
@@ -404,8 +404,12 @@ public:
 			maxVal = SMI_CurrentAmbientTemp->value;
 		}
 
-		if (Utility::PlayerIsBeastRace() == 1 && SMI_CurrentAmbientTemp->value >= NeedStage4->value) {
+		if (Utility::PlayerIsBeastRace() == true && SMI_CurrentAmbientTemp->value >= NeedStage4->value) {
 			maxVal = NeedStage4->value;
+		}
+
+		if (FastTravelled) {
+			maxVal = NeedStage3->value;
 		}
 
 		return maxVal;

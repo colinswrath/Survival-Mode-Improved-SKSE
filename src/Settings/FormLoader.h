@@ -180,6 +180,11 @@ public:
 
 		fatigueSystem->Survival_HelpExhaustionHigh = dataHandler->LookupForm(RE::FormID(0x943), smEslPluginName)->As<RE::BGSMessage>();
 		fatigueSystem->Survival_HelpShown_Exhaustion = dataHandler->LookupForm(RE::FormID(0x8E1), smEslPluginName)->As<RE::TESGlobal>();
+
+		fatigueSystem->BYOHAdoptionRestedMessageMale = dataHandler->LookupForm(RE::FormID(0x2F55), hfPluginName)->As<RE::BGSMessage>();
+		fatigueSystem->BYOHAdoptionRestedMessageFemale = dataHandler->LookupForm(RE::FormID(0x4293), hfPluginName)->As<RE::BGSMessage>();
+		fatigueSystem->BYOHAdoptionSleepAbilityMale = dataHandler->LookupForm(RE::FormID(0x2F54), hfPluginName)->As<RE::SpellItem>();
+		fatigueSystem->BYOHAdoptionSleepAbilityFemale = dataHandler->LookupForm(RE::FormID(0x4292), hfPluginName)->As<RE::SpellItem>();
 	}
 
 	void LoadColdForms(RE::TESDataHandler* dataHandler)
@@ -326,12 +331,15 @@ public:
 		utility->Survival_BrownRotCarryingRaces = dataHandler->LookupForm(RE::FormID(0x9A4), smEslPluginName)->As<RE::BGSListForm>();
 		utility->Survival_SurvivalDiseases = dataHandler->LookupForm(RE::FormID(0x9A6), smEslPluginName)->As<RE::BGSListForm>();
 
+		utility->UnboundQuest = dataHandler->LookupForm(RE::FormID(0x3372B), skyrimPluginName)->As<RE::TESQuest>();
+
 		utility->IsInWarmArea = &regionInfoSpell->effects[0]->conditions;
 		utility->IsInCoolArea = &regionInfoSpell->effects[1]->conditions;
 		utility->IsInFreezingArea = &regionInfoSpell->effects[2]->conditions;
 		utility->IsInFallForestFreezingArea = &regionInfoSpell->effects[3]->conditions;
 		utility->IsInPineForestFreezingArea = &regionInfoSpell->effects[4]->conditions;
 		utility->IsInReachArea = &regionInfoSpell->effects[5]->conditions;
+
 
 		if (dataHandler->LookupLoadedModByName(wyrmstoothRegionPatch)) {
 			utility->WTIsInWarmArea = &regionInfoSpell->effects[6]->conditions;
