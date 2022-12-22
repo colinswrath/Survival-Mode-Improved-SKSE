@@ -20,6 +20,7 @@ namespace Events
 		}
 
 		if (!exhaustion->CurrentlyStopped) {
+			exhaustion->PlayerSleepQuest->Stop();
 			exhaustion->WasSleeping = true;
 		}
 

@@ -26,24 +26,27 @@ void SurvivalMode::SurvivalModeLoopUpdate()
 	auto utility = Utility::GetSingleton();
 	utility->Survival_ModeCanBeEnabled->value = 1.0f;
 
-		if (utility->IsSurvivalEnabled() && !utility->SurvivalToggle()) {
-			StopSurvivalMode();
-		} else if (!CheckOblivionStatus() && !CheckJailStatus()) {
-			if (!utility->IsSurvivalEnabled() && utility->SurvivalToggle()) {
-				StartSurvivalMode();
-			} else if (utility->IsSurvivalEnabled()) {
-				SendAllNeedsUpdate();
-			}
+	if (utility->IsSurvivalEnabled() && !utility->SurvivalToggle()) {
+		StopSurvivalMode();
+	} else if (!CheckOblivionStatus() && !CheckJailStatus()) {
+		if (!utility->IsSurvivalEnabled() && utility->SurvivalToggle()) {
+			StartSurvivalMode();
+		} else if (utility->IsSurvivalEnabled()) {
+			SendAllNeedsUpdate();
 		}
+	}
 }
 
 void SurvivalMode::StartSurvivalMode()
 {
-	auto utility = Utility::GetSingleton();
-	AddPlayerSpellPerks();
-	SendAllNeedsUpdate();
-	utility->Survival_ModeEnabled->value = 1.0f;
-	utility->Survival_ModeEnabledShared->value = 1.0f;
+	auto playerParentCell = Utility::GetPlayer()->GetParentCell();
+	if (RE::ControlMap::GetSingleton()->IsMainFourControlsEnabled() && !playerParentCell->IsInteriorCell()) {
+		auto utility = Utility::GetSingleton();
+		AddPlayerSpellPerks();
+		SendAllNeedsUpdate();
+		utility->Survival_ModeEnabled->value = 1.0f;
+		utility->Survival_ModeEnabledShared->value = 1.0f;
+	}
 }
 
 void SurvivalMode::StopSurvivalMode()

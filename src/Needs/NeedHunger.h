@@ -117,7 +117,6 @@ public:
 		const std::lock_guard<std::mutex> lock(update_mutex);
 
 		float newNeedLevel = std::clamp(CurrentNeedValue->value - amount, minValue, NeedMaxValue->value);
-		logger::info("Current need checked");
 		CurrentNeedValue->value = newNeedLevel * GetGutwormMult();
 		SetNeedStage(false);
 		ApplyAttributePenalty();
