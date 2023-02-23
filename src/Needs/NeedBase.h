@@ -92,7 +92,6 @@ public:
 
 	virtual void IncrementNeed(int ticks)
 	{	
-		//const std::lock_guard<std::mutex> lock(update_mutex);
 		float incAmount = GetNeedIncrementAmount(ticks);
 
 		float newNeedLevel = CurrentNeedValue->value + incAmount;
@@ -108,7 +107,6 @@ public:
 
 	virtual void DecreaseNeed(float amount, float minValue = 0.0f)
 	{
-		//const std::lock_guard<std::mutex> lock(update_mutex);
 		float newNeedLevel = std::clamp(CurrentNeedValue->value - amount, minValue, NeedMaxValue->value);
 
 		CurrentNeedValue->value = newNeedLevel;

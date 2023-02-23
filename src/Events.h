@@ -75,7 +75,7 @@ namespace Events
 					float chance = baseChance * (1.0f - diseaseResistMult);
 					float result = Utility::GetRandomFloat(0, 100);
 					if (result <= chance) {
-						Utility::ShowNotification(hunger->Survival_FoodPoisoningMsg);
+						Utility::DoCombatSpellApply(player, hunger->Survival_DiseaseFoodPoisoning, player);
 					}
 				}
 

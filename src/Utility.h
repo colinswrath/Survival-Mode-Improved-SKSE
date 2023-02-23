@@ -69,6 +69,7 @@ public:
 
 	RE::EffectSetting* WerewolfFeedRestoreHealth;
 	RE::EffectSetting* DA11AbFortifyHealth;
+	RE::EffectSetting* Survival_FireCloakFreezingWaterDesc;
 
 	RE::TESCondition* IsVampireConditions;
 	RE::TESCondition* IsWerewolfConditions;
@@ -85,6 +86,7 @@ public:
 	RE::BGSPerk* Undeath_LichPerk;
 
 	RE::TESQuest* DA16;
+	RE::TESQuest* MQ101;
 	RE::TESQuest* RelationshipMarriageFIN;
 	RE::TESQuest* UnboundQuest;
 	RE::TESQuest* BYOHRelationshipAdoption;
@@ -179,6 +181,8 @@ public:
 		msg->GetDescription(messageDesc, msg);
 		if (messageBox) {
 			RE::DebugMessageBox(messageDesc.c_str());
+			/*auto uiQueue = RE::UIMessageQueue::GetSingleton();
+			uiQueue->AddMessage(RE::TutorialMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::k, uiQueue->CreateUIMessageData("TEST"));*/
 		} else {
 			RE::DebugNotification(messageDesc.c_str());
 		}
@@ -198,7 +202,7 @@ public:
 		for (auto& effect : *activeEffects) {
 			setting = effect ? effect->GetBaseObject() : nullptr;
 			if (setting) {
-				if (setting->data.archetype == RE::EffectSetting::Archetype::kCloak && setting->data.resistVariable == RE::ActorValue::kResistFire) {			
+				if ((setting->data.archetype == RE::EffectSetting::Archetype::kCloak && setting->data.resistVariable == RE::ActorValue::kResistFire) || setting == Survival_FireCloakFreezingWaterDesc) {
 					return true;
 				}
 			}

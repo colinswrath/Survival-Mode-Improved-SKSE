@@ -113,7 +113,7 @@ public:
 		RemoveNeedEffects();
 		float stage = CurrentNeedStage->value;
 		if (stage == 0 && Utility::PlayerCanGetWellRested()) {
-			if (Utility::PlayerIsNearSpouse()) {  //Todo-need to see if you are near spouse
+			if (Utility::PlayerIsNearSpouse()) { 
 				NotifyAddEffect(MarriageRestedMessage, MarriageRestedMessage, MarriageRested);
 			} else if (Utility::PlayerIsInHouseOrInn()) {  //Check inn, house
 				NotifyAddEffect(WellRestedMessage, WellRestedMessage, WellRested);
@@ -168,6 +168,7 @@ public:
 	void RemoveNeedEffects() override
 	{
 		auto player = Utility::GetPlayer();
+		player->RemoveSpell(MarriageRested);
 		player->RemoveSpell(WellRested);
 		player->RemoveSpell(Rested);
 		player->RemoveSpell(NeedSpell1);
