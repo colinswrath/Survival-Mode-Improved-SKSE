@@ -69,6 +69,7 @@ public:
 
 	RE::EffectSetting* WerewolfFeedRestoreHealth;
 	RE::EffectSetting* DA11AbFortifyHealth;
+	RE::EffectSetting* Survival_FireCloakFreezingWaterDesc;
 
 	RE::TESCondition* IsVampireConditions;
 	RE::TESCondition* IsWerewolfConditions;
@@ -85,6 +86,7 @@ public:
 	RE::BGSPerk* Undeath_LichPerk;
 
 	RE::TESQuest* DA16;
+	RE::TESQuest* MQ101;
 	RE::TESQuest* RelationshipMarriageFIN;
 	RE::TESQuest* UnboundQuest;
 	RE::TESQuest* BYOHRelationshipAdoption;
@@ -179,6 +181,8 @@ public:
 		msg->GetDescription(messageDesc, msg);
 		if (messageBox) {
 			RE::DebugMessageBox(messageDesc.c_str());
+			/*auto uiQueue = RE::UIMessageQueue::GetSingleton();
+			uiQueue->AddMessage(RE::TutorialMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::k, uiQueue->CreateUIMessageData("TEST"));*/
 		} else {
 			RE::DebugNotification(messageDesc.c_str());
 		}
@@ -198,7 +202,7 @@ public:
 		for (auto& effect : *activeEffects) {
 			setting = effect ? effect->GetBaseObject() : nullptr;
 			if (setting) {
-				if (setting->data.archetype == RE::EffectSetting::Archetype::kCloak && setting->data.resistVariable == RE::ActorValue::kResistFire) {			
+				if ((setting->data.archetype == RE::EffectSetting::Archetype::kCloak && setting->data.resistVariable == RE::ActorValue::kResistFire) || setting == Survival_FireCloakFreezingWaterDesc) {
 					return true;
 				}
 			}
@@ -216,10 +220,14 @@ public:
 	bool PlayerIsInOblivion()
 	{
 		auto player = GetPlayer();
+		auto location = player->GetCurrentLocation();
+		auto worldspace = player->GetWorldspace();
+		auto cell = player->GetParentCell();
+
 		auto da16Stage = DA16->GetCurrentStageID();
-		if (Survival_OblivionLocations->HasForm(player->GetCurrentLocation()) ||
-			Survival_OblivionAreas->HasForm(player->GetWorldspace()) ||
-			Survival_OblivionCells->HasForm(player->GetParentCell()) ||
+		if ((location && Survival_OblivionLocations->HasForm(location)) ||
+			(worldspace && Survival_OblivionAreas->HasForm(worldspace)) ||
+			(cell && Survival_OblivionCells->HasForm(cell)) ||
 			(da16Stage >= 145 && da16Stage < 160)) {
 			return true;
 		}
@@ -306,8 +314,15 @@ public:
 			return false;
 		}
 
-		if (relMarriageQuest->IsRunning() && relMarriageQuest->currentStage >= 10 && (Utility::GetPlayer()->GetCurrentLocation() == loveInterestRef->GetActorReference()->GetCurrentLocation())) {
-			return true;
+		if (relMarriageQuest->IsRunning() && relMarriageQuest->currentStage >= 10) {
+			auto playerLoc = Utility::GetPlayer()->GetCurrentLocation();
+			auto interest = loveInterestRef->GetActorReference();
+			auto interestLoc = interest == nullptr ? nullptr : interest->GetCurrentLocation();
+
+			if ((playerLoc && interestLoc) && playerLoc == interestLoc)
+			{
+				return true;
+			}
 		}
 
 		return false;

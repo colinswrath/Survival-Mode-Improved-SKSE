@@ -39,8 +39,7 @@ void SurvivalMode::SurvivalModeLoopUpdate()
 
 void SurvivalMode::StartSurvivalMode()
 {
-	auto playerParentCell = Utility::GetPlayer()->GetParentCell();
-	if (RE::ControlMap::GetSingleton()->IsMainFourControlsEnabled() && !playerParentCell->IsInteriorCell()) {
+	if (Utility::GetSingleton()->MQ101->IsCompleted() || (RE::ControlMap::GetSingleton()->IsMainFourControlsEnabled())) {
 		auto utility = Utility::GetSingleton();
 		AddPlayerSpellPerks();
 		SendAllNeedsUpdate();

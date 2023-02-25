@@ -75,7 +75,7 @@ namespace Events
 					float chance = baseChance * (1.0f - diseaseResistMult);
 					float result = Utility::GetRandomFloat(0, 100);
 					if (result <= chance) {
-						Utility::ShowNotification(hunger->Survival_FoodPoisoningMsg);
+						Utility::DoCombatSpellApply(player, hunger->Survival_DiseaseFoodPoisoning, player);
 					}
 				}
 
@@ -100,8 +100,8 @@ namespace Events
 	{
 		auto race = hitCause->GetRace();
 		auto util = Utility::GetSingleton();
-
-		if (race) {
+		
+		if (util->IsSurvivalEnabled() && race) {
 			if (util->Survival_BrownRotCarryingRaces->HasForm(race)) {
 				Utility::DoCombatSpellApply(Utility::GetPlayer(), util->Survival_DiseaseBrownRot, Utility::GetPlayer());
 			} else if (util->Survival_GreensporeCarryingRaces->HasForm(race)) {
