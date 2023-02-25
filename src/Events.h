@@ -100,8 +100,8 @@ namespace Events
 	{
 		auto race = hitCause->GetRace();
 		auto util = Utility::GetSingleton();
-
-		if (race) {
+		
+		if (util->IsSurvivalEnabled() && race) {
 			if (util->Survival_BrownRotCarryingRaces->HasForm(race)) {
 				Utility::DoCombatSpellApply(Utility::GetPlayer(), util->Survival_DiseaseBrownRot, Utility::GetPlayer());
 			} else if (util->Survival_GreensporeCarryingRaces->HasForm(race)) {
