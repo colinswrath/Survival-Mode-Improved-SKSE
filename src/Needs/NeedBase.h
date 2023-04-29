@@ -65,7 +65,7 @@ public:
 		}
 
 		if (Utility::IsPlayerInDialogue() ||
-			Utility::PlayerIsBeastRace() ||
+			Utility::PlayerIsBeastFormRace() ||
 			Utility::IsOnFlyingMount(Utility::GetPlayer())) {
 			PauseNeed();
 		} else {
@@ -175,15 +175,13 @@ protected:
 		float penaltyPerc = GetPenaltyPercentAmount();
 
 		float lastPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(NeedPenaltyAV);
-	
+
 		float newPenaltyMag = std::roundf(maxPenAv * penaltyPerc);
 
 		if (newPenaltyMag > maxPenAv) { 
 			newPenaltyMag = maxPenAv;
 		}
 		auto magDelta = lastPenaltyMag - newPenaltyMag;
-		//logger::info(FMT_STRING("Delta {}"), magDelta);
-		//logger::info("__________________________________________");
 
 		//Set tracker av not actual damage
 		Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(NeedPenaltyAV, newPenaltyMag);
@@ -191,9 +189,7 @@ protected:
 		//Damage or restore AV
 		Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, magDelta);
 		
-		//If you have just restored your AV then check to make sure you arent slightly off for existing saves
-		//Seems jank I know, but its here to prevent you from requiring a new save with 1.0.7
-		if (newPenaltyMag == 0 && lastPenaltyMag != 0) {
+		/*if (newPenaltyMag == 0 && lastPenaltyMag != 0) {
 
 			auto permMod = Utility::GetPlayer()->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute);
 			auto roundedPerm = std::roundf(permMod);
@@ -203,7 +199,7 @@ protected:
 			if (permDiff > 0) {
 				Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, permDiff);
 			}
-		}
+		}*/
 
 		SetAttributePenaltyUIGlobal(penaltyPerc);
 	}
@@ -219,7 +215,10 @@ protected:
 
 	float GetMaxAttributeAv()
 	{
-		return (Utility::GetPlayer()->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, ActorValPenaltyAttribute) + Utility::GetPlayer()->GetActorBase()->GetPermanentActorValue(ActorValPenaltyAttribute));
+
+		return (Utility::GetPlayer()->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, ActorValPenaltyAttribute) + 
+			Utility::GetPlayer()->AsActorValueOwner()->GetPermanentActorValue(ActorValPenaltyAttribute) + 
+			Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(NeedPenaltyAV));
 	}
 
 	virtual float GetPenaltyPercentAmount()
@@ -251,7 +250,10 @@ protected:
 
 	void NotifyAddEffect(RE::BGSMessage* increasingMsg, RE::BGSMessage* decreasingMsg, RE::SpellItem* spell, bool increasing=true)
 	{
-		Utility::GetPlayer()->AddSpell(spell);
+		if (spell) {
+			Utility::GetPlayer()->AddSpell(spell);
+		}
+
 		if (increasing)
 			Utility::ShowNotification(increasingMsg);
 		else

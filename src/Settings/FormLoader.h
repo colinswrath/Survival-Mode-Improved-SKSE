@@ -21,7 +21,9 @@ public:
 	const std::string_view campsitePluginName = "Campsite.esp";
 	const std::string_view obsidianPluginName = "ObsidianWeathers.esp";
 	const std::string_view undeathPluginName = "Undeath.esp";
-	const std::string_view wyrmstoothRegionPatch = "SurvivalModeImproved_Wyrmstooth.esp";
+	const std::string_view brumaPluginName = "BSHeartland.esm";
+	const std::string_view wyrmstoothPluginName = "Wyrmstooth.esp";
+	const std::string_view simonrimHealthRegenPluginName = "BladeAndBluntHealth.esp";
 
 	static FormLoader* GetSingleton()
 	{
@@ -342,12 +344,117 @@ public:
 		utility->IsInPineForestFreezingArea = &regionInfoSpell->effects[4]->conditions;
 		utility->IsInReachArea = &regionInfoSpell->effects[5]->conditions;
 
+		if (dataHandler->LookupLoadedModByName(brumaPluginName)) {
+			logger::info("Loading Bruma region data");
+			utility->CYRWeatherMountainsSnow = dataHandler->LookupForm(RE::FormID(0x6311F), brumaPluginName)->As<RE::TESRegion>();
+			utility->CYRWeatherBruma = dataHandler->LookupForm(RE::FormID(0x63102), brumaPluginName)->As<RE::TESRegion>();
+			utility->CYRWeatherGreatForestNorth = dataHandler->LookupForm(RE::FormID(0x7EE90), brumaPluginName)->As<RE::TESRegion>();
+		
+			auto brumaInFreezingArea = new RE::TESConditionItem;
+			brumaInFreezingArea->next = nullptr;
+			brumaInFreezingArea->data.comparisonValue.f = 1.0f;
+			brumaInFreezingArea->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kIsPlayerInRegion;
+			brumaInFreezingArea->data.functionData.params[0] = utility->CYRWeatherMountainsSnow;
 
-		if (dataHandler->LookupLoadedModByName(wyrmstoothRegionPatch)) {
-			utility->WTIsInWarmArea = &regionInfoSpell->effects[6]->conditions;
-			utility->WTIsInCoolArea = &regionInfoSpell->effects[7]->conditions;
-			utility->WTIsInFreezingArea = &regionInfoSpell->effects[8]->conditions;
+			auto brumaInComfortableArea = new RE::TESConditionItem;
+			brumaInComfortableArea->next = nullptr;
+			brumaInComfortableArea->data.comparisonValue.f = 1.0f;
+			brumaInComfortableArea->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kIsPlayerInRegion;
+			brumaInComfortableArea->data.functionData.params[0] = utility->CYRWeatherGreatForestNorth;
+
+			auto brumaInCityArea = new RE::TESConditionItem;
+			brumaInCityArea->next = nullptr;
+			brumaInCityArea->data.comparisonValue.f = 1.0f;
+			brumaInCityArea->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kIsPlayerInRegion;
+			brumaInCityArea->data.functionData.params[0] = utility->CYRWeatherBruma;
+
+			utility->BrumaIsCityArea = brumaInCityArea;
+			utility->BrumaIsInFreezingArea = brumaInFreezingArea;
+			utility->BrumaIsComfortableArea = brumaInComfortableArea;	
+			logger::info("Bruma region data loaded");
+
 		}
+
+		if (dataHandler->LookupLoadedModByName(wyrmstoothPluginName)) {
+			logger::info("Loading Wyrmstooth region data");
+
+			utility->WyrmstoothSteampools = dataHandler->LookupForm(RE::FormID(0x57654F), wyrmstoothPluginName)->As<RE::TESRegion>();
+			utility->WyrmstoothForest = dataHandler->LookupForm(RE::FormID(0x58CB3B), wyrmstoothPluginName)->As<RE::TESRegion>();
+			utility->WyrmstoothMarsh = dataHandler->LookupForm(RE::FormID(0x57654E), wyrmstoothPluginName)->As<RE::TESRegion>();
+
+			utility->WyrmstoothWorldspace = dataHandler->LookupForm(RE::FormID(0xD62), wyrmstoothPluginName)->As<RE::TESWorldSpace>();
+			logger::info("Loaded Wyrmstooth forms");
+		
+			auto wtWarm = new RE::TESConditionItem;
+			wtWarm->next = nullptr;
+			wtWarm->data.comparisonValue.f = 1.0f;
+			wtWarm->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kIsPlayerInRegion;
+			wtWarm->data.functionData.params[0] = utility->WyrmstoothSteampools;
+
+			auto wtWarmCond = new RE::TESCondition;
+			wtWarmCond->head = wtWarm;
+			
+			utility->WTIsInWarmArea = wtWarmCond;
+
+			//------------------------------------------------------------
+			auto wtNotMarsh = new RE::TESConditionItem;
+			wtNotMarsh->next = nullptr;
+			wtNotMarsh->data.comparisonValue.f = 0.0f;
+			wtNotMarsh->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kIsPlayerInRegion;
+			wtNotMarsh->data.functionData.params[0] = utility->WyrmstoothMarsh;
+			
+			auto wtNotForest = new RE::TESConditionItem;
+			wtNotForest->next = wtNotMarsh;
+			wtNotForest->data.comparisonValue.f = 0.0f;
+			wtNotForest->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kIsPlayerInRegion;
+			wtNotForest->data.functionData.params[0] = utility->WyrmstoothForest;
+			
+			auto wtNotSteampools = new RE::TESConditionItem;
+			wtNotSteampools->next = wtNotForest;
+			wtNotSteampools->data.comparisonValue.f = 0.0f;
+			wtNotSteampools->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kIsPlayerInRegion;
+			wtNotSteampools->data.functionData.params[0] = utility->WyrmstoothSteampools;
+			
+			auto wtWorldspaceFreezing = new RE::TESConditionItem;
+			wtWorldspaceFreezing->next = wtNotSteampools;
+			wtWorldspaceFreezing->data.comparisonValue.f = 1.0f;
+			wtWorldspaceFreezing->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kGetInWorldspace;
+			wtWorldspaceFreezing->data.functionData.params[0] = utility->WyrmstoothWorldspace;
+
+			auto wtFreezingCond = new RE::TESCondition;
+			wtFreezingCond->head = wtWorldspaceFreezing;
+
+			utility->WTIsInFreezingArea = wtFreezingCond;
+
+			//------------------------------------------------------------
+
+			auto wtMarsh = new RE::TESConditionItem;
+			wtMarsh->next = nullptr;
+			wtMarsh->data.comparisonValue.f = 1.0f;
+			wtMarsh->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kIsPlayerInRegion;
+			wtMarsh->data.functionData.params[0] = utility->WyrmstoothMarsh;
+
+			auto wtForest = new RE::TESConditionItem;
+			wtForest->next = wtMarsh;
+			wtForest->data.comparisonValue.f = 1.0f;
+			wtForest->data.flags.isOR = true;
+			wtForest->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kIsPlayerInRegion;
+			wtForest->data.functionData.params[0] = utility->WyrmstoothForest;
+
+			auto wtWorldspaceCool = new RE::TESConditionItem;
+			wtWorldspaceCool->next = wtForest;
+			wtWorldspaceCool->data.comparisonValue.f = 1.0f;
+			wtWorldspaceCool->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kGetInWorldspace;
+			wtWorldspaceCool->data.functionData.params[0] = utility->WyrmstoothWorldspace;
+
+			auto wtCoolCond = new RE::TESCondition;
+			wtCoolCond->head = wtWorldspaceCool;
+
+			utility->WTIsInCoolArea = wtCoolCond;
+			//------------------------------------------------------------
+			logger::info("Wyrmstooth region data loaded");
+			
+		}		
 
 		auto inJail = new RE::TESConditionItem;
 		inJail->next = nullptr;
@@ -460,6 +567,13 @@ public:
 			if (deadLandsLoc && !util->Survival_OblivionAreas->HasForm(deadLandsLoc)) {
 				util->Survival_OblivionLocations->AddForm(deadLandsLoc);
 			}
+		}
+
+		auto simonrimGlobal = dataHandler->LookupForm(RE::FormID(0xD25), smiPluginName)->As<RE::TESGlobal>();
+		if (dataHandler->LookupLoadedLightModByName(simonrimHealthRegenPluginName)) {
+			simonrimGlobal->value = 1.0f;
+		} else {
+			simonrimGlobal->value = 0.0f;	
 		}
 	}
 
