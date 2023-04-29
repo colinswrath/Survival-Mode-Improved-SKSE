@@ -146,7 +146,6 @@ public:
 	//In this case its more of an "update" than a definite increment 
 	void IncrementNeed(int ticks) override
 	{
-
 		float currentNeedLevel = CurrentNeedValue->value;
 
 		float incAmount = GetNeedIncrementAmount(ticks);
@@ -182,6 +181,10 @@ public:
 	void IncreaseColdLevel(float increaseAmount, float max) 
 	{
 		float currentNeedLevel = CurrentNeedValue->value;
+
+		if (currentNeedLevel > max) {
+			return;
+		}
 
 		float newNeedLevel = std::clamp(currentNeedLevel + increaseAmount, 0.0f, max);
 		
@@ -404,7 +407,7 @@ public:
 			maxVal = SMI_CurrentAmbientTemp->value;
 		}
 
-		if (Utility::PlayerIsBeastRace() == true && SMI_CurrentAmbientTemp->value >= NeedStage4->value) {
+		if (Utility::PlayerIsBeastFormRace() == true && SMI_CurrentAmbientTemp->value >= NeedStage4->value) {
 			maxVal = NeedStage4->value;
 		}
 
@@ -477,6 +480,8 @@ public:
 
 		if (playerState->IsSwimming() && !utility->PlayerHasFlameCloak() &&
 			(currentArea == AREA_TYPE::kAreaTypeFreezing || currentArea == AREA_TYPE::kAreaTypeChillyInterior || player->GetWorldspace() == DLC1HunterHQWorld)) {
+			logger::info("In freezing water");
+
 			auto currentVal = Survival_LastWaterFreezingMsgTime->value;
 
 			if (currentVal > 9 || currentVal == 0.0f) {
@@ -486,6 +491,7 @@ public:
 			}
 
 			IncreaseColdLevel(NeedMaxValue->value, NeedStage3->value);
+
 			SMI_CurrentAmbientTemp->value = Survival_ColdLevelInFreezingWater->value;
 
 			Survival_LastWaterFreezingMsgTime->value = std::clamp(currentVal += 1.0f, 0.0f, 10.0f);
@@ -499,7 +505,7 @@ public:
 
 	void MaxColdCheck()
 	{
-		if (CurrentNeedValue->value == NeedMaxValue->value && (!Utility::PlayerIsVampire() && !Utility::PlayerIsWerewolf())) {
+		if (CurrentNeedValue->value == NeedMaxValue->value && !Utility::PlayerIsBeastFormRace()) {
 			Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,RE::ActorValue::kHealth,Utility::GetRandomFloat(-100,-10));
 		}
 	}
