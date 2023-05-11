@@ -67,6 +67,10 @@ public:
 	RE::TESCondition* WTIsInCoolArea;
 	RE::TESCondition* WTIsInFreezingArea;
 
+	RE::TESConditionItem* BrumaIsInFreezingArea;
+	RE::TESConditionItem* BrumaIsComfortableArea;
+	RE::TESConditionItem* BrumaIsCityArea;
+
 	RE::EffectSetting* WerewolfFeedRestoreHealth;
 	RE::EffectSetting* DA11AbFortifyHealth;
 	RE::EffectSetting* Survival_FireCloakFreezingWaterDesc;
@@ -90,6 +94,16 @@ public:
 	RE::TESQuest* RelationshipMarriageFIN;
 	RE::TESQuest* UnboundQuest;
 	RE::TESQuest* BYOHRelationshipAdoption;
+
+	RE::TESRegion* CYRWeatherBruma;
+	RE::TESRegion* CYRWeatherGreatForestNorth;
+	RE::TESRegion* CYRWeatherMountainsSnow;
+
+	RE::TESRegion* WyrmstoothSteampools;
+	RE::TESRegion* WyrmstoothForest;
+	RE::TESRegion* WyrmstoothMarsh;
+
+	RE::TESWorldSpace* WyrmstoothWorldspace;
 	
 	RE::BGSKeyword* LocTypeInn;
 	RE::BGSKeyword* LocTypePlayerHouse;
@@ -117,9 +131,12 @@ public:
 	{
 		auto player = GetPlayer();
 		auto playerParentCell = player->GetParentCell();
+		auto worldspace = player->GetWorldspace();
+		RE::ConditionCheckParams playerParam(Utility::GetPlayer(), nullptr);
 
-		if (playerParentCell->IsInteriorCell() || Survival_InteriorAreas->HasForm(player->GetWorldspace())) {
-			if (Survival_ColdInteriorLocations->HasForm(playerParentCell) || Survival_ColdInteriorCells->HasForm(playerParentCell)) {
+		if ((playerParentCell && playerParentCell->IsInteriorCell()) || (worldspace && Survival_InteriorAreas->HasForm(worldspace))) {
+			if (playerParentCell && (Survival_ColdInteriorLocations->HasForm(playerParentCell) || 
+				Survival_ColdInteriorCells->HasForm(playerParentCell))) {
 				return AREA_TYPE::kAreaTypeChillyInterior;
 			} else {
 				return AREA_TYPE::kAreaTypeInterior;
@@ -128,12 +145,23 @@ public:
 			return AREA_TYPE::kAreaTypeFreezing;
 		} else if (IsInFallForestFreezingArea->IsTrue(player, nullptr)) {
 			return AREA_TYPE::kAreaTypeFreezing;
-		} else if (IsInWarmArea->IsTrue(player, nullptr) || (WTIsInWarmArea && WTIsInWarmArea->IsTrue(player, nullptr))) {
+		} else if (IsInWarmArea->IsTrue(player, nullptr) || 
+			(WTIsInWarmArea && WTIsInWarmArea->IsTrue(player, nullptr))) {
+			
 			return AREA_TYPE::kAreaTypeWarm;
-		} else if (IsInCoolArea->IsTrue(player, nullptr) || (WTIsInCoolArea && WTIsInCoolArea->IsTrue(player, nullptr))) {
+
+		} else if (IsInCoolArea->IsTrue(player, nullptr) || 
+			(WTIsInCoolArea && WTIsInCoolArea->IsTrue(player, nullptr)) || 
+			(BrumaIsCityArea && BrumaIsCityArea->IsTrue(playerParam))) {
+
 			return AREA_TYPE::kAreaTypeCool;
-		} else if (IsInFreezingArea->IsTrue(player, nullptr) || (WTIsInFreezingArea && WTIsInFreezingArea->IsTrue(player, nullptr))) {
+
+		} else if (IsInFreezingArea->IsTrue(player, nullptr) || 
+			(WTIsInFreezingArea && WTIsInFreezingArea->IsTrue(player, nullptr)) || 
+			(BrumaIsInFreezingArea && BrumaIsInFreezingArea->IsTrue(playerParam))) {
+
 			return AREA_TYPE::kAreaTypeFreezing;
+
 		} else if (IsInReachArea->IsTrue(player, nullptr)) {
 			return AREA_TYPE::kAreaTypeReach;
 		} else {
@@ -181,8 +209,13 @@ public:
 		msg->GetDescription(messageDesc, msg);
 		if (messageBox) {
 			RE::DebugMessageBox(messageDesc.c_str());
-			/*auto uiQueue = RE::UIMessageQueue::GetSingleton();
-			uiQueue->AddMessage(RE::TutorialMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::k, uiQueue->CreateUIMessageData("TEST"));*/
+			/*
+			auto tut = RE::UI::GetSingleton()->GetMenu(RE::TutorialMenu::MENU_NAME);
+			RE::UIMessage 
+			tut->ProcessMessage()
+			auto uiQueue = RE::UIMessageQueue::GetSingleton();
+			uiQueue->AddMessage(RE::TutorialMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, uiQueue->CreateUIMessageData("TEST")); 
+			*/
 		} else {
 			RE::DebugNotification(messageDesc.c_str());
 		}
@@ -396,7 +429,7 @@ public:
 		return false;
 	}
 
-	static bool PlayerIsBeastRace()
+	static bool PlayerIsBeastFormRace()
 	{
 		auto menuControls = Utility::GetSingleton()->GetMenuControls();
 		return menuControls->InBeastForm();
