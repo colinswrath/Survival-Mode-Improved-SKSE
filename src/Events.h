@@ -273,7 +273,7 @@ namespace Events
 			return &singleton;
 		}
 
-		RE::BSEventNotifyControl ProcessEvent([[maybe_unused]] const RE::TESHitEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESHitEvent>* a_eventSource) override
+		RE::BSEventNotifyControl ProcessEvent(const RE::TESHitEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESHitEvent>* a_eventSource) override
 		{
 			if (!a_event || !a_event->target || !a_event->target->IsPlayerRef() || !a_event->cause) {
 				return RE::BSEventNotifyControl::kContinue;

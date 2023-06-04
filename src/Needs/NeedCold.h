@@ -480,8 +480,6 @@ public:
 
 		if (playerState->IsSwimming() && !utility->PlayerHasFlameCloak() &&
 			(currentArea == AREA_TYPE::kAreaTypeFreezing || currentArea == AREA_TYPE::kAreaTypeChillyInterior || player->GetWorldspace() == DLC1HunterHQWorld)) {
-			logger::info("In freezing water");
-
 			auto currentVal = Survival_LastWaterFreezingMsgTime->value;
 
 			if (currentVal > 9 || currentVal == 0.0f) {
