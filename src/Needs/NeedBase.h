@@ -175,7 +175,6 @@ protected:
 		float penaltyPerc = GetPenaltyPercentAmount();
 
 		float lastPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(NeedPenaltyAV);
-
 		float newPenaltyMag = std::roundf(maxPenAv * penaltyPerc);
 
 		if (newPenaltyMag > maxPenAv) { 
@@ -188,18 +187,6 @@ protected:
 		
 		//Damage or restore AV
 		Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, magDelta);
-		
-		/*if (newPenaltyMag == 0 && lastPenaltyMag != 0) {
-
-			auto permMod = Utility::GetPlayer()->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute);
-			auto roundedPerm = std::roundf(permMod);
-
-			auto permDiff = roundedPerm - permMod;
-
-			if (permDiff > 0) {
-				Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, permDiff);
-			}
-		}*/
 
 		SetAttributePenaltyUIGlobal(penaltyPerc);
 	}
@@ -217,7 +204,7 @@ protected:
 	{
 
 		return (Utility::GetPlayer()->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, ActorValPenaltyAttribute) + 
-			Utility::GetPlayer()->AsActorValueOwner()->GetPermanentActorValue(ActorValPenaltyAttribute) + 
+			Utility::GetPlayer()->AsActorValueOwner()->GetPermanentActorValue(ActorValPenaltyAttribute) +
 			Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(NeedPenaltyAV));
 	}
 

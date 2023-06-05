@@ -42,6 +42,8 @@ public:
 	RE::BGSListForm* Survival_GreensporeCarryingRaces;
 	RE::BGSListForm* Survival_GutwormCarryingRaces;
 
+	RE::BGSListForm* SMI_NoNeedsRaces;
+
 	RE::SpellItem* Survival_OblivionDisplaySpell;
 
 	RE::BGSListForm* Survival_OblivionCells;
@@ -252,10 +254,10 @@ public:
 
 	bool PlayerIsInOblivion()
 	{
-		auto player = GetPlayer();
-		auto location = player->GetCurrentLocation();
-		auto worldspace = player->GetWorldspace();
-		auto cell = player->GetParentCell();
+		const auto* player = GetPlayer();
+		const auto* location = player->GetCurrentLocation();
+		const auto* worldspace = player->GetWorldspace();
+		const auto* cell = player->GetParentCell();
 
 		auto da16Stage = DA16->GetCurrentStageID();
 		if ((location && Survival_OblivionLocations->HasForm(location)) ||
@@ -305,12 +307,15 @@ public:
 
 	static bool PlayerIsLich()
 	{
+		bool lich = false;
 		auto util = Utility::GetSingleton();
-		if (util->Undeath_LichPerk) {
-			return GetPlayer()->HasPerk(util->Undeath_LichPerk);
-		} else {
-			return false;
-		}
+		if (util->Undeath_LichPerk && GetPlayer()->HasPerk(util->Undeath_LichPerk)) {
+			lich = true;
+		} else if (util->SMI_NoNeedsRaces && util->SMI_NoNeedsRaces->HasForm(GetPlayer()->GetRace())) {
+			lich = true;
+		} 
+
+		return lich;
 	}
 
 	static bool PlayerIsInJail()

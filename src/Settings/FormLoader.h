@@ -21,6 +21,7 @@ public:
 	const std::string_view campsitePluginName = "Campsite.esp";
 	const std::string_view obsidianPluginName = "ObsidianWeathers.esp";
 	const std::string_view undeathPluginName = "Undeath.esp";
+	const std::string_view transcendenceName = "The Path of Transcendence.esp";
 	const std::string_view brumaPluginName = "BSHeartland.esm";
 	const std::string_view wyrmstoothPluginName = "Wyrmstooth.esp";
 	const std::string_view simonrimHealthRegenPluginName = "BladeAndBluntHealth.esp";
@@ -464,6 +465,7 @@ public:
 
 		utility->IsInJailCondition = inJail;
 
+		utility->SMI_NoNeedsRaces = dataHandler->LookupForm(RE::FormID(0xF26), smiPluginName)->As<RE::BGSListForm>();
 	}
 
 	void LoadCompatibilityForms(RE::TESDataHandler* dataHandler)
@@ -553,6 +555,61 @@ public:
 			auto lichPerk = dataHandler->LookupForm(RE::FormID(0x3326D5), undeathPluginName);
 			if (lichPerk) {
 				util->Undeath_LichPerk = lichPerk->As<RE::BGSPerk>();
+			}
+		}
+
+		if (dataHandler->LookupLoadedModByName(transcendenceName)) {
+			auto lichRace = dataHandler->LookupForm(RE::FormID(0x38357), transcendenceName);
+			if (lichRace) {
+				util->SMI_NoNeedsRaces->AddForm(lichRace);
+			}
+			auto lichRace1 = dataHandler->LookupForm(RE::FormID(0x000e0e47), transcendenceName);
+			if (lichRace1) {
+				util->SMI_NoNeedsRaces->AddForm(lichRace1);
+			}
+			auto lichRace2 = dataHandler->LookupForm(RE::FormID(0x0022bd61), transcendenceName);
+			if (lichRace2) {
+				util->SMI_NoNeedsRaces->AddForm(lichRace2);
+			}
+			auto lichRace3 = dataHandler->LookupForm(RE::FormID(0x00240166), transcendenceName);
+			if (lichRace3) {
+				util->SMI_NoNeedsRaces->AddForm(lichRace3);
+			}
+			auto lichRace4 = dataHandler->LookupForm(RE::FormID(0x00240167), transcendenceName);
+			if (lichRace4) {
+				util->SMI_NoNeedsRaces->AddForm(lichRace4);
+			}
+			auto lichRace5 = dataHandler->LookupForm(RE::FormID(0x0024a378), transcendenceName);
+			if (lichRace5) {
+				util->SMI_NoNeedsRaces->AddForm(lichRace5);
+			}
+			auto lichRace6 = dataHandler->LookupForm(RE::FormID(0x0024a379), transcendenceName);
+			if (lichRace6) {
+				util->SMI_NoNeedsRaces->AddForm(lichRace6);
+			}
+			auto lichRace7 = dataHandler->LookupForm(RE::FormID(0x0024f47d), transcendenceName);
+			if (lichRace7) {
+				util->SMI_NoNeedsRaces->AddForm(lichRace7);
+			}
+			auto lichRace8 = dataHandler->LookupForm(RE::FormID(0x0024f47e), transcendenceName);
+			if (lichRace8) {
+				util->SMI_NoNeedsRaces->AddForm(lichRace8);
+			}
+			auto lichRace9 = dataHandler->LookupForm(RE::FormID(0x0024f482), transcendenceName);
+			if (lichRace9) {
+				util->SMI_NoNeedsRaces->AddForm(lichRace9);
+			}
+			auto lichRace10 = dataHandler->LookupForm(RE::FormID(0x0024f486), transcendenceName);
+			if (lichRace10) {
+				util->SMI_NoNeedsRaces->AddForm(lichRace10);
+			}
+			auto lichRace11 = dataHandler->LookupForm(RE::FormID(0x0024f487), transcendenceName);
+			if (lichRace11) {
+				util->SMI_NoNeedsRaces->AddForm(lichRace11);
+			}
+			auto lichRace12 = dataHandler->LookupForm(RE::FormID(0x0037fd2b), transcendenceName);
+			if (lichRace12) {
+				util->SMI_NoNeedsRaces->AddForm(lichRace12);
 			}
 		}
 
