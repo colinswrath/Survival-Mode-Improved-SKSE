@@ -20,6 +20,9 @@ protected:
 
 	inline static void SurvivalModeLoopUpdate();
 	inline static void SendAllNeedsUpdate();
+	inline static void SendHungerUpdate();
+	inline static void SendColdUpdate();
+	inline static void SendExhaustionUpdate();
 	inline static void StopAllNeeds();
 	inline static void ShowNotification(RE::BGSMessage* msg);
 	inline static void AddPlayerSpellPerks();

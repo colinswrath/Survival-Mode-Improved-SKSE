@@ -61,16 +61,47 @@ void SurvivalMode::SendAllNeedsUpdate()
 {
 	if (Utility::PlayerIsVampire()) {
 		NeedHunger::GetSingleton()->StopNeed();
-		NeedExhaustion::GetSingleton()->OnUpdatePass();
-		NeedCold::GetSingleton()->OnUpdatePass();
+		SendExhaustionUpdate();
+		SendColdUpdate();
 	} else if (Utility::PlayerIsLich()) {
 		NeedHunger::GetSingleton()->StopNeed();
 		NeedExhaustion::GetSingleton()->StopNeed();
 		NeedCold::GetSingleton()->StopNeed();
 	} else {
+		SendHungerUpdate();
+		SendExhaustionUpdate();
+		SendColdUpdate();	
+	}
+}
+
+void SurvivalMode::SendHungerUpdate()
+{
+	auto utility = Utility::GetSingleton();
+	if (utility->SMI_HungerShouldBeEnabled->value == 1.0f) {
 		NeedHunger::GetSingleton()->OnUpdatePass();
-		NeedExhaustion::GetSingleton()->OnUpdatePass();
+	} else {
+		NeedHunger::GetSingleton()->StopNeed();
+	}
+}
+
+void SurvivalMode::SendColdUpdate()
+{
+	auto utility = Utility::GetSingleton();
+	if (utility->SMI_ColdShouldBeEnabled->value == 1.0f) {
 		NeedCold::GetSingleton()->OnUpdatePass();
+	} else {
+		NeedCold::GetSingleton()->StopNeed();
+	}
+}
+
+void SurvivalMode::SendExhaustionUpdate()
+{
+	auto utility = Utility::GetSingleton();
+
+	if (utility->SMI_ExhaustionShouldBeEnabled->value == 1.0f) {
+		NeedExhaustion::GetSingleton()->OnUpdatePass();
+	} else {
+		NeedExhaustion::GetSingleton()->StopNeed();
 	}
 }
 
@@ -121,7 +152,9 @@ void SurvivalMode::AddPlayerSpellPerks()
 	auto player = Utility::GetPlayer();
 	auto utility = Utility::GetSingleton();
 
-	player->AddSpell(utility->Survival_abLowerCarryWeightSpell);
+	if (!Utility::GetSingleton()->DisableCarryWeightPenalty) {
+		player->AddSpell(utility->Survival_abLowerCarryWeightSpell);
+	}
 	player->AddSpell(utility->Survival_abLowerRegenSpell);
 	player->AddSpell(utility->Survival_abRacialNord);
 	player->AddSpell(utility->Survival_abRacialAltmer);
@@ -168,8 +201,10 @@ bool SurvivalMode::CheckOblivionStatus()
 
 	bool oblivion = utility->PlayerIsInOblivion();
 	if (oblivion && !utility->WasInOblivion) {
-		Utility::GetPlayer()->AddSpell(utility->Survival_OblivionDisplaySpell);
-		ShowNotification(utility->Survival_OblivionAreaMessage);
+		if (utility->IsSurvivalEnabled()) {
+			Utility::GetPlayer()->AddSpell(utility->Survival_OblivionDisplaySpell);
+			ShowNotification(utility->Survival_OblivionAreaMessage);
+		}
 		StopAllNeeds();
 		utility->WasInOblivion = true;
 	} else if (!oblivion && utility->WasInOblivion) {
