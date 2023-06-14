@@ -18,6 +18,10 @@ public:
 	RE::TESGlobal* Survival_ModeEnabledShared;
 	RE::TESGlobal* Survival_ModeCanBeEnabled;
 
+	RE::TESGlobal* SMI_HungerShouldBeEnabled;
+	RE::TESGlobal* SMI_ColdShouldBeEnabled;
+	RE::TESGlobal* SMI_ExhaustionShouldBeEnabled;
+
 	RE::SpellItem* Survival_abLowerCarryWeightSpell;
 	RE::SpellItem* Survival_abLowerRegenSpell;
 	RE::SpellItem* Survival_abRacialNord;
@@ -122,6 +126,7 @@ public:
 	bool WasInOblivion = false;
 	bool DisableFastTravel = true;
 	bool AutoStart = true;
+	bool DisableCarryWeightPenalty = false;
 
 	static Utility* GetSingleton()
 	{

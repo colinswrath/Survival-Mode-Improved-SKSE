@@ -80,8 +80,7 @@ public:
 	float MaxWarmthRatingBonusPerc = 0.80f;
 	const float ColdMaxStageThreshold = 600.0f;
 	float ColdToRestoreInWarmArea = 1.5f;
-	float AmountToChangeColdOnSpellHit = 30.0000;
-	
+
 	float SeasonWarmMults[12];
 	float SeasonCoolMults[12];
 	float SeasonReachMults[12];

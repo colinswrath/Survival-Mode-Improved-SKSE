@@ -62,6 +62,7 @@ public:
 		hungerSystem->NeedPenaltyAV = RE::ActorValue::kVariable02;
 		hungerSystem->ActorValPenaltyAttribute = RE::ActorValue::kStamina;
 		hungerSystem->NeedPenaltyUIGlobal = dataHandler->LookupForm(RE::FormID(0x2EDF), updatePluginName)->As<RE::TESGlobal>();
+		hungerSystem->NeedAvPenDisabled = dataHandler->LookupForm(RE::FormID(0xF2C), smiPluginName)->As<RE::TESGlobal>();
 
 		hungerSystem->NeedSpell0 = dataHandler->LookupForm(RE::FormID(0x876), smEslPluginName)->As<RE::SpellItem>();
 		hungerSystem->NeedSpell1 = dataHandler->LookupForm(RE::FormID(0x87E), smEslPluginName)->As<RE::SpellItem>();
@@ -129,6 +130,7 @@ public:
 		fatigueSystem->NeedPenaltyAV = RE::ActorValue::kVariable03;
 		fatigueSystem->ActorValPenaltyAttribute = RE::ActorValue::kMagicka;
 		fatigueSystem->NeedPenaltyUIGlobal = dataHandler->LookupForm(RE::FormID(0x2EE0), updatePluginName)->As<RE::TESGlobal>();
+		fatigueSystem->NeedAvPenDisabled = dataHandler->LookupForm(RE::FormID(0xF2B), smiPluginName)->As<RE::TESGlobal>();
 
 		fatigueSystem->WellRested = RE::TESForm::LookupByID(RE::FormID(0x000FB984))->As<RE::SpellItem>();
 		fatigueSystem->Rested = RE::TESForm::LookupByID(RE::FormID(0x000FB981))->As<RE::SpellItem>();
@@ -264,6 +266,8 @@ public:
 		coldSystem->DLC1HunterHQWorld = dataHandler->LookupForm(RE::FormID(0x1DB8), dgPluginName)->As<RE::TESWorldSpace>();
 		coldSystem->Survival_HelpShown_Cold = dataHandler->LookupForm(RE::FormID(0x8E0), smEslPluginName)->As<RE::TESGlobal>();
 		coldSystem->Survival_HelpColdHigh = dataHandler->LookupForm(RE::FormID(0x944), smEslPluginName)->As<RE::BGSMessage>();
+
+		coldSystem->NeedAvPenDisabled = dataHandler->LookupForm(RE::FormID(0xF2A), smiPluginName)->As<RE::TESGlobal>();
 	}
 
 	void LoadMiscForms(RE::TESDataHandler* dataHandler)
@@ -271,6 +275,10 @@ public:
 		auto utility = Utility::GetSingleton();
 		utility->Survival_ModeToggle = dataHandler->LookupForm(RE::FormID(0x828), smEslPluginName)->As<RE::TESGlobal>();
 		utility->Survival_ModeEnabled = dataHandler->LookupForm(RE::FormID(0x826), smEslPluginName)->As<RE::TESGlobal>();
+
+		utility->SMI_HungerShouldBeEnabled = dataHandler->LookupForm(RE::FormID(0xF27), smiPluginName)->As<RE::TESGlobal>();
+		utility->SMI_ColdShouldBeEnabled = dataHandler->LookupForm(RE::FormID(0xF28), smiPluginName)->As<RE::TESGlobal>();
+		utility->SMI_ExhaustionShouldBeEnabled = dataHandler->LookupForm(RE::FormID(0xF29), smiPluginName)->As<RE::TESGlobal>();
 
 		utility->Survival_abLowerCarryWeightSpell = dataHandler->LookupForm(RE::FormID(0x887), smEslPluginName)->As<RE::SpellItem>();
 		utility->Survival_abLowerRegenSpell = dataHandler->LookupForm(RE::FormID(0x982), smEslPluginName)->As<RE::SpellItem>();

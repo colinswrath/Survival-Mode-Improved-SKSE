@@ -115,26 +115,15 @@ namespace Events
 	static void ProcessMagicEffectApplyEvent(RE::EffectSetting* effect)
 	{
 		auto cold = NeedCold::GetSingleton();
+		auto hunger = NeedHunger::GetSingleton();
+		auto util = Utility::GetSingleton();
+		
 		if (!cold->CurrentlyStopped) {
-			if (effect->GetDangerous()) {
-				if (effect->data.resistVariable == RE::ActorValue::kResistFire) {
-					if (cold->CurrentNeedValue->value > cold->NeedStage2->value) {
-						cold->DecreaseNeed(cold->AmountToChangeColdOnSpellHit, cold->NeedStage2->value);
-					}
-				} else if (effect->data.resistVariable == RE::ActorValue::kResistFrost) {
-					if (cold->CurrentNeedValue->value < cold->NeedStage4->value) {
-						cold->IncreaseColdLevel(cold->AmountToChangeColdOnSpellHit, cold->NeedStage4->value);
-					}
-				}
-			} else {
-				if (cold->Survival_FoodRestoreCold == effect) {
-					cold->NeedBase::DecreaseNeed(cold->Survival_ColdRestoreMediumAmount->value, cold->NeedStage1->value);
-				}
+			if (cold->Survival_FoodRestoreCold == effect) {
+				cold->NeedBase::DecreaseNeed(cold->Survival_ColdRestoreMediumAmount->value, cold->NeedStage1->value);
 			}
 		}
 
-		auto hunger = NeedHunger::GetSingleton();
-		auto util = Utility::GetSingleton();
 		if (!hunger->CurrentlyStopped) {
 			if (effect == util->WerewolfFeedRestoreHealth) {
 				//WW feed

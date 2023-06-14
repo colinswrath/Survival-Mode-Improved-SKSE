@@ -35,6 +35,13 @@ namespace Serialization
 			util->HelpManualXBox->AddForm(util->Survival_HelpSurvivalModeLongXbox);
 		}
 
+		if (util->DisableCarryWeightPenalty) {
+			auto player = Utility::GetPlayer();
+			if (player) {
+				player->RemoveSpell(util->Survival_abLowerCarryWeightSpell);
+			}
+		}
+
 		if (!exhaustion->CurrentlyStopped) {
 			exhaustion->PlayerSleepQuest->Stop();
 		}

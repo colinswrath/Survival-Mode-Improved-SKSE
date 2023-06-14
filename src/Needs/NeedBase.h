@@ -53,6 +53,8 @@ public:
 	RE::ActorValue NeedPenaltyAV;
 	RE::TESGlobal* NeedPenaltyUIGlobal;
 
+	RE::TESGlobal* NeedAvPenDisabled;
+
 	std::mutex update_mutex;
 
 	/// <summary>
@@ -170,34 +172,41 @@ protected:
 
 	virtual void ApplyAttributePenalty()
 	{
-		float maxPenAv = GetMaxAttributeAv();
+		if (NeedAvPenDisabled->value != 1.0f) {
 
-		float penaltyPerc = GetPenaltyPercentAmount();
+			float maxPenAv = GetMaxAttributeAv();
 
-		float lastPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(NeedPenaltyAV);
-		float newPenaltyMag = std::roundf(maxPenAv * penaltyPerc);
+			float penaltyPerc = GetPenaltyPercentAmount();
 
-		if (newPenaltyMag > maxPenAv) { 
-			newPenaltyMag = maxPenAv;
-		}
-		auto magDelta = lastPenaltyMag - newPenaltyMag;
+			float lastPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(NeedPenaltyAV);
+			float newPenaltyMag = std::roundf(maxPenAv * penaltyPerc);
 
-		//Set tracker av not actual damage
-		Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(NeedPenaltyAV, newPenaltyMag);
+			if (newPenaltyMag > maxPenAv) { 
+				newPenaltyMag = maxPenAv;
+			}
+			auto magDelta = lastPenaltyMag - newPenaltyMag;
+
+			//Set tracker av not actual damage
+			Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(NeedPenaltyAV, newPenaltyMag);
 		
-		//Damage or restore AV
-		Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, magDelta);
+			//Damage or restore AV
+			Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, magDelta);
 
-		SetAttributePenaltyUIGlobal(penaltyPerc);
+			SetAttributePenaltyUIGlobal(penaltyPerc);
+		} else {
+			RemoveAttributePenalty();
+		}
 	}
 
 	virtual void RemoveAttributePenalty()
 	{
 		float currentPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(NeedPenaltyAV);
 
-		Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(NeedPenaltyAV, 0.0f);
-		SetAttributePenaltyUIGlobal(0.0f);
-		Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, currentPenaltyMag);
+		if (currentPenaltyMag > 0) {
+			Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(NeedPenaltyAV, 0.0f);
+			SetAttributePenaltyUIGlobal(0.0f);
+			Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, currentPenaltyMag);
+		}
 	}
 
 	float GetMaxAttributeAv()
