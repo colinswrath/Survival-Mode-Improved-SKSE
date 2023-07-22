@@ -78,7 +78,6 @@ namespace Events
 						Utility::DoCombatSpellApply(player, hunger->Survival_DiseaseFoodPoisoning, player);
 					}
 				}
-
 			}
 
 			for (auto effect : food->effects) {
@@ -92,7 +91,6 @@ namespace Events
 					hunger->DecreaseNeed(hunger->Survival_HungerRestoreLargeAmount->value);		
 				}
 			}
-
 		}
 	}
 
@@ -101,7 +99,7 @@ namespace Events
 		auto race = hitCause->GetRace();
 		auto util = Utility::GetSingleton();
 		
-		if (util->IsSurvivalEnabled() && race) {
+		if (util->IsSurvivalEnabled() && race && !util->DisableDiseaseApplicator) {
 			if (util->Survival_BrownRotCarryingRaces->HasForm(race)) {
 				Utility::DoCombatSpellApply(Utility::GetPlayer(), util->Survival_DiseaseBrownRot, Utility::GetPlayer());
 			} else if (util->Survival_GreensporeCarryingRaces->HasForm(race)) {
@@ -304,7 +302,7 @@ namespace Events
 			}
 
 			auto effect = RE::TESForm::LookupByID<RE::EffectSetting>(a_event->magicEffect);
-
+			
 			if (!effect) {
 				return RE::BSEventNotifyControl::kContinue;
 			}

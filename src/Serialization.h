@@ -42,8 +42,10 @@ namespace Serialization
 			}
 		}
 
-		if (!exhaustion->CurrentlyStopped) {
+		if (!exhaustion->CurrentlyStopped && util->SMI_ExhaustionShouldBeEnabled->value == 1.0) {
 			exhaustion->PlayerSleepQuest->Stop();
+		} else if (util->SMI_ExhaustionShouldBeEnabled->value != 1.0 && exhaustion->PlayerSleepQuest->IsStopped()) {
+			exhaustion->PlayerSleepQuest->Start();	
 		}
 	}
 

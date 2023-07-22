@@ -58,6 +58,7 @@ public:
 	RE::BGSListForm* Survival_ColdInteriorLocations;
 	RE::BGSListForm* Survival_ColdInteriorCells;
 	RE::BGSListForm* Survival_SurvivalDiseases;
+	RE::BGSListForm* SMI_WellRestedObjectsList;
 
 	RE::BGSListForm* HelpManualPC;
 	RE::BGSListForm* HelpManualXBox;
@@ -127,6 +128,14 @@ public:
 	bool DisableFastTravel = true;
 	bool AutoStart = true;
 	bool DisableCarryWeightPenalty = false;
+	bool DisableDiseaseApplicator = false;
+	bool starfrostInstalled = false;
+
+	bool vampireHunger = true;
+	bool vampireCold = true;
+	bool vampireExhaustion = true;
+
+	float MaxAvPenaltyPercent = 1.0f;
 
 	static Utility* GetSingleton()
 	{
@@ -301,7 +310,7 @@ public:
 
 	static bool PlayerCanGetWellRested()
 	{
-		return !PlayerIsVampire() && !PlayerIsWerewolf();
+		return !PlayerIsWerewolf();
 	}
 
 	static bool PlayerIsVampire()
@@ -437,6 +446,82 @@ public:
 		}
 
 		return false;
+	}
+
+	static bool PlayerIsNearWellRestedBed()
+	{
+		auto TES = RE::TES::GetSingleton();
+		auto player = Utility::GetPlayer();
+		auto util = Utility::GetSingleton();
+
+		bool nearWellRested = false;
+		if (TES) {
+			TES->ForEachReferenceInRange(player, 300.0f, [&](RE::TESObjectREFR& b_ref) {
+				if (!b_ref.IsDisabled()) {
+					if (const auto base = b_ref.GetBaseObject(); base) {
+						if (util->SMI_WellRestedObjectsList->HasForm(base)) {
+							nearWellRested = true;
+							return RE::BSContainer::ForEachResult::kStop;
+						}
+					}
+				}
+				return RE::BSContainer::ForEachResult::kContinue;
+			});
+		}
+		return nearWellRested;
+	}
+
+	//CREDIT-> po3 in papyrus extender
+	static std::string GetFormEditorID(const RE::TESForm* a_form)
+	{
+		switch (a_form->GetFormType()) {
+		case RE::FormType::Keyword:
+		case RE::FormType::LocationRefType:
+		case RE::FormType::Action:
+		case RE::FormType::MenuIcon:
+		case RE::FormType::Global:
+		case RE::FormType::HeadPart:
+		case RE::FormType::Race:
+		case RE::FormType::Sound:
+		case RE::FormType::Script:
+		case RE::FormType::Navigation:
+		case RE::FormType::Cell:
+		case RE::FormType::WorldSpace:
+		case RE::FormType::Land:
+		case RE::FormType::NavMesh:
+		case RE::FormType::Dialogue:
+		case RE::FormType::Quest:
+		case RE::FormType::Idle:
+		case RE::FormType::AnimatedObject:
+		case RE::FormType::ImageAdapter:
+		case RE::FormType::VoiceType:
+		case RE::FormType::Ragdoll:
+		case RE::FormType::DefaultObject:
+		case RE::FormType::MusicType:
+		case RE::FormType::StoryManagerBranchNode:
+		case RE::FormType::StoryManagerQuestNode:
+		case RE::FormType::StoryManagerEventNode:
+		case RE::FormType::SoundRecord:
+			return a_form->GetFormEditorID();
+		default:
+			{
+				static auto tweaks = GetModuleHandle(L"po3_Tweaks");
+				if (tweaks) {
+					static auto func = reinterpret_cast<const char* (*)(std::uint32_t)>(GetProcAddress(tweaks, "GetFormEditorID"));
+					if (func) {
+						return func(a_form->formID);
+					}
+				}
+				return {};
+			}
+		}
+	}
+
+	static bool string_Contains(std::string mainString, std::string subString)
+	{
+		std::transform(mainString.begin(), mainString.end(), mainString.begin(), [](unsigned char c) { return static_cast<unsigned char> (std::tolower(c)); });
+		std::transform(subString.begin(), subString.end(), subString.begin(), [](unsigned char c) { return static_cast <unsigned char>(std::tolower(c)); });
+		return mainString.find(subString) != std::string::npos;
 	}
 
 	static bool PlayerIsBeastFormRace()

@@ -60,9 +60,26 @@ void SurvivalMode::StopSurvivalMode()
 void SurvivalMode::SendAllNeedsUpdate()
 {
 	if (Utility::PlayerIsVampire()) {
-		NeedHunger::GetSingleton()->StopNeed();
-		SendExhaustionUpdate();
-		SendColdUpdate();
+		auto util = Utility::GetSingleton();
+
+		if (util->vampireCold) {
+			SendColdUpdate();
+		} else {
+			NeedCold::GetSingleton()->StopNeed();	
+		}	
+
+		if (util->vampireExhaustion) {
+			SendExhaustionUpdate();
+		} else {
+			NeedExhaustion::GetSingleton()->StopNeed();	
+		}
+
+		if (util->vampireHunger) {
+			SendHungerUpdate();
+		} else {
+			NeedHunger::GetSingleton()->StopNeed();
+		}
+		
 	} else if (Utility::PlayerIsLich()) {
 		NeedHunger::GetSingleton()->StopNeed();
 		NeedExhaustion::GetSingleton()->StopNeed();

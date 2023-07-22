@@ -25,6 +25,7 @@ public:
 	const std::string_view brumaPluginName = "BSHeartland.esm";
 	const std::string_view wyrmstoothPluginName = "Wyrmstooth.esp";
 	const std::string_view simonrimHealthRegenPluginName = "BladeAndBluntHealth.esp";
+	const std::string_view starfrostPluginName = "Starfrost.esp";
 
 	static FormLoader* GetSingleton()
 	{
@@ -185,6 +186,7 @@ public:
 
 		fatigueSystem->Survival_HelpExhaustionHigh = dataHandler->LookupForm(RE::FormID(0x943), smEslPluginName)->As<RE::BGSMessage>();
 		fatigueSystem->Survival_HelpShown_Exhaustion = dataHandler->LookupForm(RE::FormID(0x8E1), smEslPluginName)->As<RE::TESGlobal>();
+		fatigueSystem->SMI_WerewolfExhaustionBonus = dataHandler->LookupForm(RE::FormID(0xF2F), smiPluginName)->As<RE::TESGlobal>();
 
 		fatigueSystem->BYOHAdoptionRestedMessageMale = dataHandler->LookupForm(RE::FormID(0x2F55), hfPluginName)->As<RE::BGSMessage>();
 		fatigueSystem->BYOHAdoptionRestedMessageFemale = dataHandler->LookupForm(RE::FormID(0x4293), hfPluginName)->As<RE::BGSMessage>();
@@ -343,6 +345,7 @@ public:
 		utility->Survival_GreensporeCarryingRaces = dataHandler->LookupForm(RE::FormID(0x9A5), smEslPluginName)->As<RE::BGSListForm>();
 		utility->Survival_BrownRotCarryingRaces = dataHandler->LookupForm(RE::FormID(0x9A4), smEslPluginName)->As<RE::BGSListForm>();
 		utility->Survival_SurvivalDiseases = dataHandler->LookupForm(RE::FormID(0x9A6), smEslPluginName)->As<RE::BGSListForm>();
+		utility->SMI_WellRestedObjectsList = dataHandler->LookupForm(RE::FormID(0xF2E), smiPluginName)->As<RE::BGSListForm>();
 
 		utility->UnboundQuest = dataHandler->LookupForm(RE::FormID(0x3372B), skyrimPluginName)->As<RE::TESQuest>();
 
@@ -487,6 +490,10 @@ public:
 				warmupList->AddForm(campfire);
 			}
 		}
+
+		if (dataHandler->LookupLoadedModByName(starfrostPluginName)) {
+			util->starfrostInstalled = true;
+		}		
 			
 		if (dataHandler->LookupLoadedModByName(campfirePluginName)) {
 			auto cracklingDw = dataHandler->LookupForm(RE::FormID(0x40013), campfirePluginName);
