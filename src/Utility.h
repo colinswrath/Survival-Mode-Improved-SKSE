@@ -21,6 +21,7 @@ public:
 	RE::TESGlobal* SMI_HungerShouldBeEnabled;
 	RE::TESGlobal* SMI_ColdShouldBeEnabled;
 	RE::TESGlobal* SMI_ExhaustionShouldBeEnabled;
+	RE::TESGlobal* SMI_SimonrimHealthRegenDetected;
 
 	RE::SpellItem* Survival_abLowerCarryWeightSpell;
 	RE::SpellItem* Survival_abLowerRegenSpell;
@@ -89,7 +90,6 @@ public:
 	RE::TESConditionItem* AdoptionHomeLocationCond;
 
 	RE::BGSMessage* Survival_OblivionAreaMessage;
-
 	RE::BGSMessage* Survival_HelpSurvivalModeLong;
 	RE::BGSMessage* Survival_HelpSurvivalModeLongXbox;
 
@@ -112,6 +112,11 @@ public:
 
 	RE::TESWorldSpace* WyrmstoothWorldspace;
 	
+	RE::BSFixedString hungerVerySmallDesc;
+	RE::BSFixedString hungerSmallDesc;
+	RE::BSFixedString hungerMediumDesc;
+	RE::BSFixedString hungerLargeDesc;
+
 	RE::BGSKeyword* LocTypeInn;
 	RE::BGSKeyword* LocTypePlayerHouse;
 
@@ -130,12 +135,57 @@ public:
 	bool DisableCarryWeightPenalty = false;
 	bool DisableDiseaseApplicator = false;
 	bool starfrostInstalled = false;
+	bool forceEnableFoodPoisoning = false;
+	bool forceUpdateGlobalValues = false;
 
 	bool vampireHunger = true;
 	bool vampireCold = true;
 	bool vampireExhaustion = true;
 
 	float MaxAvPenaltyPercent = 1.0f;
+
+	//Global Load overwrite variables
+	float LoadColdStage1Val = 0.0f;
+	float LoadColdStage2Val = 0.0f;
+	float LoadColdStage3Val = 0.0f;
+	float LoadColdStage4Val = 0.0f;
+	float LoadColdStage5Val = 0.0f;
+
+	float LoadExhaustionStage1Val = 0.0f;
+	float LoadExhaustionStage2Val = 0.0f;
+	float LoadExhaustionStage3Val = 0.0f;
+	float LoadExhaustionStage4Val = 0.0f;
+	float LoadExhaustionStage5Val = 0.0f;
+
+	float LoadHungerStage1Val = 0.0f;
+	float LoadHungerStage2Val = 0.0f;
+	float LoadHungerStage3Val = 0.0f;
+	float LoadHungerStage4Val = 0.0f;
+	float LoadHungerStage5Val = 0.0f;
+
+	float coldShouldBeEnabled = 0.0f;
+	float exhaustionShouldBeEnabled = 0.0f;
+	float hungerShouldBeEnabled = 0.0f;
+
+	float coldAVPenDisabled = 0.0f;
+	float exhaustionAVPenDisabled = 0.0f;
+	float hungerAVPenDisabled = 0.0f;
+
+	float coldResistMaxValue = 0.0f;
+
+	float coldMaxValue = 0.0f;
+	float exhaustionMaxValue = 0.0f;
+	float hungerMaxValue = 0.0f;
+
+	float coldAfflictionChance = 0.0f;
+	float hungerAfflictionChance = 0.0f;
+	float exhaustionAfflictionChance = 0.0f;
+
+	float exhaustionRestorePerHour = 0.0f;
+
+	float coldRate = 0.0f;
+	float hungerRate = 0.0f;
+	float exhaustionRate = 0.0f;
 
 	static Utility* GetSingleton()
 	{
@@ -145,10 +195,10 @@ public:
 
 	AREA_TYPE GetCurrentAreaType()
 	{
-		auto player = GetPlayer();
+		auto player = Utility::GetPlayer();
 		auto playerParentCell = player->GetParentCell();
 		auto worldspace = player->GetWorldspace();
-		RE::ConditionCheckParams playerParam(Utility::GetPlayer(), nullptr);
+		RE::ConditionCheckParams playerParam(player, nullptr);
 
 		if ((playerParentCell && playerParentCell->IsInteriorCell()) || (worldspace && Survival_InteriorAreas->HasForm(worldspace))) {
 			if (playerParentCell && (Survival_ColdInteriorLocations->HasForm(playerParentCell) || 
@@ -178,7 +228,7 @@ public:
 
 			return AREA_TYPE::kAreaTypeFreezing;
 
-		} else if (IsInReachArea->IsTrue(player, nullptr)) {
+		} else if (IsInReachArea && IsInReachArea->IsTrue(player, nullptr)) {
 			return AREA_TYPE::kAreaTypeReach;
 		} else {
 			return AREA_TYPE::kAreaTypeCool;
@@ -214,9 +264,10 @@ public:
 		return SKSE::stl::RNG::GetSingleton()->Generate<float>(min, max);
 	}
 
-	bool IsSurvivalEnabled()
+	static bool IsSurvivalEnabled()
 	{
-		return Survival_ModeEnabled->value;
+		auto util = Utility::GetSingleton();
+		return util->Survival_ModeEnabled->value;
 	}
 
 	static void ShowNotification(RE::BGSMessage* msg, bool messageBox=false)
@@ -568,5 +619,5 @@ public:
 		using func_t = decltype(&Utility::IsFastTravelEnabled);
 		REL::Relocation<func_t> func{ Utility::GetSingleton()->IsFtEnabledAddress };
 		return func();
-	}
+	}	
 };

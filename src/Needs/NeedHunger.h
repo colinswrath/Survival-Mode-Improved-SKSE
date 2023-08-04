@@ -57,6 +57,41 @@ public:
 		}
 	}
 
+	void InitializeNeed() override
+	{
+		SetLastTimeStamp();
+		CurrentlyStopped = false;
+		SetHungerFoodItemDesc();
+	}
+
+	void StopNeed() override
+	{
+		if (!CurrentlyStopped) {
+			CurrentlyStopped = true;
+			RemoveNeedEffects();
+			SetHungerFoodItemDesc();
+			RemoveAfflictions();
+			RemoveAttributePenalty();
+			CurrentNeedStage->value = -1;
+		}
+	}
+
+	void SetHungerFoodItemDesc()
+	{
+		auto util = Utility::GetSingleton();
+		if (CurrentlyStopped) {
+			Survival_FoodRestoreHungerVerySmall->magicItemDescription = "";
+			Survival_FoodRestoreHungerSmall->magicItemDescription = "";
+			Survival_FoodRestoreHungerMedium->magicItemDescription = "";
+			Survival_FoodRestoreHungerLarge->magicItemDescription = "";
+		} else {
+			Survival_FoodRestoreHungerVerySmall->magicItemDescription = util->hungerVerySmallDesc;
+			Survival_FoodRestoreHungerSmall->magicItemDescription = util->hungerSmallDesc;
+			Survival_FoodRestoreHungerMedium->magicItemDescription = util->hungerMediumDesc;
+			Survival_FoodRestoreHungerLarge->magicItemDescription = util->hungerLargeDesc;
+		}
+	}
+
 	float GetNeedIncrementAmount(int ticks) override 
 	{	
 		auto player = Utility::GetPlayer();

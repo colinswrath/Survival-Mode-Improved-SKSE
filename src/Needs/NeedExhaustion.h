@@ -88,14 +88,12 @@ public:
 			amount = amount * fastTravelMult;
 		}
 
-		if (Survival_ExhaustionResistRacesMinor->HasForm(player->GetRace())) {
+		if (Utility::PlayerIsWerewolf()) {
+			amount = amount * (1.0f - SMI_WerewolfExhaustionBonus->value);
+		} else if (Survival_ExhaustionResistRacesMinor->HasForm(player->GetRace())) {
 			amount = amount * (1.0f - Survival_RacialBonusMinor->value);
 		} else if (Survival_ExhaustionResistRacesMajor->HasForm(player->GetRace())) {
 			amount = amount * (1.0f - Survival_RacialBonusMajor->value);
-		}
-
-		if (Utility::PlayerIsWerewolf()) {
-			amount = amount * (1.0f - SMI_WerewolfExhaustionBonus->value);
 		}
 
 		if (player->IsOverEncumbered()) {
@@ -226,6 +224,31 @@ public:
 		} 
 	}
 
+	void RemoveAttributePenalty() override
+	{
+		auto util = Utility::GetSingleton();
+
+		if (util->starfrostInstalled) {
+
+			float currentPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(NeedPenaltyAV);
+			float currentStamPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(RE::ActorValue::kVariable02);
+
+			if (currentPenaltyMag > 0) {
+				Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(NeedPenaltyAV, 0.0f);
+				SetAttributePenaltyUIGlobal(0.0f);
+				Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, currentPenaltyMag);
+			}
+
+			if (currentStamPenaltyMag > 0) {		
+				Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(RE::ActorValue::kVariable02, 0.0f);
+				SetAttributePenaltyUIGlobal(0.0f, true);
+				Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kStamina, currentStamPenaltyMag);
+			}
+		} else {
+			NeedBase::RemoveAttributePenalty();
+		}
+	}
+
 	//Starfrost has two AV penalties for exhaustion (stamina and magicka) and they will calculate differently than normal SMI. 
 	//Best to split off into its own method
 	void ApplyAVPenStarfrost(RE::ActorValue attrAv, RE::ActorValue penAv)
@@ -237,11 +260,11 @@ public:
 			//Perc
 			float stage = CurrentNeedStage->value;
 			auto penPerc = 0.0f;
-			if (stage == 2) {
+			if (stage == 3) {
 				penPerc = 0.1f;
-			} else if (stage == 3) {
+			} else if (stage == 4) {
 				penPerc = 0.25f;
-			} else if (stage >= 4) {
+			} else if (stage >= 5) {
 				penPerc = 0.50f;
 			}
 
@@ -280,29 +303,4 @@ public:
 		}
 	}
 
-	void RemoveAttributePenalty() override
-	{
-		auto util = Utility::GetSingleton();
-
-		if (util->starfrostInstalled) {
-
-			float currentPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(NeedPenaltyAV);
-			float currentStamPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(RE::ActorValue::kVariable02);
-
-			if (currentPenaltyMag > 0) {
-				Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(NeedPenaltyAV, 0.0f);
-				SetAttributePenaltyUIGlobal(0.0f);
-				Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, currentPenaltyMag);
-			}
-
-			if (currentStamPenaltyMag > 0) {		
-				Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(RE::ActorValue::kVariable02, 0.0f);
-				SetAttributePenaltyUIGlobal(0.0f, true);
-				Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kStamina, currentStamPenaltyMag);
-			}
-		} else {
-			NeedBase::RemoveAttributePenalty();
-
-		}
-	}
 };

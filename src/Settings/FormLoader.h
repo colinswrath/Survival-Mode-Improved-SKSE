@@ -12,6 +12,7 @@ class FormLoader
 public:
 	const std::string_view smiPluginName = "SurvivalModeImproved.esp";
 	const std::string_view smEslPluginName = "ccqdrsse001-survivalmode.esl";
+	const std::string_view campingEslPluginName = "ccqdrsse002 - firewood.esl";
 	const std::string_view causePluginName = "ccbgssse067-daedinv.esm";
 	const std::string_view updatePluginName = "Update.esm";
 	const std::string_view skyrimPluginName = "Skyrim.esm";
@@ -54,11 +55,15 @@ public:
 		logger::info("All forms are loaded.");
 		LoadCompatibilityForms(dataHandler);
 		logger::info("Compatibility forms are loaded.");
+		StoreGlobalValuesPreSave();
+		logger::info("Pre load global values for updating");
+
 	}
 
 	void LoadHungerForms(RE::TESDataHandler* dataHandler)
 	{	
 		auto hungerSystem = NeedHunger::GetSingleton();
+		auto util = Utility::GetSingleton();
 
 		hungerSystem->NeedPenaltyAV = RE::ActorValue::kVariable02;
 		hungerSystem->ActorValPenaltyAttribute = RE::ActorValue::kStamina;
@@ -100,6 +105,11 @@ public:
 		hungerSystem->Survival_FoodRestoreHungerSmall = dataHandler->LookupForm(RE::FormID(0x2EE2), updatePluginName)->As<RE::EffectSetting>();
 		hungerSystem->Survival_FoodRestoreHungerMedium = dataHandler->LookupForm(RE::FormID(0x2EE3), updatePluginName)->As<RE::EffectSetting>();
 		hungerSystem->Survival_FoodRestoreHungerLarge = dataHandler->LookupForm(RE::FormID(0x2EE4), updatePluginName)->As<RE::EffectSetting>();
+
+		util->hungerVerySmallDesc = hungerSystem->Survival_FoodRestoreHungerVerySmall->magicItemDescription;
+		util->hungerSmallDesc = hungerSystem->Survival_FoodRestoreHungerSmall->magicItemDescription;
+		util->hungerMediumDesc = hungerSystem->Survival_FoodRestoreHungerMedium->magicItemDescription;
+		util->hungerLargeDesc = hungerSystem->Survival_FoodRestoreHungerLarge->magicItemDescription;
 
 		hungerSystem->Survival_HungerRestoreVerySmallAmount = dataHandler->LookupForm(RE::FormID(0x8DE), smEslPluginName)->As<RE::TESGlobal>();
 		hungerSystem->Survival_HungerRestoreSmallAmount = dataHandler->LookupForm(RE::FormID(0x82D), smEslPluginName)->As<RE::TESGlobal>();
@@ -222,6 +232,8 @@ public:
 		coldSystem->NeedStage4 = dataHandler->LookupForm(RE::FormID(0xD23), smiPluginName)->As<RE::TESGlobal>();
 		coldSystem->NeedStage5 = dataHandler->LookupForm(RE::FormID(0xD24), smiPluginName)->As<RE::TESGlobal>();
 		coldSystem->NeedMaxValue = dataHandler->LookupForm(RE::FormID(0x84B), smEslPluginName)->As<RE::TESGlobal>();
+
+		coldSystem->Survival_AfflictionColdChance = dataHandler->LookupForm(RE::FormID(0x8E6), smEslPluginName)->As<RE::TESGlobal>();
 
 		coldSystem->Survival_ColdConditionStage0 = dataHandler->LookupForm(RE::FormID(0x93B), smEslPluginName)->As<RE::BGSMessage>();
 		coldSystem->Survival_ColdConditionStage1 = dataHandler->LookupForm(RE::FormID(0x93D), smEslPluginName)->As<RE::BGSMessage>();
@@ -356,7 +368,7 @@ public:
 		utility->IsInPineForestFreezingArea = &regionInfoSpell->effects[4]->conditions;
 		utility->IsInReachArea = &regionInfoSpell->effects[5]->conditions;
 
-		if (dataHandler->LookupLoadedModByName(brumaPluginName)) {
+		if (dataHandler->LookupLoadedModByName(brumaPluginName) || dataHandler->LookupLoadedLightModByName(brumaPluginName)) {
 			logger::info("Loading Bruma region data");
 			utility->CYRWeatherMountainsSnow = dataHandler->LookupForm(RE::FormID(0x6311F), brumaPluginName)->As<RE::TESRegion>();
 			utility->CYRWeatherBruma = dataHandler->LookupForm(RE::FormID(0x63102), brumaPluginName)->As<RE::TESRegion>();
@@ -387,7 +399,7 @@ public:
 
 		}
 
-		if (dataHandler->LookupLoadedModByName(wyrmstoothPluginName)) {
+		if (dataHandler->LookupLoadedModByName(wyrmstoothPluginName) || dataHandler->LookupLoadedLightModByName(wyrmstoothPluginName)) {
 			logger::info("Loading Wyrmstooth region data");
 
 			utility->WyrmstoothSteampools = dataHandler->LookupForm(RE::FormID(0x57654F), wyrmstoothPluginName)->As<RE::TESRegion>();
@@ -483,7 +495,7 @@ public:
 	{
 		auto warmupList = NeedCold::GetSingleton()->Survival_WarmUpObjectsList;
 		auto util = Utility::GetSingleton();
-		if (dataHandler->LookupLoadedModByName(campsitePluginName)) {
+		if (dataHandler->LookupLoadedModByName(campsitePluginName) || dataHandler->LookupLoadedLightModByName(campsitePluginName)) {
 			auto campfire = dataHandler->LookupForm(RE::FormID(0x5902), campsitePluginName);
 
 			if (campfire && !warmupList->HasForm(campfire)) {
@@ -491,11 +503,19 @@ public:
 			}
 		}
 
-		if (dataHandler->LookupLoadedModByName(starfrostPluginName)) {
+		if (dataHandler->LookupLoadedModByName(starfrostPluginName) || dataHandler->LookupLoadedLightModByName(starfrostPluginName)) {
+			logger::info("Starfrost Installed");
 			util->starfrostInstalled = true;
 		}		
+
+		if (dataHandler->LookupLoadedLightModByName(campingEslPluginName)) {
+			auto shelterActivator = dataHandler->LookupForm(RE::FormID(0x803), campingEslPluginName);
+			if (shelterActivator) {
+				util->SMI_WellRestedObjectsList->AddForm(shelterActivator);
+			}
+		}
 			
-		if (dataHandler->LookupLoadedModByName(campfirePluginName)) {
+		if (dataHandler->LookupLoadedModByName(campfirePluginName) || dataHandler->LookupLoadedLightModByName(campfirePluginName)) {
 			auto cracklingDw = dataHandler->LookupForm(RE::FormID(0x40013), campfirePluginName);
 			if (cracklingDw && !warmupList->HasForm(cracklingDw))
 				warmupList->AddForm(cracklingDw);
@@ -531,7 +551,7 @@ public:
 				warmupList->AddForm(fragBranch);		
 		}
 
-		if (dataHandler->LookupLoadedModByName(obsidianPluginName)) {
+		if (dataHandler->LookupLoadedModByName(obsidianPluginName) || dataHandler->LookupLoadedLightModByName(obsidianPluginName)) {
 
 			auto cloudy = NeedCold::GetSingleton()->SMI_ColdCloudyWeather; 
 			auto w1 = dataHandler->LookupForm(RE::FormID(0x0010E1E3), skyrimPluginName);
@@ -566,14 +586,14 @@ public:
 				cloudy->AddForm(w10);	
 		}
 
-		if (dataHandler->LookupLoadedModByName(undeathPluginName)) {
+		if (dataHandler->LookupLoadedModByName(undeathPluginName) || dataHandler->LookupModByName(undeathPluginName)) {
 			auto lichPerk = dataHandler->LookupForm(RE::FormID(0x3326D5), undeathPluginName);
 			if (lichPerk) {
 				util->Undeath_LichPerk = lichPerk->As<RE::BGSPerk>();
 			}
 		}
 
-		if (dataHandler->LookupLoadedModByName(transcendenceName)) {
+		if (dataHandler->LookupLoadedModByName(transcendenceName) || dataHandler->LookupLoadedLightModByName(transcendenceName)) {
 			auto lichRace = dataHandler->LookupForm(RE::FormID(0x38357), transcendenceName);
 			if (lichRace) {
 				util->SMI_NoNeedsRaces->AddForm(lichRace);
@@ -628,7 +648,7 @@ public:
 			}
 		}
 
-		if (dataHandler->LookupLoadedModByName(causePluginName)) {
+		if (dataHandler->LookupLoadedLightModByName(causePluginName)) {
 			auto deadLandsWorldspace = dataHandler->LookupForm(RE::FormID(0xE1592), causePluginName);
 			auto deadLandsLoc = dataHandler->LookupForm(RE::FormID(0x33F39), causePluginName);
 
@@ -641,11 +661,11 @@ public:
 			}
 		}
 
-		auto simonrimGlobal = dataHandler->LookupForm(RE::FormID(0xD25), smiPluginName)->As<RE::TESGlobal>();
-		if (dataHandler->LookupLoadedLightModByName(simonrimHealthRegenPluginName)) {
-			simonrimGlobal->value = 1.0f;
+		util->SMI_SimonrimHealthRegenDetected = dataHandler->LookupForm(RE::FormID(0xD25), smiPluginName)->As<RE::TESGlobal>();
+		if (dataHandler->LookupLoadedModByName(simonrimHealthRegenPluginName) || dataHandler->LookupLoadedLightModByName(simonrimHealthRegenPluginName)) {
+			util->SMI_SimonrimHealthRegenDetected->value = 1.0f;
 		} else {
-			simonrimGlobal->value = 0.0f;	
+			util->SMI_SimonrimHealthRegenDetected->value = 0.0f;	
 		}
 	}
 
@@ -663,5 +683,54 @@ public:
 		utility->DoCombatSpellApplyAddress = RELOCATION_ID(37666, 38620).address();
 		utility->EnableFtAddress = RELOCATION_ID(54946, 55563).address();
 		utility->IsFtEnabledAddress = RELOCATION_ID(54848, 55481).address();
+	}
+
+	void StoreGlobalValuesPreSave()
+	{
+		auto util = Utility::GetSingleton();
+		auto cold = NeedCold::GetSingleton();
+		auto exhaustion = NeedExhaustion::GetSingleton();
+		auto hunger = NeedHunger::GetSingleton();
+
+		util->LoadColdStage1Val = cold->NeedStage1->value;
+		util->LoadColdStage2Val = cold->NeedStage2->value;
+		util->LoadColdStage3Val = cold->NeedStage3->value;
+		util->LoadColdStage4Val = cold->NeedStage4->value;
+		util->LoadColdStage5Val = cold->NeedStage5->value;
+
+		util->LoadExhaustionStage1Val = exhaustion->NeedStage1->value;
+		util->LoadExhaustionStage2Val = exhaustion->NeedStage2->value;
+		util->LoadExhaustionStage3Val = exhaustion->NeedStage3->value;
+		util->LoadExhaustionStage4Val = exhaustion->NeedStage4->value;
+		util->LoadExhaustionStage5Val = exhaustion->NeedStage5->value;
+
+		util->LoadHungerStage1Val = hunger->NeedStage1->value;
+		util->LoadHungerStage2Val = hunger->NeedStage2->value;
+		util->LoadHungerStage3Val = hunger->NeedStage3->value;
+		util->LoadHungerStage4Val = hunger->NeedStage4->value;
+		util->LoadHungerStage5Val = hunger->NeedStage5->value;
+
+		util->coldShouldBeEnabled = util->SMI_ColdShouldBeEnabled->value;
+		util->hungerShouldBeEnabled = util->SMI_HungerShouldBeEnabled->value;
+		util->exhaustionShouldBeEnabled = util->SMI_ExhaustionShouldBeEnabled->value;
+
+		util->coldAVPenDisabled = cold->NeedAvPenDisabled->value;
+		util->hungerAVPenDisabled = hunger->NeedAvPenDisabled->value;
+		util->exhaustionAVPenDisabled = exhaustion->NeedAvPenDisabled->value;
+
+		util->coldResistMaxValue = cold->Survival_ColdResistMaxValue->value;
+		util->coldAfflictionChance = cold->Survival_AfflictionColdChance->value;
+		util->exhaustionAfflictionChance = exhaustion->Survival_AfflictionExhaustionChance->value;
+		util->hungerAfflictionChance = hunger->Survival_AfflictionHungerChance->value;
+		
+		util->exhaustionMaxValue = exhaustion->NeedMaxValue->value;
+		util->coldMaxValue = cold->NeedMaxValue->value;
+		util->hungerMaxValue = hunger->NeedMaxValue->value;
+
+		util->exhaustionRestorePerHour = exhaustion->Survival_ExhaustionRestorePerHour->value;
+
+		util->coldRate = cold->SMI_ColdRate->value;
+		util->hungerRate = hunger->NeedRate->value;
+		util->exhaustionRate = exhaustion->NeedRate->value;
 	}
 };

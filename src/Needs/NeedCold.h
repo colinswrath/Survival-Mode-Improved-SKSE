@@ -93,6 +93,7 @@ public:
 	float AmbientWarmthWidgetColdLevelThreshold = 200.0f;
 
 	float BlizzardWindspeedThreshold = 150;
+	float FreezingWaterMsgFrequency = 20;
 
 	static NeedCold* GetSingleton()
 	{
@@ -227,12 +228,15 @@ public:
 
 	float GetWeatherTemperature(AREA_TYPE area)
 	{
+		RE::TESWeather* currentWeather = nullptr;
 		auto sky = RE::Sky::GetSingleton();
-		auto currentWeather = sky->currentWeather;
+		if (sky) {
+			currentWeather = sky->currentWeather;
+		}
 
-		auto name = Utility::GetFormEditorID(currentWeather);
-	
 		if (currentWeather) {
+			auto name = Utility::GetFormEditorID(currentWeather);
+	
 			auto precipData = currentWeather->precipitationData;
 			auto windSpeed = static_cast<uint8_t>(currentWeather->data.windSpeed);
 
@@ -281,7 +285,11 @@ public:
 
 	float GetRegionTemperature(AREA_TYPE area)
 	{
-		auto month = Utility::GetCalendar()->GetMonth();
+		auto calender = Utility::GetCalendar();
+		auto month = 1;
+		if (calender) {
+			month = calender->GetMonth();
+		}
 
 		switch (area) {
 		case AREA_TYPE::kAreaTypeChillyInterior:
@@ -486,17 +494,17 @@ public:
 			(currentArea == AREA_TYPE::kAreaTypeFreezing || currentArea == AREA_TYPE::kAreaTypeChillyInterior || player->GetWorldspace() == DLC1HunterHQWorld)) {
 			auto currentVal = Survival_LastWaterFreezingMsgTime->value;
 
-			if (currentVal > 9 || currentVal == 0.0f) {
+			if (currentVal >= FreezingWaterMsgFrequency || currentVal == 0.0f) {
 				PlaySFX(FXFreezingWaterSoundFX, FXFreezingWaterSoundFXFemale);
 				NotifyAddEffect(Survival_WaterFreezingMessage, nullptr, Survival_FreezingWaterDamage);
-				Survival_LastWaterFreezingMsgTime->value = 0.0f;
+				currentVal = 0.0f;
 			}
 
 			IncreaseColdLevel(NeedMaxValue->value, NeedStage3->value);
 
 			SMI_CurrentAmbientTemp->value = Survival_ColdLevelInFreezingWater->value;
+			Survival_LastWaterFreezingMsgTime->value = std::clamp(currentVal += 1.0f, 0.0f, FreezingWaterMsgFrequency);
 
-			Survival_LastWaterFreezingMsgTime->value = std::clamp(currentVal += 1.0f, 0.0f, 10.0f);
 			return true;
 		} else if (player->HasSpell(Survival_FreezingWaterDamage)) {
 			player->RemoveSpell(Survival_FreezingWaterDamage);
