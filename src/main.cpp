@@ -3,6 +3,7 @@
 #include "Settings/FormLoader.h"
 #include "Serialization.h"
 #include "Settings/Settings.h"
+#include "PapyrusAPI/PapyrusAPI.h"
 
 void InitLogger()
 {
@@ -106,6 +107,12 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 		serialization->SetSaveCallback(&Serialization::SaveCallback);
 		serialization->SetLoadCallback(&Serialization::LoadCallback);
 		serialization->SetRevertCallback(&Serialization::RevertCallback);
+	}
+
+	if (SKSE::GetPapyrusInterface()->Register(PapyrusAPI::Register)) {
+		logger::info("Papyrus functions bound.");
+	} else {
+		SKSE::stl::report_and_fail("SMI-SKSE: Failure to register Papyrus bindings.");
 	}
 	
 	return true;

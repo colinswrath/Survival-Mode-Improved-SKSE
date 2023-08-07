@@ -20,6 +20,7 @@ public:
 	RE::TESGlobal* Survival_ExhaustionOverEncumberedMult;
 	RE::TESGlobal* Survival_AfflictionExhaustionChance;
 	RE::TESGlobal* Survival_HelpShown_Exhaustion;
+	RE::TESGlobal* SMI_WerewolfExhaustionBonus;
 
 	RE::BGSListForm* Survival_ExhaustionResistRacesMajor;
 	RE::BGSListForm* Survival_ExhaustionResistRacesMinor;
@@ -87,7 +88,9 @@ public:
 			amount = amount * fastTravelMult;
 		}
 
-		if (Survival_ExhaustionResistRacesMinor->HasForm(player->GetRace())) {
+		if (Utility::PlayerIsWerewolf()) {
+			amount = amount * (1.0f - SMI_WerewolfExhaustionBonus->value);
+		} else if (Survival_ExhaustionResistRacesMinor->HasForm(player->GetRace())) {
 			amount = amount * (1.0f - Survival_RacialBonusMinor->value);
 		} else if (Survival_ExhaustionResistRacesMajor->HasForm(player->GetRace())) {
 			amount = amount * (1.0f - Survival_RacialBonusMajor->value);
@@ -108,6 +111,15 @@ public:
 		WasSleeping = false;
 	}
 
+	void DecreaseNeed(float amount, float minValue = 0.0f) override
+	{
+		float newNeedLevel = std::clamp(CurrentNeedValue->value - amount, minValue, NeedMaxValue->value);
+
+		CurrentNeedValue->value = newNeedLevel;
+		SetNeedStage(false, true);
+		ApplyAttributePenalty();
+	}
+
 	void ApplyNeedStageEffects(bool increasing) override
 	{
 		RemoveNeedEffects();
@@ -115,10 +127,10 @@ public:
 		if (stage == 0 && Utility::PlayerCanGetWellRested()) {
 			if (Utility::PlayerIsNearSpouse()) { 
 				NotifyAddEffect(MarriageRestedMessage, MarriageRestedMessage, MarriageRested);
-			} else if (Utility::PlayerIsInHouseOrInn()) {  //Check inn, house
+			} else if (Utility::PlayerIsInHouseOrInn() || Utility::PlayerIsNearWellRestedBed()) {  //Check inn, house, custom well rested list
 				NotifyAddEffect(WellRestedMessage, WellRestedMessage, WellRested);
 			} else {
-				NotifyAddEffect(RestedMessage, RestedMessage, Rested);			
+				NotifyAddEffect(RestedMessage, RestedMessage, Rested);	
 			}	
 		} else if (stage <= 1) {
 			NotifyAddEffect(NeedMessage1, NeedMessage1Decreasing, NeedSpell1, increasing);
@@ -194,4 +206,101 @@ public:
 			}
 		}
 	}
+
+	///////////////////////////////
+	//  Starfrost support below	 //
+	///////////////////////////////
+
+	//Starfrost AV calcs
+	void ApplyAttributePenalty() override
+	{
+		auto util = Utility::GetSingleton();
+
+		if (util->starfrostInstalled) {
+			ApplyAVPenStarfrost(ActorValPenaltyAttribute, NeedPenaltyAV);
+			ApplyAVPenStarfrost(RE::ActorValue::kStamina, RE::ActorValue::kVariable02);
+		} else {	//Normal behavior	
+			NeedBase::ApplyAttributePenalty();
+		} 
+	}
+
+	void RemoveAttributePenalty() override
+	{
+		auto util = Utility::GetSingleton();
+
+		if (util->starfrostInstalled) {
+
+			float currentPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(NeedPenaltyAV);
+			float currentStamPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(RE::ActorValue::kVariable02);
+
+			if (currentPenaltyMag > 0) {
+				Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(NeedPenaltyAV, 0.0f);
+				SetAttributePenaltyUIGlobal(0.0f);
+				Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, currentPenaltyMag);
+			}
+
+			if (currentStamPenaltyMag > 0) {		
+				Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(RE::ActorValue::kVariable02, 0.0f);
+				SetAttributePenaltyUIGlobal(0.0f, true);
+				Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kStamina, currentStamPenaltyMag);
+			}
+		} else {
+			NeedBase::RemoveAttributePenalty();
+		}
+	}
+
+	//Starfrost has two AV penalties for exhaustion (stamina and magicka) and they will calculate differently than normal SMI. 
+	//Best to split off into its own method
+	void ApplyAVPenStarfrost(RE::ActorValue attrAv, RE::ActorValue penAv)
+	{
+		if (NeedAvPenDisabled->value != 1.0f) {
+			//Max
+			auto maxPenAv = GetMaxAttributeAv(attrAv, penAv);
+
+			//Perc
+			float stage = CurrentNeedStage->value;
+			auto penPerc = 0.0f;
+			if (stage == 3) {
+				penPerc = 0.1f;
+			} else if (stage == 4) {
+				penPerc = 0.25f;
+			} else if (stage >= 5) {
+				penPerc = 0.50f;
+			}
+
+			//Magnitude
+			float lastPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(penAv);
+			float newPenaltyMag = std::roundf(maxPenAv * penPerc);
+
+			if (newPenaltyMag > maxPenAv) {
+				newPenaltyMag = maxPenAv;
+			}
+			auto magDelta = lastPenaltyMag - newPenaltyMag;
+
+			//Set tracker av not actual damage
+			Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(penAv, newPenaltyMag);
+
+			//Damage or restore AV
+			Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, attrAv, magDelta);
+
+			SetAttributePenaltyUIGlobal(penPerc, attrAv == RE::ActorValue::kStamina);
+		} else {
+			RemoveAttributePenalty();
+		}
+	}
+
+	void SetAttributePenaltyUIGlobal(float penaltyPerc, bool stam = false)
+	{
+		auto newVal = penaltyPerc * 100.0f;
+		newVal = std::clamp(newVal, 0.0f, 100.0f);
+
+		if (stam) {
+			//We just reference hunger here because thats where the UI global for stamina penalty is stored
+			auto hunger = NeedHunger::GetSingleton();	
+			hunger->NeedPenaltyUIGlobal->value = newVal;
+		} else {
+			NeedPenaltyUIGlobal->value = newVal;
+		}
+	}
+
 };

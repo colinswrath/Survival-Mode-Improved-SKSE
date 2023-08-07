@@ -64,9 +64,10 @@ namespace Events
 	static void ProcessHungerOnEquipEvent(RE::AlchemyItem* food)
 	{
 		auto hunger = NeedHunger::GetSingleton();
+		auto util = Utility::GetSingleton();
 		auto player = Utility::GetPlayer();
 
-		if (!hunger->CurrentlyStopped) {
+		if (!hunger->CurrentlyStopped || util->forceEnableFoodPoisoning) {
 			if (hunger->Survival_FoodRawMeat->HasForm(food) || food->HasKeyword(hunger->VendorItemFoodRaw)) {
 				float diseaseResistMult = player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kResistDisease);
 
@@ -78,9 +79,10 @@ namespace Events
 						Utility::DoCombatSpellApply(player, hunger->Survival_DiseaseFoodPoisoning, player);
 					}
 				}
-
 			}
+		}
 
+		if (!hunger->CurrentlyStopped) {
 			for (auto effect : food->effects) {
 				if (hunger->Survival_FoodRestoreHungerVerySmall == effect->baseEffect) {
 					hunger->DecreaseNeed(hunger->Survival_HungerRestoreVerySmallAmount->value);
@@ -92,7 +94,6 @@ namespace Events
 					hunger->DecreaseNeed(hunger->Survival_HungerRestoreLargeAmount->value);		
 				}
 			}
-
 		}
 	}
 
@@ -101,7 +102,7 @@ namespace Events
 		auto race = hitCause->GetRace();
 		auto util = Utility::GetSingleton();
 		
-		if (util->IsSurvivalEnabled() && race) {
+		if (util->IsSurvivalEnabled() && race && !util->DisableDiseaseApplicator) {
 			if (util->Survival_BrownRotCarryingRaces->HasForm(race)) {
 				Utility::DoCombatSpellApply(Utility::GetPlayer(), util->Survival_DiseaseBrownRot, Utility::GetPlayer());
 			} else if (util->Survival_GreensporeCarryingRaces->HasForm(race)) {
@@ -237,7 +238,7 @@ namespace Events
 
 			auto alchemyItem = RE::TESForm::LookupByID<RE::AlchemyItem>(a_event->baseObject);
 
-			if (alchemyItem && alchemyItem->IsFood()) {
+			if (alchemyItem && alchemyItem->IsFood() && Utility::IsSurvivalEnabled()) {
 				ProcessHungerOnEquipEvent(alchemyItem);
 			}
 
@@ -304,7 +305,7 @@ namespace Events
 			}
 
 			auto effect = RE::TESForm::LookupByID<RE::EffectSetting>(a_event->magicEffect);
-
+			
 			if (!effect) {
 				return RE::BSEventNotifyControl::kContinue;
 			}

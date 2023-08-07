@@ -145,7 +145,7 @@ protected:
 		return ticks;
 	}
 
-	virtual void SetNeedStage(bool increasing)
+	virtual void SetNeedStage(bool increasing, bool forceUpdateEffects = false)
 	{
 		float currentNeedValue = CurrentNeedValue->value;
 
@@ -165,7 +165,7 @@ protected:
 			CurrentNeedStage->value = 5.0f;
 		}
 
-		if (lastStage != CurrentNeedStage->value) {
+		if (lastStage != CurrentNeedStage->value || forceUpdateEffects) {
 			ApplyNeedStageEffects(increasing);
 		}
 	}
@@ -174,7 +174,7 @@ protected:
 	{
 		if (NeedAvPenDisabled->value != 1.0f) {
 
-			float maxPenAv = GetMaxAttributeAv();
+			float maxPenAv = GetMaxAttributeAv(ActorValPenaltyAttribute, NeedPenaltyAV);
 
 			float penaltyPerc = GetPenaltyPercentAmount();
 
@@ -209,18 +209,18 @@ protected:
 		}
 	}
 
-	float GetMaxAttributeAv()
+	float GetMaxAttributeAv(RE::ActorValue avPenAttribute, RE::ActorValue needPenaltyAv)
 	{
-
-		return (Utility::GetPlayer()->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, ActorValPenaltyAttribute) + 
-			Utility::GetPlayer()->AsActorValueOwner()->GetPermanentActorValue(ActorValPenaltyAttribute) +
-			Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(NeedPenaltyAV));
+		return (Utility::GetPlayer()->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, avPenAttribute) + 
+			Utility::GetPlayer()->AsActorValueOwner()->GetPermanentActorValue(avPenAttribute) +
+			Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(needPenaltyAv));
 	}
 
 	virtual float GetPenaltyPercentAmount()
 	{
+		auto util = Utility::GetSingleton();
 		auto penalty = (CurrentNeedValue->value - NeedStage2->value - 1) / (NeedMaxValue->value - NeedStage2->value - 1);
-		penalty = std::clamp(penalty, 0.0f, 1.0f);
+		penalty = std::clamp(penalty, 0.0f, util->MaxAvPenaltyPercent);
 
 		return penalty;
 	}

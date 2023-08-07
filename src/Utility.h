@@ -21,6 +21,7 @@ public:
 	RE::TESGlobal* SMI_HungerShouldBeEnabled;
 	RE::TESGlobal* SMI_ColdShouldBeEnabled;
 	RE::TESGlobal* SMI_ExhaustionShouldBeEnabled;
+	RE::TESGlobal* SMI_SimonrimHealthRegenDetected;
 
 	RE::SpellItem* Survival_abLowerCarryWeightSpell;
 	RE::SpellItem* Survival_abLowerRegenSpell;
@@ -58,6 +59,7 @@ public:
 	RE::BGSListForm* Survival_ColdInteriorLocations;
 	RE::BGSListForm* Survival_ColdInteriorCells;
 	RE::BGSListForm* Survival_SurvivalDiseases;
+	RE::BGSListForm* SMI_WellRestedObjectsList;
 
 	RE::BGSListForm* HelpManualPC;
 	RE::BGSListForm* HelpManualXBox;
@@ -88,7 +90,6 @@ public:
 	RE::TESConditionItem* AdoptionHomeLocationCond;
 
 	RE::BGSMessage* Survival_OblivionAreaMessage;
-
 	RE::BGSMessage* Survival_HelpSurvivalModeLong;
 	RE::BGSMessage* Survival_HelpSurvivalModeLongXbox;
 
@@ -111,6 +112,11 @@ public:
 
 	RE::TESWorldSpace* WyrmstoothWorldspace;
 	
+	RE::BSFixedString hungerVerySmallDesc;
+	RE::BSFixedString hungerSmallDesc;
+	RE::BSFixedString hungerMediumDesc;
+	RE::BSFixedString hungerLargeDesc;
+
 	RE::BGSKeyword* LocTypeInn;
 	RE::BGSKeyword* LocTypePlayerHouse;
 
@@ -127,6 +133,59 @@ public:
 	bool DisableFastTravel = true;
 	bool AutoStart = true;
 	bool DisableCarryWeightPenalty = false;
+	bool DisableDiseaseApplicator = false;
+	bool starfrostInstalled = false;
+	bool forceEnableFoodPoisoning = false;
+	bool forceUpdateGlobalValues = false;
+
+	bool vampireHunger = true;
+	bool vampireCold = true;
+	bool vampireExhaustion = true;
+
+	float MaxAvPenaltyPercent = 1.0f;
+
+	//Global Load overwrite variables
+	float LoadColdStage1Val = 0.0f;
+	float LoadColdStage2Val = 0.0f;
+	float LoadColdStage3Val = 0.0f;
+	float LoadColdStage4Val = 0.0f;
+	float LoadColdStage5Val = 0.0f;
+
+	float LoadExhaustionStage1Val = 0.0f;
+	float LoadExhaustionStage2Val = 0.0f;
+	float LoadExhaustionStage3Val = 0.0f;
+	float LoadExhaustionStage4Val = 0.0f;
+	float LoadExhaustionStage5Val = 0.0f;
+
+	float LoadHungerStage1Val = 0.0f;
+	float LoadHungerStage2Val = 0.0f;
+	float LoadHungerStage3Val = 0.0f;
+	float LoadHungerStage4Val = 0.0f;
+	float LoadHungerStage5Val = 0.0f;
+
+	float coldShouldBeEnabled = 0.0f;
+	float exhaustionShouldBeEnabled = 0.0f;
+	float hungerShouldBeEnabled = 0.0f;
+
+	float coldAVPenDisabled = 0.0f;
+	float exhaustionAVPenDisabled = 0.0f;
+	float hungerAVPenDisabled = 0.0f;
+
+	float coldResistMaxValue = 0.0f;
+
+	float coldMaxValue = 0.0f;
+	float exhaustionMaxValue = 0.0f;
+	float hungerMaxValue = 0.0f;
+
+	float coldAfflictionChance = 0.0f;
+	float hungerAfflictionChance = 0.0f;
+	float exhaustionAfflictionChance = 0.0f;
+
+	float exhaustionRestorePerHour = 0.0f;
+
+	float coldRate = 0.0f;
+	float hungerRate = 0.0f;
+	float exhaustionRate = 0.0f;
 
 	static Utility* GetSingleton()
 	{
@@ -136,10 +195,10 @@ public:
 
 	AREA_TYPE GetCurrentAreaType()
 	{
-		auto player = GetPlayer();
+		auto player = Utility::GetPlayer();
 		auto playerParentCell = player->GetParentCell();
 		auto worldspace = player->GetWorldspace();
-		RE::ConditionCheckParams playerParam(Utility::GetPlayer(), nullptr);
+		RE::ConditionCheckParams playerParam(player, nullptr);
 
 		if ((playerParentCell && playerParentCell->IsInteriorCell()) || (worldspace && Survival_InteriorAreas->HasForm(worldspace))) {
 			if (playerParentCell && (Survival_ColdInteriorLocations->HasForm(playerParentCell) || 
@@ -169,7 +228,7 @@ public:
 
 			return AREA_TYPE::kAreaTypeFreezing;
 
-		} else if (IsInReachArea->IsTrue(player, nullptr)) {
+		} else if (IsInReachArea && IsInReachArea->IsTrue(player, nullptr)) {
 			return AREA_TYPE::kAreaTypeReach;
 		} else {
 			return AREA_TYPE::kAreaTypeCool;
@@ -205,9 +264,10 @@ public:
 		return SKSE::stl::RNG::GetSingleton()->Generate<float>(min, max);
 	}
 
-	bool IsSurvivalEnabled()
+	static bool IsSurvivalEnabled()
 	{
-		return Survival_ModeEnabled->value;
+		auto util = Utility::GetSingleton();
+		return util->Survival_ModeEnabled->value;
 	}
 
 	static void ShowNotification(RE::BGSMessage* msg, bool messageBox=false)
@@ -301,7 +361,7 @@ public:
 
 	static bool PlayerCanGetWellRested()
 	{
-		return !PlayerIsVampire() && !PlayerIsWerewolf();
+		return !PlayerIsWerewolf();
 	}
 
 	static bool PlayerIsVampire()
@@ -439,6 +499,82 @@ public:
 		return false;
 	}
 
+	static bool PlayerIsNearWellRestedBed()
+	{
+		auto TES = RE::TES::GetSingleton();
+		auto player = Utility::GetPlayer();
+		auto util = Utility::GetSingleton();
+
+		bool nearWellRested = false;
+		if (TES) {
+			TES->ForEachReferenceInRange(player, 300.0f, [&](RE::TESObjectREFR& b_ref) {
+				if (!b_ref.IsDisabled()) {
+					if (const auto base = b_ref.GetBaseObject(); base) {
+						if (util->SMI_WellRestedObjectsList->HasForm(base)) {
+							nearWellRested = true;
+							return RE::BSContainer::ForEachResult::kStop;
+						}
+					}
+				}
+				return RE::BSContainer::ForEachResult::kContinue;
+			});
+		}
+		return nearWellRested;
+	}
+
+	//CREDIT-> po3 in papyrus extender
+	static std::string GetFormEditorID(const RE::TESForm* a_form)
+	{
+		switch (a_form->GetFormType()) {
+		case RE::FormType::Keyword:
+		case RE::FormType::LocationRefType:
+		case RE::FormType::Action:
+		case RE::FormType::MenuIcon:
+		case RE::FormType::Global:
+		case RE::FormType::HeadPart:
+		case RE::FormType::Race:
+		case RE::FormType::Sound:
+		case RE::FormType::Script:
+		case RE::FormType::Navigation:
+		case RE::FormType::Cell:
+		case RE::FormType::WorldSpace:
+		case RE::FormType::Land:
+		case RE::FormType::NavMesh:
+		case RE::FormType::Dialogue:
+		case RE::FormType::Quest:
+		case RE::FormType::Idle:
+		case RE::FormType::AnimatedObject:
+		case RE::FormType::ImageAdapter:
+		case RE::FormType::VoiceType:
+		case RE::FormType::Ragdoll:
+		case RE::FormType::DefaultObject:
+		case RE::FormType::MusicType:
+		case RE::FormType::StoryManagerBranchNode:
+		case RE::FormType::StoryManagerQuestNode:
+		case RE::FormType::StoryManagerEventNode:
+		case RE::FormType::SoundRecord:
+			return a_form->GetFormEditorID();
+		default:
+			{
+				static auto tweaks = GetModuleHandle(L"po3_Tweaks");
+				if (tweaks) {
+					static auto func = reinterpret_cast<const char* (*)(std::uint32_t)>(GetProcAddress(tweaks, "GetFormEditorID"));
+					if (func) {
+						return func(a_form->formID);
+					}
+				}
+				return {};
+			}
+		}
+	}
+
+	static bool string_Contains(std::string mainString, std::string subString)
+	{
+		std::transform(mainString.begin(), mainString.end(), mainString.begin(), [](unsigned char c) { return static_cast<unsigned char> (std::tolower(c)); });
+		std::transform(subString.begin(), subString.end(), subString.begin(), [](unsigned char c) { return static_cast <unsigned char>(std::tolower(c)); });
+		return mainString.find(subString) != std::string::npos;
+	}
+
 	static bool PlayerIsBeastFormRace()
 	{
 		auto menuControls = Utility::GetSingleton()->GetMenuControls();
@@ -483,5 +619,5 @@ public:
 		using func_t = decltype(&Utility::IsFastTravelEnabled);
 		REL::Relocation<func_t> func{ Utility::GetSingleton()->IsFtEnabledAddress };
 		return func();
-	}
+	}	
 };

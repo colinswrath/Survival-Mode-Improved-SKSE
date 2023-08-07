@@ -27,12 +27,21 @@ public:
 		logger::info("Loading general settings");
 		util->DisableFastTravel = ini.GetBoolValue("General", "bDisableFastTravel", true);
 		util->AutoStart = ini.GetBoolValue("General", "bAutoEnableSMOnNewGame", true);
-		util->DisableCarryWeightPenalty = ini.GetBoolValue("General", "bDisableCarryWeightPenalty", true);
+		util->DisableCarryWeightPenalty = ini.GetBoolValue("General", "bDisableCarryWeightPenalty", false);
+		util->DisableDiseaseApplicator = ini.GetBoolValue("General", "bDisableDiseaseApplication", false);
+		util->forceEnableFoodPoisoning = ini.GetBoolValue("General", "bForceEnableFoodPoisoning", false);
+		util->forceUpdateGlobalValues = ini.GetBoolValue("General", "bForceUpdateGlobalsOnSaveLoad", false);
+
+		util->MaxAvPenaltyPercent = std::clamp(std::stof((ini.GetValue("General", "fMaxAvPenPercent", "1.0"))), 0.0f, 1.0f);
+
+		util->vampireCold = ini.GetBoolValue("General", "bVampireColdEnabled", true);
+		util->vampireHunger = ini.GetBoolValue("General", "bVampireHungerEnabled", true);
+		util->vampireExhaustion = ini.GetBoolValue("General", "bVampireExhaustionEnabled", true);
 
 		logger::info("Loading season mults");
 
 		const char* currentHeader = settings->SosSeasonMultHeader;
-		if (dataHandler->LookupLoadedModByName("SnowOverSkyrim.esp")) {
+		if (dataHandler->LookupLoadedModByName("SnowOverSkyrim.esp") || dataHandler->LookupLoadedLightModByName("SnowOverSkyrim.esp")) {
 			currentHeader = settings->DefaultSeasonMultHeader;
 		}
 		

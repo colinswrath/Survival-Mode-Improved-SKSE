@@ -76,7 +76,8 @@ public:
 	const char* Survival_FreezingBSD = "Survival_FreezingBSD";
 	const char* Survival_FreezingAFemaleSD = "Survival_FreezingAFemaleSD";
 	const char* Survival_FreezingBFemaleSD = "Survival_FreezingBFemaleSD";
-
+	const std::string ashCheckString = "ash";
+	
 	float MaxWarmthRatingBonusPerc = 0.80f;
 	const float ColdMaxStageThreshold = 600.0f;
 	float ColdToRestoreInWarmArea = 1.5f;
@@ -92,6 +93,7 @@ public:
 	float AmbientWarmthWidgetColdLevelThreshold = 200.0f;
 
 	float BlizzardWindspeedThreshold = 150;
+	float FreezingWaterMsgFrequency = 20;
 
 	static NeedCold* GetSingleton()
 	{
@@ -136,7 +138,11 @@ public:
 		auto oldAmbientTemp = SMI_CurrentAmbientTemp->value;
 		float newAmbientTemp = 0.0f;
 
-		newAmbientTemp = std::clamp(GetWeatherTemperature(currentArea) + GetRegionTemperature(currentArea) + GetNightPenalty(currentArea), 0.0f, NeedMaxValue->value);
+		auto weatherTemp = GetWeatherTemperature(currentArea);
+		auto regionTemp = GetRegionTemperature(currentArea);
+		auto nightTemp = GetNightPenalty(currentArea);
+
+		newAmbientTemp = std::clamp(weatherTemp + regionTemp + nightTemp, 0.0f, NeedMaxValue->value);
 
 		SMI_CurrentAmbientTemp->value = newAmbientTemp;
 		DisplayAmbientTempTransitionMessage(oldAmbientTemp, newAmbientTemp);
@@ -222,13 +228,18 @@ public:
 
 	float GetWeatherTemperature(AREA_TYPE area)
 	{
+		RE::TESWeather* currentWeather = nullptr;
 		auto sky = RE::Sky::GetSingleton();
-		auto currentWeather = sky->currentWeather;
-	
+		if (sky) {
+			currentWeather = sky->currentWeather;
+		}
+
 		if (currentWeather) {
+			auto name = Utility::GetFormEditorID(currentWeather);
+	
 			auto precipData = currentWeather->precipitationData;
 			auto windSpeed = static_cast<uint8_t>(currentWeather->data.windSpeed);
-		
+
 			bool snowParticle = false;
 			bool rainParticle = false;
 
@@ -245,28 +256,26 @@ public:
 				}
 			}
 
-			if (currentWeather) {
-				if (area != AREA_TYPE::kAreaTypeInterior) {
-					bool coldCloudy = SMI_ColdCloudyWeather->HasForm(currentWeather);
-					if (coldCloudy && (area == AREA_TYPE::kAreaTypeFreezing)) {
-						return static_cast<float>(WEATHER_TEMPS::kSnowTemp);	
-					} else if (coldCloudy) {
-						return static_cast<float>(WEATHER_TEMPS::kColdCloudySnowTemp);
+			if (area != AREA_TYPE::kAreaTypeInterior) {
+				bool coldCloudy = SMI_ColdCloudyWeather->HasForm(currentWeather);
+				if (coldCloudy && (area == AREA_TYPE::kAreaTypeFreezing)) {
+					return static_cast<float>(WEATHER_TEMPS::kSnowTemp);	
+				} else if (coldCloudy) {
+					return static_cast<float>(WEATHER_TEMPS::kColdCloudySnowTemp);
+				}
+
+				if (snowParticle) {
+
+					if (Survival_AshWeather->HasForm(currentWeather) || (!name.empty() && Utility::string_Contains(std::string(name), ashCheckString))) {
+						return static_cast<float>(WEATHER_TEMPS::kComfortableTemp);
+					} else if (Survival_BlizzardWeather->HasForm(currentWeather) || windSpeed >= BlizzardWindspeedThreshold) {
+						return static_cast<float>(WEATHER_TEMPS::kBlizzardTemp);
+					} else {
+						return static_cast<float>(WEATHER_TEMPS::kSnowTemp);
 					}
 
-					if (currentWeather->data.flags.any(RE::TESWeather::WeatherDataFlag::kSnow) || snowParticle) {
-
-						if (Survival_AshWeather->HasForm(currentWeather)) {
-							return static_cast<float>(WEATHER_TEMPS::kComfortableTemp);
-						} else if (Survival_BlizzardWeather->HasForm(currentWeather) || windSpeed >= BlizzardWindspeedThreshold) {
-							return static_cast<float>(WEATHER_TEMPS::kBlizzardTemp);
-						} else {
-							return static_cast<float>(WEATHER_TEMPS::kSnowTemp);
-						}
-
-					} else if (currentWeather->data.flags.any(RE::TESWeather::WeatherDataFlag::kRainy) || rainParticle) {
-						return static_cast<float>(WEATHER_TEMPS::kRainyTemp);		
-					}
+				} else if (rainParticle) {
+					return static_cast<float>(WEATHER_TEMPS::kRainyTemp);		
 				}
 			}
 		}
@@ -276,7 +285,11 @@ public:
 
 	float GetRegionTemperature(AREA_TYPE area)
 	{
-		auto month = Utility::GetCalendar()->GetMonth();
+		auto calender = Utility::GetCalendar();
+		auto month = 1;
+		if (calender) {
+			month = calender->GetMonth();
+		}
 
 		switch (area) {
 		case AREA_TYPE::kAreaTypeChillyInterior:
@@ -370,7 +383,7 @@ public:
 		if (oldColdVal == newColdVal) {
 			uiSetting = UI_LEVEL::kNeutral;
 		} else if (oldColdVal > newColdVal) {
-			if (SMI_CurrentAmbientTemp->value < AmbientWarmthWidgetColdLevelThreshold) {
+			if (SMI_CurrentAmbientTemp->value <= AmbientWarmthWidgetColdLevelThreshold) {
 				uiSetting = UI_LEVEL::kWarm;
 			} else {
 				uiSetting = UI_LEVEL::kNeutral;	
@@ -481,17 +494,17 @@ public:
 			(currentArea == AREA_TYPE::kAreaTypeFreezing || currentArea == AREA_TYPE::kAreaTypeChillyInterior || player->GetWorldspace() == DLC1HunterHQWorld)) {
 			auto currentVal = Survival_LastWaterFreezingMsgTime->value;
 
-			if (currentVal > 9 || currentVal == 0.0f) {
+			if (currentVal >= FreezingWaterMsgFrequency || currentVal == 0.0f) {
 				PlaySFX(FXFreezingWaterSoundFX, FXFreezingWaterSoundFXFemale);
 				NotifyAddEffect(Survival_WaterFreezingMessage, nullptr, Survival_FreezingWaterDamage);
-				Survival_LastWaterFreezingMsgTime->value = 0.0f;
+				currentVal = 0.0f;
 			}
 
 			IncreaseColdLevel(NeedMaxValue->value, NeedStage3->value);
 
 			SMI_CurrentAmbientTemp->value = Survival_ColdLevelInFreezingWater->value;
+			Survival_LastWaterFreezingMsgTime->value = std::clamp(currentVal += 1.0f, 0.0f, FreezingWaterMsgFrequency);
 
-			Survival_LastWaterFreezingMsgTime->value = std::clamp(currentVal += 1.0f, 0.0f, 10.0f);
 			return true;
 		} else if (player->HasSpell(Survival_FreezingWaterDamage)) {
 			player->RemoveSpell(Survival_FreezingWaterDamage);

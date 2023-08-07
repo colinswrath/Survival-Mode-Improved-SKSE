@@ -102,6 +102,7 @@ set(SOURCES
 	src/Settings/FormLoader.h
 	src/Serialization.h
 	src/Settings/Settings.h
+	src/PapyrusAPI/PapyrusAPI.h
 )
 
 source_group(
