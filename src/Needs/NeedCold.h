@@ -516,7 +516,7 @@ public:
 	void MaxColdCheck()
 	{
 		if (CurrentNeedValue->value == NeedMaxValue->value && !Utility::PlayerIsBeastFormRace()) {
-			Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,RE::ActorValue::kHealth,Utility::GetRandomFloat(-100,-10));
+			//Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage,RE::ActorValue::kHealth,Utility::GetRandomFloat(-100,-10));
 		}
 	}
 
@@ -540,9 +540,9 @@ public:
 
 		bool nearHeat = false;
 		if (TES && !player->IsRunning() && !playerState->IsSprinting() && !playerState->IsSwimming()) {
-			TES->ForEachReferenceInRange(player, 580.0f, [&](RE::TESObjectREFR& b_ref) {
+			Utility::ForEachReferenceInRange(player, 580.0f, [&](RE::TESObjectREFR& b_ref) {
 				if (!b_ref.IsDisabled()) {
-					if (const auto base = b_ref.GetBaseObject(); base && b_ref.Is3DLoaded()) {
+					if (const auto base = b_ref.GetBaseObject(); base && b_ref.Is3DLoaded()) {	
 						if (Survival_WarmUpObjectsList->HasForm(base)) {
 							nearHeat = true;
 							return RE::BSContainer::ForEachResult::kStop;

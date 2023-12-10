@@ -1,11 +1,11 @@
 {
   "name": "survivalmodeimproved",
-  "version-string": "1.0.0",
+  "version-string": "1.4.0",
   "description": "",
-  "homepage": "",
+  "homepage": "https://www.nexusmods.com/skyrimspecialedition/mods/78244",
   "license": "MIT",
   "dependencies": [
     "commonlibsse-ng-flatrim",
-	  "simpleini"
+	"simpleini"
   ]
 }

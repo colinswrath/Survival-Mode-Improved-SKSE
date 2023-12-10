@@ -32,7 +32,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE STR
 
 project(
 	SurvivalModeImproved
-	VERSION 1.0.0
+	VERSION 1.4.0
 	LANGUAGES CXX
 )
 
