@@ -367,9 +367,9 @@ public:
         utility->IsInPineForestFreezingArea = &regionInfoSpell->effects[4]->conditions;
 
         // Load reach region conditions
-        utility->WeatherMountains = dataHandler->LookupForm(RE::FormID(0x6311F), brumaPluginName)->As<RE::TESRegion>();
-        utility->WeatherReach     = dataHandler->LookupForm(RE::FormID(0x63102), brumaPluginName)->As<RE::TESRegion>();
-        utility->WeatherSnow      = dataHandler->LookupForm(RE::FormID(0x7EE90), brumaPluginName)->As<RE::TESRegion>();
+        utility->WeatherMountains = dataHandler->LookupForm(RE::FormID(0x4D7FD), skyrimPluginName)->As<RE::TESRegion>();
+        utility->WeatherReach     = dataHandler->LookupForm(RE::FormID(0xC5856), skyrimPluginName)->As<RE::TESRegion>();
+        utility->WeatherSnow      = dataHandler->LookupForm(RE::FormID(0xC5853), skyrimPluginName)->As<RE::TESRegion>();
 
         auto inWeatherReach                         = new RE::TESConditionItem;
         inWeatherReach->next                        = nullptr;

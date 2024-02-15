@@ -103,6 +103,10 @@ else()
   set(BUILD_NAME Release)
 endif()
 
+if(BUILD_SKYRIMAE1130)
+  set(BUILD_NAME ${BUILD_NAME}1130)
+endif()
+
 add_custom_command(
   TARGET ${PROJECT_NAME}
   POST_BUILD
