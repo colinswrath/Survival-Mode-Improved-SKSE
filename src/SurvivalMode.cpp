@@ -39,22 +39,29 @@ void SurvivalMode::SurvivalModeLoopUpdate()
 
 void SurvivalMode::StartSurvivalMode()
 {
-	if (Utility::GetSingleton()->MQ101->IsCompleted() || (RE::ControlMap::GetSingleton()->IsMainFourControlsEnabled())) {
+	if (Utility::GetSingleton()->MQ101->IsCompleted() || (RE::ControlMap::GetSingleton()->IsMainFourControlsEnabled()))
+	{
+		logger::info("Starting SM");
 		auto utility = Utility::GetSingleton();
 		AddPlayerSpellPerks();
 		SendAllNeedsUpdate();
 		utility->Survival_ModeEnabled->value = 1.0f;
 		utility->Survival_ModeEnabledShared->value = 1.0f;
+		logger::info("SM started");
+
 	}
 }
 
 void SurvivalMode::StopSurvivalMode()
 {
+	logger::info("Stopping SM");
+
 	auto utility = Utility::GetSingleton();
 	StopAllNeeds();
 	RemovePlayerSpellPerks();
 	utility->Survival_ModeEnabled->value = 0;
 	utility->Survival_ModeEnabledShared->value = 0;
+	logger::info("SM stopped");
 }
 
 void SurvivalMode::SendAllNeedsUpdate()

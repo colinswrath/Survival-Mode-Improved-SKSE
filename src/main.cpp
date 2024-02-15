@@ -7,54 +7,24 @@
 
 void InitLogger()
 {
-#ifndef NDEBUG
-	auto sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
-#else
-	auto path = logger::log_directory();
-	if (!path) {
-		return;
-	}
+    auto path{ SKSE::log::log_directory() };
+    if (!path)
+        stl::report_and_fail("Unable to lookup SKSE logs directory.");
+    *path /= SKSE::PluginDeclaration::GetSingleton()->GetName();
+    *path += L".log";
 
-	*path /= std::format("{}.log"sv, Version::PROJECT);
-	auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
-#endif
+    std::shared_ptr<spdlog::logger> log;
+    if (IsDebuggerPresent())
+        log = std::make_shared<spdlog::logger>("Global", std::make_shared<spdlog::sinks::msvc_sink_mt>());
+    else
+        log = std::make_shared<spdlog::logger>("Global", std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true));
 
-	auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
+    log->set_level(spdlog::level::level_enum::info);
+    log->flush_on(spdlog::level::level_enum::trace);
 
-#ifndef NDEBUG
-	log->set_level(spdlog::level::trace);
-#else
-	log->set_level(spdlog::level::info);
-	log->flush_on(spdlog::level::info);
-#endif
+    set_default_logger(std::move(log));
 
-	spdlog::set_default_logger(std::move(log));
-	spdlog::set_pattern("%s(%#): [%^%l%$] %v"s);
-
-	logger::info(FMT_STRING("{} v{}"), Version::PROJECT, Version::NAME);
-}
-
-//	1.5.97 Necessary
-extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface * a_skse, SKSE::PluginInfo * a_info)
-{
-	InitLogger();
-
-	a_info->infoVersion = SKSE::PluginInfo::kVersion;
-	a_info->name = Version::PROJECT.data();
-	a_info->version = Version::MAJOR;
-
-	if (a_skse->IsEditor()) {
-		logger::critical(FMT_STRING("Loaded in editor, marking as incompatible"));
-		return false;
-	}
-
-	const auto ver = a_skse->RuntimeVersion();
-	if (ver < SKSE::RUNTIME_VR_1_4_15) {
-		logger::critical(FMT_STRING("Unsupported runtime version {}"), ver.string());
-		return false;
-	}
-
-	return true;
+    spdlog::set_pattern("[%T.%e UTC%z] [%L] [%=5t] %v");
 }
 
 void InitListener(SKSE::MessagingInterface::Message* a_msg)
@@ -73,47 +43,45 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 	}
 }
 
-extern "C" DLLEXPORT constexpr auto SKSEPlugin_Version =
-[]() {
-	SKSE::PluginVersionData v{};
-	v.PluginVersion(Version::MAJOR);
-	v.PluginName(Version::PROJECT);
-	v.AuthorName("colinswrath"sv);
-	v.UsesAddressLibrary(true);
-	v.HasNoStructUse(true);
-	v.UsesStructsPost629(false);
-	return v;
-}();
-
-
-extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
+SKSEPluginLoad(const SKSE::LoadInterface* skse)
 {
-	InitLogger();
-	logger::info("loading SMI");
+    InitLogger();
 
-	SKSE::Init(a_skse);
-	FormLoader::GetSingleton()->CacheGameAddresses();
-	SKSE::AllocTrampoline(42);
-	Hooks::Install();
-	Events::Register();
+    const auto plugin{ SKSE::PluginDeclaration::GetSingleton() };
+    const auto version{ plugin->GetVersion() };
 
-	auto messaging = SKSE::GetMessagingInterface();
-	if (!messaging->RegisterListener(InitListener)) {
-		return false;
-	}
+    logger::info("{} {} loading...", plugin->GetName(), version);
 
-	if (auto serialization = SKSE::GetSerializationInterface()) {
-		serialization->SetUniqueID(Serialization::ID);
-		serialization->SetSaveCallback(&Serialization::SaveCallback);
-		serialization->SetLoadCallback(&Serialization::LoadCallback);
-		serialization->SetRevertCallback(&Serialization::RevertCallback);
-	}
+    #ifdef SKYRIM_SUPPORT_AE
+        logger::info("Post 1130 build is active.");
+    #endif // SKYRIM_SUPPORT_AE
 
-	if (SKSE::GetPapyrusInterface()->Register(PapyrusAPI::Register)) {
-		logger::info("Papyrus functions bound.");
-	} else {
-		SKSE::stl::report_and_fail("SMI-SKSE: Failure to register Papyrus bindings.");
-	}
-	
-	return true;
+    SKSE::Init(skse);
+
+    FormLoader::GetSingleton()->CacheGameAddresses();
+    SKSE::AllocTrampoline(42);
+    Hooks::Install();
+    Events::Register();
+
+    auto messaging = SKSE::GetMessagingInterface();
+    if (!messaging->RegisterListener(InitListener)) {
+        return false;
+    }
+
+    if (auto serialization = SKSE::GetSerializationInterface()) {
+        serialization->SetUniqueID(Serialization::ID);
+        serialization->SetSaveCallback(&Serialization::SaveCallback);
+        serialization->SetLoadCallback(&Serialization::LoadCallback);
+        serialization->SetRevertCallback(&Serialization::RevertCallback);
+    }
+
+    if (SKSE::GetPapyrusInterface()->Register(PapyrusAPI::Register)) {
+        logger::info("Papyrus functions bound.");
+    }
+    else {
+        SKSE::stl::report_and_fail("SMI-SKSE: Failure to register Papyrus bindings.");
+    }
+
+    logger::info("SMI loaded successfully");
+    return true;
 }

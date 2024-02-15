@@ -261,7 +261,7 @@ public:
 
 	static float GetRandomFloat(float min, float max) 
 	{
-		return SKSE::stl::RNG::GetSingleton()->Generate<float>(min, max);
+        return clib_util::RNG().Generate<float>(min, max);
 	}
 
 	static bool IsSurvivalEnabled()
@@ -501,24 +501,22 @@ public:
 
 	static bool PlayerIsNearWellRestedBed()
 	{
-		auto TES = RE::TES::GetSingleton();
 		auto player = Utility::GetPlayer();
 		auto util = Utility::GetSingleton();
 
 		bool nearWellRested = false;
-		if (TES) {
-			TES->ForEachReferenceInRange(player, 300.0f, [&](RE::TESObjectREFR& b_ref) {
-				if (!b_ref.IsDisabled()) {
-					if (const auto base = b_ref.GetBaseObject(); base) {
-						if (util->SMI_WellRestedObjectsList->HasForm(base)) {
-							nearWellRested = true;
-							return RE::BSContainer::ForEachResult::kStop;
-						}
+		RE::TES::GetSingleton()->ForEachReferenceInRange(player, 300.0f, [&](RE::TESObjectREFR& b_ref) {
+			if (!b_ref.IsDisabled()) {
+				if (const auto base = b_ref.GetBaseObject(); base) {
+					if (util->SMI_WellRestedObjectsList->HasForm(base)) {
+						nearWellRested = true;
+						return RE::BSContainer::ForEachResult::kStop;
 					}
 				}
-				return RE::BSContainer::ForEachResult::kContinue;
-			});
-		}
+			}
+			return RE::BSContainer::ForEachResult::kContinue;
+		});
+		
 		return nearWellRested;
 	}
 
