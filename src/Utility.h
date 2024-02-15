@@ -102,6 +102,10 @@ public:
 	RE::TESQuest* UnboundQuest;
 	RE::TESQuest* BYOHRelationshipAdoption;
 
+    RE::TESRegion* WeatherMountains;
+    RE::TESRegion* WeatherSnow;
+    RE::TESRegion* WeatherReach;
+
 	RE::TESRegion* CYRWeatherBruma;
 	RE::TESRegion* CYRWeatherGreatForestNorth;
 	RE::TESRegion* CYRWeatherMountainsSnow;
