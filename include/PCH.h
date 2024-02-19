@@ -161,6 +161,9 @@
 
 #include <ClibUtil/editorID.hpp>
 
+#define DLLEXPORT __declspec(dllexport)
+
+#include "Version.h"
 
 using namespace std::literals;
 using namespace REL::literals;

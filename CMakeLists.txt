@@ -3,12 +3,12 @@ message("Using toolchain file ${CMAKE_TOOLCHAIN_FILE}.")
 
 project(
   SurvivalModeImproved
-  VERSION 1.5.0
+  VERSION 1.5.2
   LANGUAGES CXX
 )
 
 #Enable for 1130 changes
-set(BUILD_SKYRIMAE1130 ON)
+set(ENABLE_SKYRIMAE1130 OFF)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -16,8 +16,15 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
 set(SKSE_SUPPORT_XBYAK ON)
+set(ENABLE_SKYRIM_VR OFF)
 
 include(GNUInstallDirs)
+
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/cmake/Version.h.in
+	${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
+	@ONLY
+)
 
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.rc.in
@@ -33,6 +40,8 @@ file(
   headers
   ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp
+  ${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
+
 )
 list(REMOVE_ITEM headers ${CMAKE_CURRENT_SOURCE_DIR}/include/PCH.h)
 
@@ -43,6 +52,7 @@ file(
   ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc
   ${CMAKE_CURRENT_BINARY_DIR}/version.rc
+  ${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
 )
 
 source_group(
@@ -64,6 +74,8 @@ add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 find_path(SIMPLEINI_INCLUDE_DIRS "SimpleIni.h")
 
+set (SOURCES ${headers} ${sources})
+
 # target_link_libraries(
 # ${PROJECT_NAME}
 # PRIVATE
@@ -74,6 +86,7 @@ target_include_directories(
   PRIVATE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
   $<INSTALL_INTERFACE:src>
   ${SIMPLEINI_INCLUDE_DIRS}
   PUBLIC
@@ -103,7 +116,8 @@ else()
   set(BUILD_NAME Release)
 endif()
 
-if(BUILD_SKYRIMAE1130)
+if(ENABLE_SKYRIMAE1130)
+	message("\tBuilding 1130")
   set(BUILD_NAME ${BUILD_NAME}1130)
 endif()
 

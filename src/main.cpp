@@ -38,10 +38,22 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 		break;
 	case SKSE::MessagingInterface::kDataLoaded:
 		FormLoader::GetSingleton()->LoadAllForms();
+        Events::Register();
 		Settings::LoadSettings();
 		break;
 	}
 }
+
+extern "C" DLLEXPORT constexpr auto SKSEPlugin_Version = []() {
+    SKSE::PluginVersionData v{};
+    v.PluginVersion(REL::Version{ Version::MAJOR, Version::MINOR, Version::PATCH, 0 });
+    v.PluginName("SurvivalModeImproved"sv);
+    v.AuthorName("colinswrath"sv);
+    v.UsesAddressLibrary(true);
+    v.HasNoStructUse(true);
+    v.UsesStructsPost629(false);
+    return v;
+}();
 
 SKSEPluginLoad(const SKSE::LoadInterface* skse)
 {
@@ -49,6 +61,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
 
     const auto plugin{ SKSE::PluginDeclaration::GetSingleton() };
     const auto version{ plugin->GetVersion() };
+    auto runtimcompat = plugin->GetRuntimeCompatibility();
 
     logger::info("{} {} loading...", plugin->GetName(), version);
 
@@ -61,7 +74,6 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
     FormLoader::GetSingleton()->CacheGameAddresses();
     SKSE::AllocTrampoline(42);
     Hooks::Install();
-    Events::Register();
 
     auto messaging = SKSE::GetMessagingInterface();
     if (!messaging->RegisterListener(InitListener)) {

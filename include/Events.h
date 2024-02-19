@@ -220,8 +220,6 @@ namespace Events
 	class OnEquipEventHandler : public RE::BSTEventSink<RE::TESEquipEvent>
 	{
 	public:
-		std::mutex equip_mutex;
-
 		static OnEquipEventHandler* GetSingleton()
 		{
 			static OnEquipEventHandler singleton;
@@ -233,8 +231,6 @@ namespace Events
 			if (!a_event || !a_event->actor || !a_event->actor->IsPlayerRef()) {
 				return RE::BSEventNotifyControl::kContinue;
 			}
-
-			const std::lock_guard<std::mutex> lock(equip_mutex);
 
 			auto alchemyItem = RE::TESForm::LookupByID<RE::AlchemyItem>(a_event->baseObject);
 
@@ -255,7 +251,6 @@ namespace Events
 	class OnHitEventHandler : public RE::BSTEventSink<RE::TESHitEvent>
 	{
 	public:
-		std::mutex on_hit_mutex;
 
 		static OnHitEventHandler* GetSingleton()
 		{
@@ -268,8 +263,6 @@ namespace Events
 			if (!a_event || !a_event->target || !a_event->target->IsPlayerRef() || !a_event->cause) {
 				return RE::BSEventNotifyControl::kContinue;
 			}
-
-			const std::lock_guard<std::mutex> lock(on_hit_mutex);
 
 			auto source = RE::TESForm::LookupByID<RE::TESObjectWEAP>(a_event->source);
 			if (source && source->IsMelee()) {

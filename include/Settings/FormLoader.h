@@ -42,9 +42,6 @@ public:
 
         const auto dataHandler = RE::TESDataHandler::GetSingleton();
 
-        if (!dataHandler->LookupLoadedLightModByName("ccQDRSSE001-SurvivalMode.esl"))
-            return;
-
         LoadHungerForms(dataHandler);
         logger::info("Hunger forms are loaded.");
         LoadFatigueForms(dataHandler);
@@ -394,7 +391,7 @@ public:
 
         utility->IsInReachArea = reachCond;
 
-        if (dataHandler->LookupLoadedModByName(brumaPluginName) || dataHandler->LookupLoadedLightModByName(brumaPluginName)) {
+        if (utility->LookupLoadedModByName(brumaPluginName) || utility->LookupLoadedLightModByName(brumaPluginName)) {
             logger::info("Loading Bruma region data");
             utility->CYRWeatherMountainsSnow    = dataHandler->LookupForm(RE::FormID(0x6311F), brumaPluginName)->As<RE::TESRegion>();
             utility->CYRWeatherBruma            = dataHandler->LookupForm(RE::FormID(0x63102), brumaPluginName)->As<RE::TESRegion>();
@@ -424,7 +421,7 @@ public:
             logger::info("Bruma region data loaded");
         }
 
-        if (dataHandler->LookupLoadedModByName(wyrmstoothPluginName) || dataHandler->LookupLoadedLightModByName(wyrmstoothPluginName)) {
+        if (utility->LookupLoadedModByName(wyrmstoothPluginName) || utility->LookupLoadedLightModByName(wyrmstoothPluginName)) {
             logger::info("Loading Wyrmstooth region data");
 
             utility->WyrmstoothSteampools = dataHandler->LookupForm(RE::FormID(0x57654F), wyrmstoothPluginName)->As<RE::TESRegion>();
@@ -518,8 +515,8 @@ public:
     void LoadCompatibilityForms(RE::TESDataHandler* dataHandler)
     {
         auto warmupList = NeedCold::GetSingleton()->Survival_WarmUpObjectsList;
-        auto util       = Utility::GetSingleton();
-        if (dataHandler->LookupLoadedModByName(campsitePluginName) || dataHandler->LookupLoadedLightModByName(campsitePluginName)) {
+        auto utility       = Utility::GetSingleton();
+        if (utility->LookupLoadedModByName(campsitePluginName) || utility->LookupLoadedLightModByName(campsitePluginName)) {
             auto campfire = dataHandler->LookupForm(RE::FormID(0x5902), campsitePluginName);
 
             if (campfire && !warmupList->HasForm(campfire)) {
@@ -527,19 +524,19 @@ public:
             }
         }
 
-        if (dataHandler->LookupLoadedModByName(starfrostPluginName) || dataHandler->LookupLoadedLightModByName(starfrostPluginName)) {
+        if (utility->LookupLoadedModByName(starfrostPluginName) || utility->LookupLoadedLightModByName(starfrostPluginName)) {
             logger::info("Starfrost Installed");
-            util->starfrostInstalled = true;
+            utility->starfrostInstalled = true;
         }
 
-        if (dataHandler->LookupLoadedLightModByName(campingEslPluginName)) {
+        if (utility->LookupLoadedLightModByName(campingEslPluginName)) {
             auto shelterActivator = dataHandler->LookupForm(RE::FormID(0x803), campingEslPluginName);
             if (shelterActivator) {
-                util->SMI_WellRestedObjectsList->AddForm(shelterActivator);
+                utility->SMI_WellRestedObjectsList->AddForm(shelterActivator);
             }
         }
 
-        if (dataHandler->LookupLoadedModByName(campfirePluginName) || dataHandler->LookupLoadedLightModByName(campfirePluginName)) {
+        if (utility->LookupLoadedModByName(campfirePluginName) || utility->LookupLoadedLightModByName(campfirePluginName)) {
             auto cracklingDw = dataHandler->LookupForm(RE::FormID(0x40013), campfirePluginName);
             if (cracklingDw && !warmupList->HasForm(cracklingDw))
                 warmupList->AddForm(cracklingDw);
@@ -575,7 +572,7 @@ public:
                 warmupList->AddForm(fragBranch);
         }
 
-        if (dataHandler->LookupLoadedModByName(obsidianPluginName) || dataHandler->LookupLoadedLightModByName(obsidianPluginName)) {
+        if (utility->LookupLoadedModByName(obsidianPluginName) || utility->LookupLoadedLightModByName(obsidianPluginName)) {
             auto cloudy = NeedCold::GetSingleton()->SMI_ColdCloudyWeather;
             auto w1     = dataHandler->LookupForm(RE::FormID(0x0010E1E3), skyrimPluginName);
             if (w1 && !cloudy->HasForm(w1))
@@ -609,87 +606,87 @@ public:
                 cloudy->AddForm(w10);
         }
 
-        if (dataHandler->LookupLoadedModByName(undeathPluginName) || dataHandler->LookupModByName(undeathPluginName)) {
+        if (utility->LookupLoadedModByName(undeathPluginName) || dataHandler->LookupModByName(undeathPluginName)) {
             auto lichPerk = dataHandler->LookupForm(RE::FormID(0x3326D5), undeathPluginName);
             if (lichPerk) {
-                util->Undeath_LichPerk = lichPerk->As<RE::BGSPerk>();
+                utility->Undeath_LichPerk = lichPerk->As<RE::BGSPerk>();
             }
         }
 
-        if (dataHandler->LookupLoadedModByName(transcendenceName) || dataHandler->LookupLoadedLightModByName(transcendenceName)) {
+        if (utility->LookupLoadedModByName(transcendenceName) || utility->LookupLoadedLightModByName(transcendenceName)) {
             auto lichRace = dataHandler->LookupForm(RE::FormID(0x38357), transcendenceName);
             if (lichRace) {
-                util->SMI_NoNeedsRaces->AddForm(lichRace);
+                utility->SMI_NoNeedsRaces->AddForm(lichRace);
             }
             auto lichRace1 = dataHandler->LookupForm(RE::FormID(0x000e0e47), transcendenceName);
             if (lichRace1) {
-                util->SMI_NoNeedsRaces->AddForm(lichRace1);
+                utility->SMI_NoNeedsRaces->AddForm(lichRace1);
             }
             auto lichRace2 = dataHandler->LookupForm(RE::FormID(0x0022bd61), transcendenceName);
             if (lichRace2) {
-                util->SMI_NoNeedsRaces->AddForm(lichRace2);
+                utility->SMI_NoNeedsRaces->AddForm(lichRace2);
             }
             auto lichRace3 = dataHandler->LookupForm(RE::FormID(0x00240166), transcendenceName);
             if (lichRace3) {
-                util->SMI_NoNeedsRaces->AddForm(lichRace3);
+                utility->SMI_NoNeedsRaces->AddForm(lichRace3);
             }
             auto lichRace4 = dataHandler->LookupForm(RE::FormID(0x00240167), transcendenceName);
             if (lichRace4) {
-                util->SMI_NoNeedsRaces->AddForm(lichRace4);
+                utility->SMI_NoNeedsRaces->AddForm(lichRace4);
             }
             auto lichRace5 = dataHandler->LookupForm(RE::FormID(0x0024a378), transcendenceName);
             if (lichRace5) {
-                util->SMI_NoNeedsRaces->AddForm(lichRace5);
+                utility->SMI_NoNeedsRaces->AddForm(lichRace5);
             }
             auto lichRace6 = dataHandler->LookupForm(RE::FormID(0x0024a379), transcendenceName);
             if (lichRace6) {
-                util->SMI_NoNeedsRaces->AddForm(lichRace6);
+                utility->SMI_NoNeedsRaces->AddForm(lichRace6);
             }
             auto lichRace7 = dataHandler->LookupForm(RE::FormID(0x0024f47d), transcendenceName);
             if (lichRace7) {
-                util->SMI_NoNeedsRaces->AddForm(lichRace7);
+                utility->SMI_NoNeedsRaces->AddForm(lichRace7);
             }
             auto lichRace8 = dataHandler->LookupForm(RE::FormID(0x0024f47e), transcendenceName);
             if (lichRace8) {
-                util->SMI_NoNeedsRaces->AddForm(lichRace8);
+                utility->SMI_NoNeedsRaces->AddForm(lichRace8);
             }
             auto lichRace9 = dataHandler->LookupForm(RE::FormID(0x0024f482), transcendenceName);
             if (lichRace9) {
-                util->SMI_NoNeedsRaces->AddForm(lichRace9);
+                utility->SMI_NoNeedsRaces->AddForm(lichRace9);
             }
             auto lichRace10 = dataHandler->LookupForm(RE::FormID(0x0024f486), transcendenceName);
             if (lichRace10) {
-                util->SMI_NoNeedsRaces->AddForm(lichRace10);
+                utility->SMI_NoNeedsRaces->AddForm(lichRace10);
             }
             auto lichRace11 = dataHandler->LookupForm(RE::FormID(0x0024f487), transcendenceName);
             if (lichRace11) {
-                util->SMI_NoNeedsRaces->AddForm(lichRace11);
+                utility->SMI_NoNeedsRaces->AddForm(lichRace11);
             }
             auto lichRace12 = dataHandler->LookupForm(RE::FormID(0x0037fd2b), transcendenceName);
             if (lichRace12) {
-                util->SMI_NoNeedsRaces->AddForm(lichRace12);
+                utility->SMI_NoNeedsRaces->AddForm(lichRace12);
             }
         }
 
-        if (dataHandler->LookupLoadedLightModByName(causePluginName)) {
+        if (utility->LookupLoadedLightModByName(causePluginName)) {
             auto deadLandsWorldspace = dataHandler->LookupForm(RE::FormID(0xE1592), causePluginName);
             auto deadLandsLoc        = dataHandler->LookupForm(RE::FormID(0x33F39), causePluginName);
 
-            if (deadLandsWorldspace && !util->Survival_OblivionAreas->HasForm(deadLandsWorldspace)) {
-                util->Survival_OblivionAreas->AddForm(deadLandsWorldspace);
+            if (deadLandsWorldspace && !utility->Survival_OblivionAreas->HasForm(deadLandsWorldspace)) {
+                utility->Survival_OblivionAreas->AddForm(deadLandsWorldspace);
             }
 
-            if (deadLandsLoc && !util->Survival_OblivionAreas->HasForm(deadLandsLoc)) {
-                util->Survival_OblivionLocations->AddForm(deadLandsLoc);
+            if (deadLandsLoc && !utility->Survival_OblivionAreas->HasForm(deadLandsLoc)) {
+                utility->Survival_OblivionLocations->AddForm(deadLandsLoc);
             }
         }
 
-        util->SMI_SimonrimHealthRegenDetected = dataHandler->LookupForm(RE::FormID(0xD25), smiPluginName)->As<RE::TESGlobal>();
-        if (dataHandler->LookupLoadedModByName(simonrimHealthRegenPluginName) || dataHandler->LookupLoadedLightModByName(simonrimHealthRegenPluginName)) {
-            util->SMI_SimonrimHealthRegenDetected->value = 1.0f;
+        utility->SMI_SimonrimHealthRegenDetected = dataHandler->LookupForm(RE::FormID(0xD25), smiPluginName)->As<RE::TESGlobal>();
+        if (utility->LookupLoadedModByName(simonrimHealthRegenPluginName) || utility->LookupLoadedLightModByName(simonrimHealthRegenPluginName)) {
+            utility->SMI_SimonrimHealthRegenDetected->value = 1.0f;
         }
         else {
-            util->SMI_SimonrimHealthRegenDetected->value = 0.0f;
+            utility->SMI_SimonrimHealthRegenDetected->value = 0.0f;
         }
     }
 
