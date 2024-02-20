@@ -1,11 +1,21 @@
 {
-  "name": "survivalmodeimproved",
-  "version-string": "1.0.0",
-  "description": "",
-  "homepage": "",
-  "license": "MIT",
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "survival-mode-improved",
+  "version-semver": "1.5.0",
   "dependencies": [
-    "commonlibsse-ng-flatrim",
-	  "simpleini"
-  ]
+    "fmt",
+    "spdlog",
+    "rapidcsv",
+    "simpleini",
+    "xbyak",
+    "clib-util"
+  ],
+  "license": "GPL-3.0-or-later",
+  "vcpkg-configuration": {
+    "default-registry": {
+      "kind": "git",
+      "repository": "https://github.com/microsoft/vcpkg",
+      "baseline": "095ee06e7f60dceef7d713e3f8b1c2eb10d650d7"
+    }
+  }
 }

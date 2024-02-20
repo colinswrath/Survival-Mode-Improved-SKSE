@@ -102,6 +102,10 @@ public:
 	RE::TESQuest* UnboundQuest;
 	RE::TESQuest* BYOHRelationshipAdoption;
 
+    RE::TESRegion* WeatherMountains;
+    RE::TESRegion* WeatherSnow;
+    RE::TESRegion* WeatherReach;
+
 	RE::TESRegion* CYRWeatherBruma;
 	RE::TESRegion* CYRWeatherGreatForestNorth;
 	RE::TESRegion* CYRWeatherMountainsSnow;
@@ -261,7 +265,7 @@ public:
 
 	static float GetRandomFloat(float min, float max) 
 	{
-		return SKSE::stl::RNG::GetSingleton()->Generate<float>(min, max);
+        return clib_util::RNG().Generate<float>(min, max);
 	}
 
 	static bool IsSurvivalEnabled()
@@ -501,24 +505,22 @@ public:
 
 	static bool PlayerIsNearWellRestedBed()
 	{
-		auto TES = RE::TES::GetSingleton();
 		auto player = Utility::GetPlayer();
 		auto util = Utility::GetSingleton();
 
 		bool nearWellRested = false;
-		if (TES) {
-			TES->ForEachReferenceInRange(player, 300.0f, [&](RE::TESObjectREFR& b_ref) {
-				if (!b_ref.IsDisabled()) {
-					if (const auto base = b_ref.GetBaseObject(); base) {
-						if (util->SMI_WellRestedObjectsList->HasForm(base)) {
-							nearWellRested = true;
-							return RE::BSContainer::ForEachResult::kStop;
-						}
+		RE::TES::GetSingleton()->ForEachReferenceInRange(player, 300.0f, [&](RE::TESObjectREFR& b_ref) {
+			if (!b_ref.IsDisabled()) {
+				if (const auto base = b_ref.GetBaseObject(); base) {
+					if (util->SMI_WellRestedObjectsList->HasForm(base)) {
+						nearWellRested = true;
+						return RE::BSContainer::ForEachResult::kStop;
 					}
 				}
-				return RE::BSContainer::ForEachResult::kContinue;
-			});
-		}
+			}
+			return RE::BSContainer::ForEachResult::kContinue;
+		});
+		
 		return nearWellRested;
 	}
 
@@ -619,5 +621,25 @@ public:
 		using func_t = decltype(&Utility::IsFastTravelEnabled);
 		REL::Relocation<func_t> func{ Utility::GetSingleton()->IsFtEnabledAddress };
 		return func();
-	}	
+	}
+
+    static RE::TESFile* LookupLoadedModByName(std::string_view a_modName)
+    {
+        for (auto& file : RE::TESDataHandler::GetSingleton()->compiledFileCollection.files) {
+            if (a_modName.size() == strlen(file->fileName) && _strnicmp(file->fileName, a_modName.data(), a_modName.size()) == 0) {
+                return file;
+            }
+        }
+        return nullptr;
+    }
+
+    static const RE::TESFile* LookupLoadedLightModByName(std::string_view a_modName)
+    {
+        for (auto& smallFile : RE::TESDataHandler::GetSingleton()->compiledFileCollection.smallFiles) {
+            if (a_modName.size() == strlen(smallFile->fileName) && _strnicmp(smallFile->fileName, a_modName.data(), a_modName.size()) == 0) {
+                return smallFile;
+            }
+        }
+        return nullptr;
+    }
 };

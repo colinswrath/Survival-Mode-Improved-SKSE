@@ -1,0 +1,32 @@
+name: Prettier
+
+on:
+  push:
+    branches: main
+    paths:
+      - "**.json"
+      - "**.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prettier:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Prettier
+        uses: actionsx/prettier@v3
+        with:
+          args: --write "${{ github.workspace }}/*.json"
+
+      - name: Add & Commit
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: "ci: formatting"
+          default_author: github_actions
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
