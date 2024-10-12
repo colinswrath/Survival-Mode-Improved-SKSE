@@ -36,6 +36,17 @@ public:
 	RE::SpellItem* Survival_abWarmthTorch;
 	RE::SpellItem* Survival_OverencumberedSpell;
 
+	RE::SpellItem* BnBInjury1;
+    RE::SpellItem* BnBInjury2;
+    RE::SpellItem* BnBInjury3;
+
+    RE::TESGlobal* MAG_InjuriesSMOnly;
+    RE::TESGlobal* MAG_InjuriesAndRest;
+
+    RE::SpellItem* StarfrostHunger1;
+    RE::SpellItem* StarfrostHunger2;
+    RE::SpellItem* StarfrostHunger3;
+
 	RE::SpellItem* Survival_DiseaseBrownRot;
 	RE::SpellItem* Survival_DiseaseGreenspore;
 	
@@ -102,6 +113,11 @@ public:
 	RE::TESQuest* UnboundQuest;
 	RE::TESQuest* BYOHRelationshipAdoption;
 
+	RE::TESQuest* hungerQuest;
+    RE::TESQuest* fatigueQuest;
+    RE::TESQuest* coldQuest;
+    RE::TESQuest* mainQuest;
+
     RE::TESRegion* WeatherMountains;
     RE::TESRegion* WeatherSnow;
     RE::TESRegion* WeatherReach;
@@ -148,6 +164,9 @@ public:
 
 	float MaxAvPenaltyPercent = 1.0f;
 
+    float MainUpdateInterval = 1.0f;
+    float AvUpdateInterval   = 0.5f;
+
 	//Global Load overwrite variables
 	float LoadColdStage1Val = 0.0f;
 	float LoadColdStage2Val = 0.0f;
@@ -184,6 +203,10 @@ public:
 	float coldAfflictionChance = 0.0f;
 	float hungerAfflictionChance = 0.0f;
 	float exhaustionAfflictionChance = 0.0f;
+
+    float injury1AVPercent = 0.0f;
+    float injury2AVPercent = 0.0f;
+    float injury3AVPercent = 0.0f;
 
 	float exhaustionRestorePerHour = 0.0f;
 
@@ -342,8 +365,8 @@ public:
 	static void RemoveSurvivalDiseases()
 	{
 		auto util = Utility::GetSingleton();
-		util->Survival_SurvivalDiseases->ForEachForm([&](RE::TESForm& a_form) {
-			if (auto disease = a_form.As<RE::SpellItem>()) {
+		util->Survival_SurvivalDiseases->ForEachForm([&](RE::TESForm* a_form) {
+			if (auto disease = a_form->As<RE::SpellItem>()) {
 				Utility::GetPlayer()->RemoveSpell(disease);
 			}
 			return RE::BSContainer::ForEachResult::kContinue;
@@ -509,9 +532,9 @@ public:
 		auto util = Utility::GetSingleton();
 
 		bool nearWellRested = false;
-		RE::TES::GetSingleton()->ForEachReferenceInRange(player, 300.0f, [&](RE::TESObjectREFR& b_ref) {
-			if (!b_ref.IsDisabled()) {
-				if (const auto base = b_ref.GetBaseObject(); base) {
+		RE::TES::GetSingleton()->ForEachReferenceInRange(player, 300.0f, [&](RE::TESObjectREFR* b_ref) {
+			if (!b_ref->IsDisabled()) {
+				if (const auto base = b_ref->GetBaseObject(); base) {
 					if (util->SMI_WellRestedObjectsList->HasForm(base)) {
 						nearWellRested = true;
 						return RE::BSContainer::ForEachResult::kStop;

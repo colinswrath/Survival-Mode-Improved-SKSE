@@ -4,17 +4,25 @@
 #include "Needs/NeedExhaustion.h"
 #include "Needs/NeedCold.h"
 #include "Utility.h"
+#include "AvPenaltyManager.h"
 
 std::int32_t SurvivalMode::OnUpdate()
 { 
 	if (!Utility::GetUI()->GameIsPaused()) {
 		
 		if (g_deltaTime > 0) {
-			lastTime += g_deltaTime;
-			if (lastTime >= 1.0f) {
+			lastMainTime += g_deltaTime;
+            lastAvTime += g_deltaTime;
+
+			if (lastMainTime >= 1.0f) {
 				SurvivalModeLoopUpdate();
-				lastTime = 0;
+				lastMainTime = 0.0f;
 			}
+
+            if (lastAvTime >= 0.5f) {
+                AvPenaltyCheckUpdate();
+                lastAvTime = 0.0f;
+            }
 		}
 	}
 
@@ -37,9 +45,22 @@ void SurvivalMode::SurvivalModeLoopUpdate()
 	}
 }
 
+void SurvivalMode::AvPenaltyCheckUpdate()
+{
+    auto avMan = AvPenaltyManager::GetSingleton();
+    auto utility = Utility::GetSingleton();
+
+    if (!utility->IsSurvivalEnabled() || !utility->SurvivalToggle()) {
+        avMan->RemoveAllAvPenalties();
+    }
+    else {
+        avMan->UpdateActorValuePenalties();
+    }
+}
+
 void SurvivalMode::StartSurvivalMode()
 {
-	if (Utility::GetSingleton()->MQ101->IsCompleted() || (RE::ControlMap::GetSingleton()->IsMainFourControlsEnabled()))
+    if (Utility::GetSingleton()->MQ101->IsCompleted() || (RE::ControlMap::GetSingleton()->IsMainFourControlsEnabled()))
 	{
 		logger::info("Starting SM");
 		auto utility = Utility::GetSingleton();

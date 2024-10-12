@@ -114,6 +114,11 @@ namespace Serialization
 		a_skse->GetNextRecordInfo(type, version, length);
 
 		if (type != SerializationType) {
+            logger::info("No data, stopping old quests");
+            utility->hungerQuest->Stop();
+            utility->coldQuest->Stop();
+            utility->fatigueQuest->Stop();
+            utility->mainQuest->Stop();
 			return;
 		}
 			

@@ -87,7 +87,6 @@ public:
 			CurrentlyStopped = true;
 			RemoveNeedEffects();
 			RemoveAfflictions();
-			RemoveAttributePenalty();
 			CurrentNeedStage->value = -1;
 		}
 	}
@@ -104,7 +103,6 @@ public:
 		
 		CurrentNeedValue->value = newNeedLevel;
 		SetNeedStage(true);
-		ApplyAttributePenalty();
 	}
 
 	virtual void DecreaseNeed(float amount, float minValue = 0.0f)
@@ -113,7 +111,6 @@ public:
 
 		CurrentNeedValue->value = newNeedLevel;
 		SetNeedStage(false);
-		ApplyAttributePenalty();
 	}
 
 	void SetLastTimeStamp(float timeToSet = Utility::GetCalendar()->GetCurrentGameTime() * 1440)
@@ -168,69 +165,6 @@ protected:
 		if (lastStage != CurrentNeedStage->value || forceUpdateEffects) {
 			ApplyNeedStageEffects(increasing);
 		}
-	}
-
-	virtual void ApplyAttributePenalty()
-	{
-		if (NeedAvPenDisabled->value != 1.0f) {
-
-			float maxPenAv = GetMaxAttributeAv(ActorValPenaltyAttribute, NeedPenaltyAV);
-
-			float penaltyPerc = GetPenaltyPercentAmount();
-
-			float lastPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(NeedPenaltyAV);
-			float newPenaltyMag = std::roundf(maxPenAv * penaltyPerc);
-
-			if (newPenaltyMag > maxPenAv) { 
-				newPenaltyMag = maxPenAv;
-			}
-			auto magDelta = lastPenaltyMag - newPenaltyMag;
-
-			//Set tracker av not actual damage
-			Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(NeedPenaltyAV, newPenaltyMag);
-		
-			//Damage or restore AV
-			Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, magDelta);
-
-			SetAttributePenaltyUIGlobal(penaltyPerc);
-		} else {
-			RemoveAttributePenalty();
-		}
-	}
-
-	virtual void RemoveAttributePenalty()
-	{
-		float currentPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(NeedPenaltyAV);
-
-		if (currentPenaltyMag > 0) {
-			Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(NeedPenaltyAV, 0.0f);
-			SetAttributePenaltyUIGlobal(0.0f);
-			Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, ActorValPenaltyAttribute, currentPenaltyMag);
-		}
-	}
-
-	float GetMaxAttributeAv(RE::ActorValue avPenAttribute, RE::ActorValue needPenaltyAv)
-	{
-		return (Utility::GetPlayer()->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, avPenAttribute) + 
-			Utility::GetPlayer()->AsActorValueOwner()->GetPermanentActorValue(avPenAttribute) +
-			Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(needPenaltyAv));
-	}
-
-	virtual float GetPenaltyPercentAmount()
-	{
-		auto util = Utility::GetSingleton();
-		auto penalty = (CurrentNeedValue->value - NeedStage2->value - 1) / (NeedMaxValue->value - NeedStage2->value - 1);
-		penalty = std::clamp(penalty, 0.0f, util->MaxAvPenaltyPercent);
-
-		return penalty;
-	}
-
-	void SetAttributePenaltyUIGlobal(float penaltyPerc) 
-	{
-		auto newVal = penaltyPerc * 100.0f;
-		newVal = std::clamp(newVal, 0.0f, 100.0f);
-
-		NeedPenaltyUIGlobal->value = newVal;
 	}
 
 	virtual void RemoveNeedEffects()

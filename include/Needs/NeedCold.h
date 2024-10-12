@@ -196,7 +196,6 @@ public:
 		CurrentNeedValue->value = newNeedLevel;
 		UpdateTemperatureUI(currentNeedLevel, newNeedLevel);
 		SetNeedStage(true);
-		ApplyAttributePenalty();
 	}
 
 	void DecreaseNeed(float decreaseAmount, float min = 0.0f) override
@@ -209,7 +208,6 @@ public:
 
 		UpdateTemperatureUI(currentNeedLevel, newNeedLevel);
 		SetNeedStage(false);
-		ApplyAttributePenalty();
 	}
 
 	float GetNeedIncrementAmount(int ticks) override
@@ -540,9 +538,9 @@ public:
 
 		bool nearHeat = false;
 		if (TES && !player->IsRunning() && !playerState->IsSprinting() && !playerState->IsSwimming()) {
-            TES->ForEachReferenceInRange(player, 580.0f, [&](RE::TESObjectREFR& b_ref) {
-				if (!b_ref.IsDisabled()) {
-					if (const auto base = b_ref.GetBaseObject(); base && b_ref.Is3DLoaded()) {	
+            TES->ForEachReferenceInRange(player, 580.0f, [&](RE::TESObjectREFR* b_ref) {
+				if (!b_ref->IsDisabled()) {
+					if (const auto base = b_ref->GetBaseObject(); base && b_ref->Is3DLoaded()) {	
 						if (Survival_WarmUpObjectsList->HasForm(base)) {
 							nearHeat = true;
 							return RE::BSContainer::ForEachResult::kStop;

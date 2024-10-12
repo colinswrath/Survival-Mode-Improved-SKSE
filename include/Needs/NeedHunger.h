@@ -71,7 +71,6 @@ public:
 			RemoveNeedEffects();
 			SetHungerFoodItemDesc();
 			RemoveAfflictions();
-			RemoveAttributePenalty();
 			CurrentNeedStage->value = -1;
 		}
 	}
@@ -154,7 +153,6 @@ public:
 		float newNeedLevel = std::clamp(CurrentNeedValue->value - amount, minValue, NeedMaxValue->value);
 		CurrentNeedValue->value = newNeedLevel * GetGutwormMult();
 		SetNeedStage(false);
-		ApplyAttributePenalty();
 	}
 
 	void RemoveAfflictions() override

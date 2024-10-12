@@ -1,7 +1,8 @@
 #pragma once
 
 static float& g_deltaTime = (*(float*)RELOCATION_ID(523660, 410199).address());
-static float lastTime;
+static float lastMainTime;
+static float lastAvTime;
 
 class SurvivalMode
 {
@@ -19,6 +20,7 @@ protected:
 	inline static REL::Relocation<decltype(OverwriteFastTravelMessage)> _OverwriteFastTravelMessage;
 
 	inline static void SurvivalModeLoopUpdate();
+    inline static void AvPenaltyCheckUpdate();
 	inline static void SendAllNeedsUpdate();
 	inline static void SendHungerUpdate();
 	inline static void SendColdUpdate();
