@@ -54,7 +54,6 @@ public:
     void UpdateHealthAvPenalty()
     {
         auto util = Utility::GetSingleton();
-        logger::info("Starfrost installed {0}", util->starfrostInstalled);
         // If starfrost
         if (util->starfrostInstalled) {
             ApplyStarfrostHealthPenalty();
@@ -131,15 +130,15 @@ private:
 
         // Check starfrost hunger spells
         // Note: Hunger in starfrost is not managed internally by the DLL, instead its spell based in the esp
-        if (Utility::GetPlayer()->HasSpell(util->StarfrostHunger1)) {
-            penPerc += 0.10;
-        }
-        else if (Utility::GetPlayer()->HasSpell(util->StarfrostHunger2)) {
-            penPerc += 0.25;
-        }
-        else if (Utility::GetPlayer()->HasSpell(util->StarfrostHunger3)) {
-            penPerc += 0.50;
-        }
+        //if (Utility::GetPlayer()->HasSpell(util->StarfrostHunger1)) {
+        //    penPerc += 0.10;
+        //}
+        //else if (Utility::GetPlayer()->HasSpell(util->StarfrostHunger2)) {
+        //    penPerc += 0.25;
+        //}
+        //else if (Utility::GetPlayer()->HasSpell(util->StarfrostHunger3)) {
+        //    penPerc += 0.50;
+        //}
 
         return penPerc;
     }
@@ -194,7 +193,7 @@ private:
         }
 
         //BnB Installed
-        if (util->BnBInjury1)
+        /*if (util->BnBInjury1)
         {
 
             if ((util->MAG_InjuriesAndRest->value && util->MAG_InjuriesSMOnly->value == 0) || ((util->MAG_InjuriesSMOnly->value == 0) && (util->MAG_InjuriesAndRest->value > 0) && util->IsSurvivalEnabled()))
@@ -209,7 +208,7 @@ private:
                     penPerc += util->injury3AVPercent;
                 }
             }
-        }
+        }*/
 
         return penPerc;
     }
@@ -266,15 +265,15 @@ private:
 
         // Check starfrost hunger spells
         // Note: Hunger in starfrost is not managed internally by the DLL, instead its spell based in the esp
-        if (Utility::GetPlayer()->HasSpell(util->StarfrostHunger1)) {
-            penPerc += 0.10;
-        }
-        else if (Utility::GetPlayer()->HasSpell(util->StarfrostHunger2)) {
-            penPerc += 0.25;
-        }
-        else if (Utility::GetPlayer()->HasSpell(util->StarfrostHunger3)) {
-            penPerc += 0.50;
-        }
+        //if (Utility::GetPlayer()->HasSpell(util->StarfrostHunger1)) {
+        //    penPerc += 0.10;
+        //}
+        //else if (Utility::GetPlayer()->HasSpell(util->StarfrostHunger2)) {
+        //    penPerc += 0.25;
+        //}
+        //else if (Utility::GetPlayer()->HasSpell(util->StarfrostHunger3)) {
+        //    penPerc += 0.50;
+        //}
 
         return penPerc;
     }
