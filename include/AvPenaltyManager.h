@@ -15,13 +15,6 @@ public:
         return &avPenManager;
     }
 
-    //Update all 3 needs
-    //Take starfrost into account
-        //TODO-Starfrost needs to check needs enabled
-    //TODO-Hande individual needs being off
-    //TODO-Handle SM being off
-
-
     void UpdateActorValuePenalties()
     {
         UpdateStaminaAvPenalty();
@@ -54,14 +47,15 @@ public:
     void UpdateHealthAvPenalty()
     {
         auto util = Utility::GetSingleton();
+        // Note: will be needed for future starfrost versions
         // If starfrost
-        if (util->starfrostInstalled) {
-            ApplyStarfrostHealthPenalty();
-        }
-        else {
-            // Cold Pen
+        //if (util->starfrostInstalled) {
+        //    ApplyStarfrostHealthPenalty();
+        //}
+        //else {
+        //    // Cold Pen
             ApplyNeedAttributePenalty(NeedCold::GetSingleton());
-        }
+        /*}*/
     }
 
     void UpdateMagickaAvPenalty()
@@ -179,7 +173,6 @@ private:
         auto cold = NeedCold::GetSingleton();
         auto penPerc = 0.0f;
 
-        //Cold
         float stage = cold->CurrentNeedStage->value;
 
         if (stage == 3) {
@@ -304,7 +297,7 @@ private:
             // Damage or restore AV
             Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, need->ActorValPenaltyAttribute, magDelta);
 
-            SetAttributePenaltyUIGlobal(penaltyPerc, StaminaUIGlobal);
+            SetAttributePenaltyUIGlobal(penaltyPerc, need->NeedPenaltyUIGlobal);
         }
         else {
             RemoveNeedAttributePenalty(need);
