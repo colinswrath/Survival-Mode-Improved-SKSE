@@ -329,12 +329,13 @@ namespace Events
 			if (!a_event || !a_eventSource) {
 				return RE::BSEventNotifyControl::kContinue;
 			}
+            auto util = Utility::GetSingleton();
 
-			if(a_event->menuName == RE::MapMenu::MENU_NAME && Utility::GetSingleton()->DisableFastTravel) {
-				if (a_event->opening && Utility::IsFastTravelEnabled() && Utility::DisableFTCheck()) {
-					Utility::EnableFastTravel(false);
+			if (a_event->menuName == RE::MapMenu::MENU_NAME && util->DisableFastTravel) {
+                if (a_event->opening && Utility::IsSurvivalEnabled() && Utility::IsFastTravelEnabled() && Utility::DisableFTCheck()) {
+                    Utility::EnableFastTravel(nullptr, nullptr, nullptr, false);
 				} else if (!a_event->opening) {
-					Utility::EnableFastTravel(true);	
+                    Utility::EnableFastTravel(nullptr, nullptr, nullptr, true);	
 				}
 			}
 			

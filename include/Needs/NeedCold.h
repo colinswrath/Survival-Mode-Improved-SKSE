@@ -539,7 +539,7 @@ public:
 		bool nearHeat = false;
 		if (TES && !player->IsRunning() && !playerState->IsSprinting() && !playerState->IsSwimming()) {
             TES->ForEachReferenceInRange(player, 580.0f, [&](RE::TESObjectREFR* b_ref) {
-				if (!b_ref->IsDisabled()) {
+                if (b_ref && !b_ref->IsDisabled()) {
 					if (const auto base = b_ref->GetBaseObject(); base && b_ref->Is3DLoaded()) {	
 						if (Survival_WarmUpObjectsList->HasForm(base)) {
 							nearHeat = true;

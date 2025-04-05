@@ -632,11 +632,11 @@ public:
 		return func(actor, spell, target);
 	}
 
-	static void EnableFastTravel(bool a_enable)
+	static void EnableFastTravel(void* a1, void* a2, void* a3, bool a_enable)
 	{
 		using func_t = decltype(&Utility::EnableFastTravel);
 		REL::Relocation<func_t> func{ Utility::GetSingleton()->EnableFtAddress };
-		return func(a_enable);
+        return func(a1, a2, a3, a_enable);
 	}
 
 	static bool IsFastTravelEnabled()

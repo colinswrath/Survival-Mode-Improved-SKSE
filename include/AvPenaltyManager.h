@@ -46,8 +46,8 @@ public:
 
     void UpdateHealthAvPenalty()
     {
-        auto util = Utility::GetSingleton();
         // Note: will be needed for future starfrost versions
+        //auto util = Utility::GetSingleton();
         // If starfrost
         //if (util->starfrostInstalled) {
         //    ApplyStarfrostHealthPenalty();
@@ -105,7 +105,7 @@ private:
 
     float CalculateStaminaPenaltyPercentStarfrost()
     {
-        auto util = Utility::GetSingleton();
+        //auto util = Utility::GetSingleton();
         auto exhaustion = NeedExhaustion::GetSingleton();
 
         // Exhaustion
@@ -169,7 +169,7 @@ private:
 
     float CalculateHealthPenaltyPercentStarfrost()
     {
-        auto util       = Utility::GetSingleton();
+        //auto util       = Utility::GetSingleton();
         auto cold = NeedCold::GetSingleton();
         auto penPerc = 0.0f;
 
@@ -186,6 +186,7 @@ private:
         }
 
         //BnB Installed
+        //Needed for future BnB version
         /*if (util->BnBInjury1)
         {
 
@@ -216,6 +217,7 @@ private:
 
         // Max
         auto maxPenAv = GetMaxAttributeAv(RE::ActorValue::kMagicka, magickaPenAv);
+
         
         auto penPerc = CalculateMagickaPenaltyPercentStarfrost();
 
@@ -239,7 +241,7 @@ private:
 
     float CalculateMagickaPenaltyPercentStarfrost()
     {
-        auto util       = Utility::GetSingleton();
+        //auto util       = Utility::GetSingleton();
         auto exhaustion = NeedExhaustion::GetSingleton();
 
         // Exhaustion

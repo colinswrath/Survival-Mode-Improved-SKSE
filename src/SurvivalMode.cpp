@@ -187,7 +187,11 @@ void SurvivalMode::OverwriteFastTravelMessage(const char* a_notification, const 
 {
 	if (!Utility::GetUI()->IsMenuOpen(RE::MapMenu::MENU_NAME) || !Utility::DisableFTCheck() || !Utility::GetSingleton()->DisableFastTravel) {
 		_OverwriteFastTravelMessage(a_notification, a_soundToPlay, a_cancelIfAlreadyQueued);
-	}
+    }
+    else if (Utility::DisableFTCheck() && Utility::GetSingleton()->DisableFastTravel)
+    {
+        _OverwriteFastTravelMessage("Fast travel is disabled in survival mode!", a_soundToPlay, a_cancelIfAlreadyQueued);
+    }
 }
 
 void SurvivalMode::AddPlayerSpellPerks() 
