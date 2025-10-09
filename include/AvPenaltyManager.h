@@ -2,6 +2,15 @@
 
 #include "Utility.h"
 
+struct AvPenaltyHandler
+{
+    std::function<float()> calculatePenalty;
+    RE::ActorValue         trackedAV;
+    RE::ActorValue         affectedAV;
+    RE::TESGlobal*         uiGlobal;
+    NeedBase*              associatedNeed{ nullptr }; //For non starfrost AV Penalties
+};
+
 class AvPenaltyManager
 {
 public:
@@ -15,11 +24,48 @@ public:
         return &avPenManager;
     }
 
+    void InitializeHandlers()
+    {
+        auto util = Utility::GetSingleton();
+
+        //If old starfrost, hunger does not effect AVs
+        // if new starfrost, exhaustion/hunger effect stamina and magicka
+        
+        //If starfrost
+        if (util->starfrostInstalled)
+        {
+            if (util->starfrostVer >= ModVersion(2,0,0))
+            {
+                staminaHandler = { [this] { return CalculateExhaustionPenPercent() + CalculateHungerPenPercent(); }, RE::ActorValue::kVariable02, RE::ActorValue::kStamina, StaminaUIGlobal, nullptr };
+                healthHandler  = { [this] { return CalculateColdPenPercent() + CalculateHealthPenaltyPercentBladeAndBlunt(); }, RE::ActorValue::kVariable04, RE::ActorValue::kHealth, HealthUIGlobal, nullptr };
+                magickaHandler = { [this] { return CalculateExhaustionPenPercent() + CalculateHungerPenPercent(); }, RE::ActorValue::kVariable03, RE::ActorValue::kMagicka, MagickaUIGlobal, nullptr };
+            }
+            else
+            {
+                staminaHandler = { [this] { return CalculateExhaustionPenPercent(); }, RE::ActorValue::kVariable02, RE::ActorValue::kStamina, StaminaUIGlobal, nullptr };
+                healthHandler  = { [this] { return CalculateHealthPenaltyPercentBladeAndBlunt(); }, RE::ActorValue::kVariable04, RE::ActorValue::kHealth, HealthUIGlobal, nullptr };
+                magickaHandler = { [this] { return CalculateExhaustionPenPercent(); }, RE::ActorValue::kVariable03, RE::ActorValue::kMagicka, MagickaUIGlobal, nullptr };
+            }
+        }
+        else
+        {
+            auto hunger    = NeedHunger::GetSingleton();
+            staminaHandler = { [this, hunger] { return GetPenaltyPercentAmount(hunger); }, hunger->NeedPenaltyAV, hunger->ActorValPenaltyAttribute, hunger->NeedPenaltyUIGlobal, hunger };
+
+            auto cold = NeedCold::GetSingleton();
+            healthHandler = { [this, cold] { return GetPenaltyPercentAmount(cold); }, cold->NeedPenaltyAV, cold->ActorValPenaltyAttribute, cold->NeedPenaltyUIGlobal, cold };
+
+            auto exhaustion = NeedExhaustion::GetSingleton();
+            magickaHandler  = { [this, exhaustion] { return GetPenaltyPercentAmount(exhaustion); }, exhaustion->NeedPenaltyAV, exhaustion->ActorValPenaltyAttribute,
+                               exhaustion->NeedPenaltyUIGlobal, exhaustion };
+        }
+    }
+
     void UpdateActorValuePenalties()
     {
-        UpdateStaminaAvPenalty();
-        UpdateHealthAvPenalty();
-        UpdateMagickaAvPenalty();
+        ApplyHandler(staminaHandler);
+        ApplyHandler(healthHandler);
+        ApplyHandler(magickaHandler);
     }
 
     void RemoveAllAvPenalties()
@@ -28,169 +74,92 @@ public:
         RemoveNeedAttributePenalty(NeedHunger::GetSingleton());
         RemoveNeedAttributePenalty(NeedExhaustion::GetSingleton());
     }
-    
-    void UpdateStaminaAvPenalty()
-    {
-        auto util = Utility::GetSingleton();
-
-        // If starfrost
-        if (util->starfrostInstalled) {
-            ApplyStarfrostStaminaPenalty();
-        }
-        //If normal SMI
-        else {
-            ApplyNeedAttributePenalty(NeedHunger::GetSingleton());     
-        }
-    }
-
-
-    void UpdateHealthAvPenalty()
-    {
-        // Note: will be needed for future starfrost versions
-        //auto util = Utility::GetSingleton();
-        // If starfrost
-        //if (util->starfrostInstalled) {
-        //    ApplyStarfrostHealthPenalty();
-        //}
-        //else {
-        //    // Cold Pen
-            ApplyNeedAttributePenalty(NeedCold::GetSingleton());
-        /*}*/
-    }
-
-    void UpdateMagickaAvPenalty()
-    {
-        auto util = Utility::GetSingleton();
-
-        // If starfrost
-        if (util->starfrostInstalled) {
-            ApplyStarfrostMagickaPenalty();
-        }
-        else {
-            // Exhaustion Pen
-            ApplyNeedAttributePenalty(NeedExhaustion::GetSingleton());
-        }
-    }
 
 private:
 
-#pragma region Starfrost Stamina 
+#pragma region Starfrost
 
-    void ApplyStarfrostStaminaPenalty()
+
+    float CalculateHungerPenPercent()
     {
-        auto staminaPenAv = RE::ActorValue::kVariable02;
+        auto hunger = NeedHunger::GetSingleton();
 
-        // Max
-        auto maxPenAv = GetMaxAttributeAv(RE::ActorValue::kStamina, staminaPenAv);
+        float hungerStage = hunger->CurrentNeedStage->value;
+        auto  penPerc     = 0.0f;
 
-        auto penPerc = CalculateStaminaPenaltyPercentStarfrost();
-
-        // Magnitude
-        float lastPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(staminaPenAv);
-        float newPenaltyMag  = std::roundf(maxPenAv * penPerc);
-
-        if (newPenaltyMag > maxPenAv) {
-            newPenaltyMag = maxPenAv;
+        if (!hunger->CurrentlyStopped) {
+            if (hungerStage == 3) {
+                penPerc += 0.1f;
+            }
+            else if (hungerStage == 4) {
+                penPerc += 0.25f;
+            }
+            else if (hungerStage >= 5) {
+                penPerc += 0.50f;
+            }
         }
-        auto magDelta = lastPenaltyMag - newPenaltyMag;
-
-        // Set tracker av not actual damage
-        Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(staminaPenAv, newPenaltyMag);
-
-        // Damage or restore AV
-        Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kStamina, magDelta);
-
-        SetAttributePenaltyUIGlobal(penPerc, StaminaUIGlobal);
-    }
-
-    float CalculateStaminaPenaltyPercentStarfrost()
-    {
-        //auto util = Utility::GetSingleton();
-        auto exhaustion = NeedExhaustion::GetSingleton();
-
-        // Exhaustion
-        auto  penPerc = 0.0f;
-        float stage   = exhaustion->CurrentNeedStage->value;
-
-        if (stage == 3) {
-            penPerc = 0.1f;
-        }
-        else if (stage == 4) {
-            penPerc = 0.25f;
-        }
-        else if (stage >= 5) {
-            penPerc = 0.50f;
-        }
-
-        // Check starfrost hunger spells
-        // Note: Hunger in starfrost is not managed internally by the DLL, instead its spell based in the esp
-        //if (Utility::GetPlayer()->HasSpell(util->StarfrostHunger1)) {
-        //    penPerc += 0.10;
-        //}
-        //else if (Utility::GetPlayer()->HasSpell(util->StarfrostHunger2)) {
-        //    penPerc += 0.25;
-        //}
-        //else if (Utility::GetPlayer()->HasSpell(util->StarfrostHunger3)) {
-        //    penPerc += 0.50;
-        //}
 
         return penPerc;
     }
 
-#pragma endregion
-
-#pragma region Starfrost Health
-
-    void ApplyStarfrostHealthPenalty()
+    float CalculateExhaustionPenPercent()
     {
-        auto healthPenAv = RE::ActorValue::kVariable04;
+        auto exhaustion = NeedExhaustion::GetSingleton();
+        float exhaustionStage = exhaustion->CurrentNeedStage->value;
+        auto  penPerc         = 0.0f;
 
-        // Max
-        auto maxPenAv = GetMaxAttributeAv(RE::ActorValue::kHealth, healthPenAv);
-        auto penPerc = CalculateHealthPenaltyPercentStarfrost();
-
-        // Magnitude
-        float lastPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(healthPenAv);
-        float newPenaltyMag  = std::roundf(maxPenAv * penPerc);
-
-        if (newPenaltyMag > maxPenAv) {
-            newPenaltyMag = maxPenAv;
+        if (!exhaustion->CurrentlyStopped) {
+            if (exhaustionStage == 3) {
+                penPerc = 0.1f;
+            }
+            else if (exhaustionStage == 4) {
+                penPerc = 0.25f;
+            }
+            else if (exhaustionStage >= 5) {
+                penPerc = 0.50f;
+            }
         }
-        auto magDelta = lastPenaltyMag - newPenaltyMag;
 
-        // Set tracker av not actual damage
-        Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(healthPenAv, newPenaltyMag);
-
-        // Damage or restore AV
-        Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealth, magDelta);
-
-        SetAttributePenaltyUIGlobal(penPerc, HealthUIGlobal);
+        return penPerc;
     }
 
-    float CalculateHealthPenaltyPercentStarfrost()
+    float CalculateColdPenPercent()
     {
-        //auto util       = Utility::GetSingleton();
+        auto util = Utility::GetSingleton();
         auto cold = NeedCold::GetSingleton();
+
         auto penPerc = 0.0f;
 
-        float stage = cold->CurrentNeedStage->value;
+        if (!cold->CurrentlyStopped) {
+            float stage = cold->CurrentNeedStage->value;
 
-        if (stage == 3) {
-            penPerc = 0.1f;
-        }
-        else if (stage == 4) {       
-            penPerc = 0.25f;
-        }
-        else if (stage >= 5) {
-            penPerc = 0.50f;
+            if (stage == 3) {
+                penPerc = 0.1f;
+            }
+            else if (stage == 4) {
+                penPerc = 0.25f;
+            }
+            else if (stage >= 5) {
+                penPerc = 0.50f;
+            }
         }
 
-        //BnB Installed
-        //Needed for future BnB version
-        /*if (util->BnBInjury1)
-        {
+        return penPerc;
+    }
 
-            if ((util->MAG_InjuriesAndRest->value && util->MAG_InjuriesSMOnly->value == 0) || ((util->MAG_InjuriesSMOnly->value == 0) && (util->MAG_InjuriesAndRest->value > 0) && util->IsSurvivalEnabled()))
+
+#pragma endregion
+
+#pragma region BladeAndBlunt
+
+    float CalculateHealthPenaltyPercentBladeAndBlunt()
+    {
+        auto util    = Utility::GetSingleton();
+        auto penPerc = 0.0f;
+
+        if (util->BladeAndBlunt4 && util->BnBInjury1) {
+            if ((util->MAG_InjuriesAndRest->value && util->MAG_InjuriesSMOnly->value == 0)
+                || ((util->MAG_InjuriesSMOnly->value == 0) && (util->MAG_InjuriesAndRest->value > 0) && util->IsSurvivalEnabled()))
             {
                 if (Utility::GetPlayer()->HasSpell(util->BnBInjury1)) {
                     penPerc += util->injury1AVPercent;
@@ -202,128 +171,8 @@ private:
                     penPerc += util->injury3AVPercent;
                 }
             }
-        }*/
-
+        }
         return penPerc;
-    }
-
-#pragma endregion
-
-#pragma region Starfrost Magicka
-
-    void ApplyStarfrostMagickaPenalty()
-    {
-        auto magickaPenAv = RE::ActorValue::kVariable03;
-
-        // Max
-        auto maxPenAv = GetMaxAttributeAv(RE::ActorValue::kMagicka, magickaPenAv);
-
-        
-        auto penPerc = CalculateMagickaPenaltyPercentStarfrost();
-
-        // Magnitude
-        float lastPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(magickaPenAv);
-        float newPenaltyMag  = std::roundf(maxPenAv * penPerc);
-
-        if (newPenaltyMag > maxPenAv) {
-            newPenaltyMag = maxPenAv;
-        }
-        auto magDelta = lastPenaltyMag - newPenaltyMag;
-
-        // Set tracker av not actual damage
-        Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(magickaPenAv, newPenaltyMag);
-
-        // Damage or restore AV
-        Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kMagicka, magDelta);
-
-        SetAttributePenaltyUIGlobal(penPerc, MagickaUIGlobal);
-    }
-
-    float CalculateMagickaPenaltyPercentStarfrost()
-    {
-        //auto util       = Utility::GetSingleton();
-        auto exhaustion = NeedExhaustion::GetSingleton();
-
-        // Exhaustion
-        float stage   = exhaustion->CurrentNeedStage->value;
-        auto  penPerc = 0.0f;
-
-        if (stage == 3) {
-            penPerc = 0.1f;
-        }
-        else if (stage == 4) {
-            penPerc = 0.25f;
-        }
-        else if (stage >= 5) {
-            penPerc = 0.50f;
-        }
-
-        // Check starfrost hunger spells
-        // Note: Hunger in starfrost is not managed internally by the DLL, instead its spell based in the esp
-        //if (Utility::GetPlayer()->HasSpell(util->StarfrostHunger1)) {
-        //    penPerc += 0.10;
-        //}
-        //else if (Utility::GetPlayer()->HasSpell(util->StarfrostHunger2)) {
-        //    penPerc += 0.25;
-        //}
-        //else if (Utility::GetPlayer()->HasSpell(util->StarfrostHunger3)) {
-        //    penPerc += 0.50;
-        //}
-
-        return penPerc;
-    }
-
-#pragma endregion
-
-#pragma region SMI Attribute Penalties
-
-
-    virtual void ApplyNeedAttributePenalty(NeedBase* need)
-    {
-        if (need->NeedAvPenDisabled->value != 1.0f && !need->CurrentlyStopped) {
-            float maxPenAv = GetMaxAttributeAv(need->ActorValPenaltyAttribute, need->NeedPenaltyAV);
-
-            float penaltyPerc = GetPenaltyPercentAmount(need);
-
-            float lastPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(need->NeedPenaltyAV);
-            float newPenaltyMag  = std::roundf(maxPenAv * penaltyPerc);
-
-            if (newPenaltyMag > maxPenAv) {
-                newPenaltyMag = maxPenAv;
-            }
-            auto magDelta = lastPenaltyMag - newPenaltyMag;
-
-            // Set tracker av not actual damage
-            Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(need->NeedPenaltyAV, newPenaltyMag);
-
-            // Damage or restore AV
-            Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, need->ActorValPenaltyAttribute, magDelta);
-
-            SetAttributePenaltyUIGlobal(penaltyPerc, need->NeedPenaltyUIGlobal);
-        }
-        else {
-            RemoveNeedAttributePenalty(need);
-        }
-    }
-
-    virtual void RemoveNeedAttributePenalty(NeedBase* need)
-    {
-        float currentPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(need->NeedPenaltyAV);
-
-        if (currentPenaltyMag > 0) {
-            Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(need->NeedPenaltyAV, 0.0f);
-            SetAttributePenaltyUIGlobal(0.0f, need->NeedPenaltyUIGlobal);
-            Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, need->ActorValPenaltyAttribute, currentPenaltyMag);
-        }
-    }
-
-    virtual float GetPenaltyPercentAmount(NeedBase* need)
-    {
-        auto util    = Utility::GetSingleton();
-        auto penalty = (need->CurrentNeedValue->value - need->NeedStage2->value - 1) / (need->NeedMaxValue->value - need->NeedStage2->value - 1);
-        penalty      = std::clamp(penalty, 0.0f, util->MaxAvPenaltyPercent);
-
-        return penalty;
     }
 
 #pragma endregion
@@ -347,4 +196,57 @@ private:
     }
 
 #pragma endregion
+
+private:
+    AvPenaltyHandler  staminaHandler;
+    AvPenaltyHandler  healthHandler;
+    AvPenaltyHandler  magickaHandler;
+
+    void ApplyHandler(const AvPenaltyHandler& handler)
+    {
+        if (handler.associatedNeed)
+        {
+            if (handler.associatedNeed->NeedAvPenDisabled->value == 1.0f || handler.associatedNeed->CurrentlyStopped)
+            {
+                RemoveNeedAttributePenalty(handler.associatedNeed);
+                return;
+            }
+        }
+
+        auto player   = Utility::GetPlayer();
+        auto maxPenAv = GetMaxAttributeAv(handler.affectedAV, handler.trackedAV);
+
+        float penPerc = std::clamp(handler.calculatePenalty(), 0.0f, 1.0f);
+
+        float lastPenaltyMag = player->AsActorValueOwner()->GetActorValue(handler.trackedAV);
+        float newPenaltyMag  = std::roundf(maxPenAv * penPerc);
+        newPenaltyMag        = std::min(newPenaltyMag, maxPenAv);
+
+        float magDelta = lastPenaltyMag - newPenaltyMag;
+
+        player->AsActorValueOwner()->SetActorValue(handler.trackedAV, newPenaltyMag);
+        player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, handler.affectedAV, magDelta);
+
+        SetAttributePenaltyUIGlobal(penPerc, handler.uiGlobal);
+    }
+
+    virtual void RemoveNeedAttributePenalty(NeedBase* need)
+    {
+        float currentPenaltyMag = Utility::GetPlayer()->AsActorValueOwner()->GetActorValue(need->NeedPenaltyAV);
+
+        if (currentPenaltyMag > 0) {
+            Utility::GetPlayer()->AsActorValueOwner()->SetActorValue(need->NeedPenaltyAV, 0.0f);
+            SetAttributePenaltyUIGlobal(0.0f, need->NeedPenaltyUIGlobal);
+            Utility::GetPlayer()->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, need->ActorValPenaltyAttribute, currentPenaltyMag);
+        }
+    }
+
+    virtual float GetPenaltyPercentAmount(NeedBase* need)
+    {
+        auto util    = Utility::GetSingleton();
+        auto penalty = (need->CurrentNeedValue->value - need->NeedStage2->value - 1) / (need->NeedMaxValue->value - need->NeedStage2->value - 1);
+        penalty      = std::clamp(penalty, 0.0f, util->MaxAvPenaltyPercent);
+
+        return penalty;
+    }
 };

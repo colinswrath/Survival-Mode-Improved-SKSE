@@ -4,6 +4,7 @@
 #include "Serialization.h"
 #include "Settings/Settings.h"
 #include "PapyrusAPI/PapyrusAPI.h"
+#include "AvPenaltyManager.h"
 
 void InitLogger()
 {
@@ -38,8 +39,10 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 		break;
 	case SKSE::MessagingInterface::kDataLoaded:
 		FormLoader::GetSingleton()->LoadAllForms();
-        Events::Register();
+        Utility::GetSingleton()->ClearSurvivalModeQuestScripts();
 		Settings::LoadSettings();
+        Events::Register();
+        AvPenaltyManager::GetSingleton()->InitializeHandlers();
 		break;
 	}
 }

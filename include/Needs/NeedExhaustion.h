@@ -22,6 +22,8 @@ public:
 	RE::TESGlobal* Survival_HelpShown_Exhaustion;
 	RE::TESGlobal* SMI_WerewolfExhaustionBonus;
 
+	RE::TESGlobal* SMI_ExhaustionRateMult;
+
 	RE::BGSListForm* Survival_ExhaustionResistRacesMajor;
 	RE::BGSListForm* Survival_ExhaustionResistRacesMinor;
 
@@ -99,6 +101,8 @@ public:
 		if (player->IsOverEncumbered()) {
 			amount = amount * Survival_ExhaustionOverEncumberedMult->value;
 		}
+
+        amount *= SMI_ExhaustionRateMult->value;
 
 		return amount;
 	}

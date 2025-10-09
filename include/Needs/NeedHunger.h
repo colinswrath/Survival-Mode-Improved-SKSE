@@ -21,6 +21,8 @@ public:
 	RE::TESGlobal* Survival_HungerRestoreSmallAmount;
 	RE::TESGlobal* Survival_HungerRestoreVerySmallAmount;
 	RE::TESGlobal* Survival_HelpShown_Hunger;
+
+	RE::TESGlobal* SMI_HungerRateMult;
 	
 	RE::TESGlobal* Survival_AfflictionHungerChance;
 	RE::SpellItem* Survival_AfflictionWeakened;
@@ -111,6 +113,8 @@ public:
 		if (Survival_HungerResistRacesMinor->HasForm(player->GetRace())) {
 			amount = amount * (1.0f - Survival_RacialBonusMinor->value);
 		}
+
+        amount *= SMI_HungerRateMult->value;
 
 		return amount;
 	}

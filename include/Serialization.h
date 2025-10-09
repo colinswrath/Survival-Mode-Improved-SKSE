@@ -22,6 +22,12 @@ namespace Serialization
 		auto player = Utility::GetPlayer();
 		auto util = Utility::GetSingleton();
 
+        //Stop SM quests
+        for(auto* quest: util->smQuestsToHandle)
+        {
+            quest->Stop();
+        }
+
 		if (util->AutoStart) {
 			if (util->Survival_ModeCanBeEnabled->value == 0.0f) {  //This will only be 0 in the event you havent started SMI yet
 				util->Survival_ModeToggle->value = 1.0f;
@@ -112,15 +118,6 @@ namespace Serialization
 		std::uint32_t version;
 		std::uint32_t length;
 		a_skse->GetNextRecordInfo(type, version, length);
-
-		if (type != SerializationType) {
-            logger::info("No data, stopping old quests");
-            utility->hungerQuest->Stop();
-            utility->coldQuest->Stop();
-            utility->fatigueQuest->Stop();
-            utility->mainQuest->Stop();
-			return;
-		}
 			
 		if(version != SerializationVersion)
 		{

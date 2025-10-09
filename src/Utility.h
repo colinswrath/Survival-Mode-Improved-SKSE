@@ -10,6 +10,87 @@ enum class AREA_TYPE
 	kAreaTypeReach = 4
 };
 
+class ModVersion
+{
+public:
+    int Major;
+    int Minor;
+    int Patch;
+
+    ModVersion(int major = 0, int minor = 0, int patch = 0) : Major(major), Minor(minor), Patch(patch) {}
+
+    ModVersion(const std::vector<std::string>& versionVec)
+    {
+        if (versionVec.size() != 3) {
+            throw std::invalid_argument("Version vector must contain exactly three elements.");
+        }
+        Major = std::stoi(versionVec[0]);
+        Minor = std::stoi(versionVec[1]);
+        Patch = std::stoi(versionVec[2]);
+    }
+
+    ModVersion& operator=(const ModVersion& other)
+    {
+        if (this != &other) {
+            Major = other.Major;
+            Minor = other.Minor;
+            Patch = other.Patch;
+        }
+        return *this;
+    }
+
+    bool operator>(const ModVersion& other) const
+    {
+        if (Major > other.Major)
+            return true;
+        if (Major < other.Major)
+            return false;
+        if (Minor > other.Minor)
+            return true;
+        if (Minor < other.Minor)
+            return false;
+        return Patch > other.Patch;
+    }
+
+    bool operator<(const ModVersion& other) const
+    {
+        if (Major < other.Major)
+            return true;
+        if (Major > other.Major)
+            return false;
+        if (Minor < other.Minor)
+            return true;
+        if (Minor > other.Minor)
+            return false;
+        return Patch < other.Patch;
+    }
+
+    bool operator>=(const ModVersion& other) const { return (*this > other) || (*this == other); }
+
+    bool operator<=(const ModVersion& other) const { return (*this < other) || (*this == other); }
+
+    bool operator==(const ModVersion& other) const { return Major == other.Major && Minor == other.Minor && Patch == other.Patch; }
+
+    std::string getVersionAsString() const
+    {
+        std::ostringstream oss;
+        oss << Major << '.' << Minor << '.' << Patch;
+        return oss.str();
+    }
+
+    std::vector<int> getVersionAsVector() const { return { Major, Minor, Patch }; }
+
+    bool IsEmptyVersion() const
+    {
+        if (Major == 0 && Minor == 0 && Patch == 0) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+};
+
 class Utility
 {
 public:
@@ -113,10 +194,7 @@ public:
 	RE::TESQuest* UnboundQuest;
 	RE::TESQuest* BYOHRelationshipAdoption;
 
-	RE::TESQuest* hungerQuest;
-    RE::TESQuest* fatigueQuest;
-    RE::TESQuest* coldQuest;
-    RE::TESQuest* mainQuest;
+    std::vector<RE::TESQuest*> smQuestsToHandle;
 
     RE::TESRegion* WeatherMountains;
     RE::TESRegion* WeatherSnow;
@@ -149,6 +227,8 @@ public:
 	uintptr_t EnableFtAddress;
 	uintptr_t IsFtEnabledAddress;
 
+    ModVersion starfrostVer;
+
 	bool WasInOblivion = false;
 	bool DisableFastTravel = true;
 	bool AutoStart = true;
@@ -161,6 +241,7 @@ public:
 	bool vampireHunger = true;
 	bool vampireCold = true;
 	bool vampireExhaustion = true;
+    bool BladeAndBlunt4   = false;
 
 	float MaxAvPenaltyPercent = 1.0f;
 
@@ -314,6 +395,36 @@ public:
 			RE::DebugNotification(messageDesc.c_str());
 		}
 	}
+
+    void ClearSurvivalModeQuestScripts()
+    {
+        logger::info("Searching for attached sm quest scripts");
+
+        for(auto* quest: smQuestsToHandle)
+        {
+            DetachQuestScripts(quest);
+        }
+    }
+
+    static void DetachQuestScripts(RE::TESQuest* quest)
+    {
+        auto       vm     = RE::BSScript::Internal::VirtualMachine::GetSingleton();
+        const auto policy = vm ? vm->GetObjectHandlePolicy() : nullptr;
+
+        const auto          handle = policy->GetHandleForObject(quest->GetFormType(), quest);
+
+        RE::BSSpinLockGuard locker(vm->attachedScriptsLock);
+        if (const auto it = vm->attachedScripts.find(handle); it != vm->attachedScripts.end()) {
+            for (auto& script : it->second) {
+                if (auto typeInfo = script ? script->GetTypeInfo() : nullptr) {
+                    logger::info("Attached script found. Clearing {}", typeInfo->name.c_str());
+                }
+            }
+        }
+
+        vm->ResetAllBoundObjects(handle);
+        vm->GetObjectBindPolicy()->bindInterface->RemoveAllBoundObjects(handle);
+    }
 
 	bool SurvivalToggle()
 	{
@@ -664,5 +775,27 @@ public:
             }
         }
         return nullptr;
+    }
+
+    static std::vector<std::string> split(const std::string& s, char delimiter)
+    {
+        std::vector<std::string> tokens;
+        std::string              token;
+        std::istringstream       tokenStream(s);
+        while (std::getline(tokenStream, token, delimiter)) {
+            tokens.push_back(token);
+        }
+        return tokens;
+    }
+
+    static std::vector<std::string> ParseVersionString(const std::string& str)
+    {
+        std::vector<std::string> version;
+        auto                     versions = split(str, '.');
+
+        if (versions.size() < 3) {
+            logger::error("Unable to parse MAJOR.MINOR.PATCH from {}", str);
+        }
+        return versions;
     }
 };

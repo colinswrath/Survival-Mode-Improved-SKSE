@@ -67,6 +67,7 @@ public:
         hungerSystem->ActorValPenaltyAttribute = RE::ActorValue::kStamina;
         hungerSystem->NeedPenaltyUIGlobal      = dataHandler->LookupForm(RE::FormID(0x2EDF), updatePluginName)->As<RE::TESGlobal>();
         hungerSystem->NeedAvPenDisabled        = dataHandler->LookupForm(RE::FormID(0xF2C), smiPluginName)->As<RE::TESGlobal>();
+        hungerSystem->SMI_HungerRateMult       = dataHandler->LookupForm(RE::FormID(0x0B6F30), updatePluginName)->As<RE::TESGlobal>();
 
         hungerSystem->NeedSpell0 = dataHandler->LookupForm(RE::FormID(0x876), smEslPluginName)->As<RE::SpellItem>();
         hungerSystem->NeedSpell1 = dataHandler->LookupForm(RE::FormID(0x87E), smEslPluginName)->As<RE::SpellItem>();
@@ -140,6 +141,7 @@ public:
         fatigueSystem->ActorValPenaltyAttribute = RE::ActorValue::kMagicka;
         fatigueSystem->NeedPenaltyUIGlobal      = dataHandler->LookupForm(RE::FormID(0x2EE0), updatePluginName)->As<RE::TESGlobal>();
         fatigueSystem->NeedAvPenDisabled        = dataHandler->LookupForm(RE::FormID(0xF2B), smiPluginName)->As<RE::TESGlobal>();
+        fatigueSystem->SMI_ExhaustionRateMult   = dataHandler->LookupForm(RE::FormID(0x0B6F31), updatePluginName)->As<RE::TESGlobal>();
 
         fatigueSystem->WellRested = RE::TESForm::LookupByID(RE::FormID(0x000FB984))->As<RE::SpellItem>();
         fatigueSystem->Rested     = RE::TESForm::LookupByID(RE::FormID(0x000FB981))->As<RE::SpellItem>();
@@ -291,10 +293,15 @@ public:
         avPenManager->StaminaUIGlobal = dataHandler->LookupForm(RE::FormID(0x2EDF), updatePluginName)->As<RE::TESGlobal>();
         avPenManager->MagickaUIGlobal = dataHandler->LookupForm(RE::FormID(0x2EE0), updatePluginName)->As<RE::TESGlobal>();
 
-        utility->hungerQuest = dataHandler->LookupForm(RE::FormID(0x894), smEslPluginName)->As<RE::TESQuest>();
-        utility->coldQuest = dataHandler->LookupForm(RE::FormID(0x896), smEslPluginName)->As<RE::TESQuest>();
-        utility->fatigueQuest = dataHandler->LookupForm(RE::FormID(0x899), smEslPluginName)->As<RE::TESQuest>();
-        utility->mainQuest    = dataHandler->LookupForm(RE::FormID(0x899), smEslPluginName)->As<RE::TESQuest>();
+        utility->smQuestsToHandle.push_back(dataHandler->LookupForm(RE::FormID(0x894), smEslPluginName)->As<RE::TESQuest>()); //Hunger
+        utility->smQuestsToHandle.push_back(dataHandler->LookupForm(RE::FormID(0x896), smEslPluginName)->As<RE::TESQuest>()); //Cold
+        utility->smQuestsToHandle.push_back(dataHandler->LookupForm(RE::FormID(0x899), smEslPluginName)->As<RE::TESQuest>()); // Exhaustion
+        utility->smQuestsToHandle.push_back(dataHandler->LookupForm(RE::FormID(0x899), smEslPluginName)->As<RE::TESQuest>()); // Exhaustion
+        utility->smQuestsToHandle.push_back(dataHandler->LookupForm(RE::FormID(0x898), smEslPluginName)->As<RE::TESQuest>()); // Main
+        utility->smQuestsToHandle.push_back(dataHandler->LookupForm(RE::FormID(0x8C5), smEslPluginName)->As<RE::TESQuest>()); // Movement Update
+        utility->smQuestsToHandle.push_back(dataHandler->LookupForm(RE::FormID(0x895), smEslPluginName)->As<RE::TESQuest>()); // Heat Check
+        utility->smQuestsToHandle.push_back(dataHandler->LookupForm(RE::FormID(0x855), smEslPluginName)->As<RE::TESQuest>()); // Heat Source Locator
+        utility->smQuestsToHandle.push_back(dataHandler->LookupForm(RE::FormID(0x897), smEslPluginName)->As<RE::TESQuest>()); // player Info
 
         utility->Survival_ModeToggle  = dataHandler->LookupForm(RE::FormID(0x828), smEslPluginName)->As<RE::TESGlobal>();
         utility->Survival_ModeEnabled = dataHandler->LookupForm(RE::FormID(0x826), smEslPluginName)->As<RE::TESGlobal>();
@@ -544,6 +551,12 @@ public:
             utility->StarfrostHunger1   = dataHandler->LookupForm(RE::FormID(0x84E), starfrostPluginName)->As<RE::SpellItem>();
             utility->StarfrostHunger2   = dataHandler->LookupForm(RE::FormID(0x856), starfrostPluginName)->As<RE::SpellItem>();
             utility->StarfrostHunger3   = dataHandler->LookupForm(RE::FormID(0x857), starfrostPluginName)->As<RE::SpellItem>();
+        }
+
+        auto newBnBForm = dataHandler->LookupForm(RE::FormID(0x020), bnbPluginName);
+        if (newBnBForm)
+        {
+            utility->BladeAndBlunt4 = true;
         }
 
         auto bnbInjury1 = dataHandler->LookupForm(RE::FormID(0x84A), bnbPluginName);

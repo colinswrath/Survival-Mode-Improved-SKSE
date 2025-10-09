@@ -66,7 +66,7 @@ namespace Events
 		auto hunger = NeedHunger::GetSingleton();
 		auto util = Utility::GetSingleton();
 		auto player = Utility::GetPlayer();
-
+        
 		if (!hunger->CurrentlyStopped || util->forceEnableFoodPoisoning) {
 			if (hunger->Survival_FoodRawMeat->HasForm(food) || food->HasKeyword(hunger->VendorItemFoodRaw)) {
 				float diseaseResistMult = player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kResistDisease);
@@ -135,6 +135,48 @@ namespace Events
 			}
 		}
 	}
+
+    static void ProcessQuestStartStopHandler(RE::TESQuest* quest)
+    {
+        auto utility = Utility::GetSingleton();
+
+        if (std::find(utility->smQuestsToHandle.begin(), utility->smQuestsToHandle.end(), quest) != utility->smQuestsToHandle.end())
+        {
+            quest->Stop();
+        }
+    }
+
+    class OnQuestStartStopHandler : public RE::BSTEventSink<RE::TESQuestStartStopEvent>
+    {
+    public:
+        static OnQuestStartStopHandler* GetSingleton()
+        {
+            static OnQuestStartStopHandler singleton;
+            return &singleton;
+        }
+
+        RE::BSEventNotifyControl ProcessEvent(const RE::TESQuestStartStopEvent* a_event, RE::BSTEventSource<RE::TESQuestStartStopEvent>*) override
+        {
+            if (!a_event) {
+                return RE::BSEventNotifyControl::kContinue;
+            }
+
+            if (const auto quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID); quest) {
+                if (a_event->started)
+                {
+                    ProcessQuestStartStopHandler(quest);
+                }
+            }
+
+            return RE::BSEventNotifyControl::kContinue;
+        }
+
+        static void Register()
+        {
+            RE::ScriptEventSourceHolder* eventHolder = RE::ScriptEventSourceHolder::GetSingleton();
+            eventHolder->AddEventSink(OnQuestStartStopHandler::GetSingleton());
+        }
+    };
 
 	class OnFastTravelEndEventHandler : public RE::BSTEventSink<RE::TESFastTravelEndEvent>
 	{
@@ -359,5 +401,6 @@ namespace Events
 		OnEffectApplyEventHandler::Register();
 		OnMenuOpenCloseEventHandler::Register();
 		OnFastTravelEndEventHandler::Register();
+        OnQuestStartStopHandler::Register();
 	}
 }

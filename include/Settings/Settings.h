@@ -48,6 +48,12 @@ public:
 		if (dataHandler->LookupLoadedModByName("SnowOverSkyrim.esp") || dataHandler->LookupLoadedLightModByName("SnowOverSkyrim.esp")) {
 		currentHeader = settings->SosSeasonMultHeader;
 		}
+
+        logger::info("Loading starfrost settings");
+        auto ver = ini.GetValue("Starfrost", "sVersion", "0.0.0");
+        logger::info("Current starfrost version from ini {}", ver);
+        auto currentVersions = Utility::ParseVersionString(ver);
+        util->starfrostVer   = ModVersion(currentVersions);
 		
 		auto cold = NeedCold::GetSingleton();
 
