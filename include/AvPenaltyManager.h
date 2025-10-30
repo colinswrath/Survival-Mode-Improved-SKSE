@@ -4,7 +4,7 @@
 
 struct AvPenaltyHandler
 {
-    std::function<float()> calculatePenalty;
+    std::optional <std::function<float()>> calculatePenalty;
     RE::ActorValue         trackedAV;
     RE::ActorValue         affectedAV;
     RE::TESGlobal*         uiGlobal;
@@ -30,6 +30,8 @@ public:
 
         //If old starfrost, hunger does not effect AVs
         // if new starfrost, exhaustion/hunger effect stamina and magicka
+
+        bool hasBnB4 = util->BladeAndBlunt4;
         
         //If starfrost
         if (util->starfrostInstalled)
@@ -37,13 +39,22 @@ public:
             if (util->starfrostVer >= ModVersion(2,0,0))
             {
                 staminaHandler = { [this] { return CalculateExhaustionPenPercent() + CalculateHungerPenPercent(); }, RE::ActorValue::kVariable02, RE::ActorValue::kStamina, StaminaUIGlobal, nullptr };
-                healthHandler  = { [this] { return CalculateColdPenPercent() + CalculateHealthPenaltyPercentBladeAndBlunt(); }, RE::ActorValue::kVariable04, RE::ActorValue::kHealth, HealthUIGlobal, nullptr };
+                healthHandler  = {
+                        [this, hasBnB4] {
+                            float pen = CalculateColdPenPercent();
+                            if (hasBnB4)
+                                pen += CalculateHealthPenaltyPercentBladeAndBlunt();
+                            return pen;
+                    },
+                    RE::ActorValue::kVariable04, RE::ActorValue::kHealth, HealthUIGlobal, nullptr };
                 magickaHandler = { [this] { return CalculateExhaustionPenPercent() + CalculateHungerPenPercent(); }, RE::ActorValue::kVariable03, RE::ActorValue::kMagicka, MagickaUIGlobal, nullptr };
             }
             else
             {
                 staminaHandler = { [this] { return CalculateExhaustionPenPercent(); }, RE::ActorValue::kVariable02, RE::ActorValue::kStamina, StaminaUIGlobal, nullptr };
-                healthHandler  = { [this] { return CalculateHealthPenaltyPercentBladeAndBlunt(); }, RE::ActorValue::kVariable04, RE::ActorValue::kHealth, HealthUIGlobal, nullptr };
+                healthHandler  = { hasBnB4 ?
+                    std::optional{ std::function<float()>{ [this] { return CalculateHealthPenaltyPercentBladeAndBlunt();}}} : std::nullopt,
+                                  RE::ActorValue::kVariable04, RE::ActorValue::kHealth, HealthUIGlobal, nullptr };
                 magickaHandler = { [this] { return CalculateExhaustionPenPercent(); }, RE::ActorValue::kVariable03, RE::ActorValue::kMagicka, MagickaUIGlobal, nullptr };
             }
         }
@@ -53,7 +64,14 @@ public:
             staminaHandler = { [this, hunger] { return GetPenaltyPercentAmount(hunger); }, hunger->NeedPenaltyAV, hunger->ActorValPenaltyAttribute, hunger->NeedPenaltyUIGlobal, hunger };
 
             auto cold = NeedCold::GetSingleton();
-            healthHandler = { [this, cold] { return GetPenaltyPercentAmount(cold); }, cold->NeedPenaltyAV, cold->ActorValPenaltyAttribute, cold->NeedPenaltyUIGlobal, cold };
+            healthHandler = {
+                [this, cold, hasBnB4] {
+                    float pen = GetPenaltyPercentAmount(cold);
+                    if (hasBnB4)
+                        pen += CalculateHealthPenaltyPercentBladeAndBlunt();
+                    return pen;
+                },
+                cold->NeedPenaltyAV, cold->ActorValPenaltyAttribute, cold->NeedPenaltyUIGlobal, cold };
 
             auto exhaustion = NeedExhaustion::GetSingleton();
             magickaHandler  = { [this, exhaustion] { return GetPenaltyPercentAmount(exhaustion); }, exhaustion->NeedPenaltyAV, exhaustion->ActorValPenaltyAttribute,
@@ -125,7 +143,6 @@ private:
 
     float CalculateColdPenPercent()
     {
-        auto util = Utility::GetSingleton();
         auto cold = NeedCold::GetSingleton();
 
         auto penPerc = 0.0f;
@@ -216,7 +233,13 @@ private:
         auto player   = Utility::GetPlayer();
         auto maxPenAv = GetMaxAttributeAv(handler.affectedAV, handler.trackedAV);
 
-        float penPerc = std::clamp(handler.calculatePenalty(), 0.0f, 1.0f);
+        float penPerc = 0.0f;
+        if (handler.calculatePenalty) {
+            penPerc = std::clamp((*handler.calculatePenalty)(), 0.0f, 1.0f);
+        }
+        else {
+            return;
+        }
 
         float lastPenaltyMag = player->AsActorValueOwner()->GetActorValue(handler.trackedAV);
         float newPenaltyMag  = std::roundf(maxPenAv * penPerc);

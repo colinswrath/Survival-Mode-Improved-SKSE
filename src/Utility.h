@@ -10,6 +10,26 @@ enum class AREA_TYPE
 	kAreaTypeReach = 4
 };
 
+namespace HashUtility
+{
+    static constexpr uint32_t hash(const char* data, const size_t size) noexcept
+    {
+        uint32_t hash = 5381;
+
+        for (const char* c = data; c < data + size; ++c) {
+            hash = ((hash << 5) + hash) + (unsigned char)*c;
+        }
+
+        return hash;
+    }
+
+    constexpr uint32_t operator"" _h(const char* str, size_t size) noexcept
+    {
+        return hash(str, size);
+    }
+
+}
+
 class ModVersion
 {
 public:
@@ -173,7 +193,8 @@ public:
 
 	RE::EffectSetting* WerewolfFeedRestoreHealth;
 	RE::EffectSetting* DA11AbFortifyHealth;
-	RE::EffectSetting* Survival_FireCloakFreezingWaterDesc;
+    RE::EffectSetting* Survival_FireCloakFreezingWaterDesc;
+    RE::EffectSetting* Survival_FoodRestoreHungerLargeVampire;
 
 	RE::TESCondition* IsVampireConditions;
 	RE::TESCondition* IsWerewolfConditions;
@@ -508,6 +529,16 @@ public:
 		return util->IsVampireConditions->IsTrue(GetPlayer(), nullptr);
 	}
 
+    static bool VampireFeedCheck()
+    {
+        auto* package = Utility::GetPlayer()->GetCurrentPackage();
+
+        if (package && package->packData.packType == RE::PACKAGE_PROCEDURE_TYPE::kVampireFeed) {
+            return true;
+        }
+        return false;
+    }
+
 	static bool PlayerIsLich()
 	{
 		bool lich = false;
@@ -535,7 +566,7 @@ public:
 		auto relMarriageQuest = Utility::GetSingleton()->RelationshipMarriageFIN;
 		auto interestString = RE::BSFixedString("LoveInterest");
 
-		auto aliases = relMarriageQuest->aliases;
+		auto& aliases = relMarriageQuest->aliases;
 		RE::BGSBaseAlias* loveInterestBase = nullptr;
 
 		for (auto alias : aliases) {
@@ -577,7 +608,7 @@ public:
 		auto child1String = RE::BSFixedString("Child1");
 		auto child2String = RE::BSFixedString("Child2");
 
-		auto aliases = adoptionQuest->aliases;
+		auto& aliases = adoptionQuest->aliases;
 
 		RE::BGSBaseAlias* child1Base = nullptr;
 		RE::BGSBaseAlias* child2Base = nullptr;

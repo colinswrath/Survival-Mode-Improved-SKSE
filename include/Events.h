@@ -4,6 +4,8 @@
 #include "Needs/NeedCold.h"
 #include "Utility.h"
 
+#undef GetObject
+
 namespace Events
 {
 	static inline float Hours;
@@ -118,6 +120,17 @@ namespace Events
 		auto cold = NeedCold::GetSingleton();
 		auto hunger = NeedHunger::GetSingleton();
 		auto util = Utility::GetSingleton();
+
+        using DefaultObject       = RE::BGSDefaultObjectManager::DefaultObject;
+        auto dom = RE::BGSDefaultObjectManager::GetSingleton();
+
+        bool isVampire = false;
+        if (dom) {
+            auto vampGlobal = dom->GetObject<RE::TESGlobal>(DefaultObject::kPlayerIsVampireVariable);
+            if (vampGlobal) {
+                isVampire = vampGlobal->value != 0.0f;
+            }
+        }
 		
 		if (!cold->CurrentlyStopped) {
 			if (cold->Survival_FoodRestoreCold == effect) {
@@ -132,7 +145,12 @@ namespace Events
 			} else if (effect == util->DA11AbFortifyHealth) {
 				//Cannibal feed
 				hunger->DecreaseNeed(hunger->Survival_HungerRestoreMediumAmount->value);
-			}
+            }
+            else if (effect == util->Survival_FoodRestoreHungerLargeVampire && util->PlayerIsVampire())
+            {
+                //Vampire Feed
+                hunger->DecreaseNeed(hunger->Survival_HungerRestoreLargeAmount->value);
+            }
 		}
 	}
 

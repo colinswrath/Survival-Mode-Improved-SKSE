@@ -3,6 +3,7 @@
 static float& g_deltaTime = (*(float*)RELOCATION_ID(523660, 410199).address());
 static float lastMainTime;
 static float lastAvTime;
+static bool   wasFeeding;
 
 class SurvivalMode
 {
@@ -21,6 +22,7 @@ protected:
 
 	inline static void SurvivalModeLoopUpdate();
     inline static void AvPenaltyCheckUpdate();
+    inline static void MiscStatusChecks();
 	inline static void SendAllNeedsUpdate();
 	inline static void SendHungerUpdate();
 	inline static void SendColdUpdate();

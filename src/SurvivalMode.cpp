@@ -21,6 +21,7 @@ std::int32_t SurvivalMode::OnUpdate()
 
             if (lastAvTime >= 0.5f) {
                 AvPenaltyCheckUpdate();
+                MiscStatusChecks();
                 lastAvTime = 0.0f;
             }
 		}
@@ -56,6 +57,19 @@ void SurvivalMode::AvPenaltyCheckUpdate()
     else {
         avMan->UpdateActorValuePenalties();
     }
+}
+
+void SurvivalMode::MiscStatusChecks()
+{
+    bool isFeeding = Utility::VampireFeedCheck();
+    if (!isFeeding && wasFeeding) {
+        // Restore hunger when done feeding
+        auto* hunger = NeedHunger::GetSingleton();
+        if (!hunger->CurrentlyStopped) {
+            hunger->DecreaseNeed(hunger->Survival_HungerRestoreLargeAmount->value);
+        }
+    }
+    wasFeeding = isFeeding;
 }
 
 void SurvivalMode::StartSurvivalMode()
@@ -153,7 +167,6 @@ void SurvivalMode::SendExhaustionUpdate()
 void SurvivalMode::StopAllNeeds()
 {
 	logger::info("Stopping all needs");
-
 	NeedHunger::GetSingleton()->StopNeed();
 	NeedExhaustion::GetSingleton()->StopNeed();
 	NeedCold::GetSingleton()->StopNeed();

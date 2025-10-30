@@ -348,6 +348,7 @@ public:
         utility->WerewolfFeedRestoreHealth           = dataHandler->LookupForm(RE::FormID(0xEC356), skyrimPluginName)->As<RE::EffectSetting>();
         utility->DA11AbFortifyHealth                 = dataHandler->LookupForm(RE::FormID(0x10F814), skyrimPluginName)->As<RE::EffectSetting>();
         utility->Survival_FireCloakFreezingWaterDesc = dataHandler->LookupForm(RE::FormID(0x2EE9), updatePluginName)->As<RE::EffectSetting>();
+        utility->Survival_FoodRestoreHungerLargeVampire = dataHandler->LookupForm(RE::FormID(0x831), smEslPluginName)->As<RE::EffectSetting>();
         utility->RelationshipMarriageFIN             = dataHandler->LookupForm(RE::FormID(0x21382), skyrimPluginName)->As<RE::TESQuest>();
         utility->BYOHRelationshipAdoption            = dataHandler->LookupForm(RE::FormID(0x42B4), hfPluginName)->As<RE::TESQuest>();
         RE::SpellItem* regionInfoSpell               = dataHandler->LookupForm(RE::FormID(0x87F), smEslPluginName)->As<RE::SpellItem>();
@@ -556,6 +557,7 @@ public:
         auto newBnBForm = dataHandler->LookupForm(RE::FormID(0x020), bnbPluginName);
         if (newBnBForm)
         {
+            logger::info("BnB 4 Detected");
             utility->BladeAndBlunt4 = true;
         }
 
