@@ -122,7 +122,7 @@ void SurvivalMode::SendAllNeedsUpdate()
 			NeedHunger::GetSingleton()->StopNeed();
 		}
 		
-	} else if (Utility::PlayerIsLich()) {
+	} else if (Utility::PlayerIsNoNeedsRace()) {
 		NeedHunger::GetSingleton()->StopNeed();
 		NeedExhaustion::GetSingleton()->StopNeed();
 		NeedCold::GetSingleton()->StopNeed();
@@ -217,9 +217,7 @@ void SurvivalMode::AddPlayerSpellPerks()
 	if (!Utility::GetSingleton()->DisableCarryWeightPenalty) {
 		player->AddSpell(utility->Survival_abLowerCarryWeightSpell);
 	}
-	if (utility->SMI_SimonrimHealthRegenDetected->value == 0.0) {
-		player->AddSpell(utility->Survival_abLowerRegenSpell);
-	}
+	player->AddSpell(utility->Survival_abLowerRegenSpell);
 	player->AddSpell(utility->Survival_abRacialNord);
 	player->AddSpell(utility->Survival_abRacialAltmer);
 	player->AddSpell(utility->Survival_abRacialOrc);

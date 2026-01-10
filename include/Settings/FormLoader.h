@@ -26,7 +26,6 @@ public:
     const std::string transcendenceName             = "The Path of Transcendence.esp";
     const std::string brumaPluginName               = "BSHeartland.esm";
     const std::string wyrmstoothPluginName          = "Wyrmstooth.esp";
-    const std::string simonrimHealthRegenPluginName = "BladeAndBluntHealth.esp";
     const std::string starfrostPluginName           = "Starfrost.esp";
     const std::string bnbPluginName                 = "BladeAndBlunt.esp";
 
@@ -68,6 +67,7 @@ public:
         hungerSystem->NeedPenaltyUIGlobal      = dataHandler->LookupForm(RE::FormID(0x2EDF), updatePluginName)->As<RE::TESGlobal>();
         hungerSystem->NeedAvPenDisabled        = dataHandler->LookupForm(RE::FormID(0xF2C), smiPluginName)->As<RE::TESGlobal>();
         hungerSystem->SMI_HungerRateMult       = dataHandler->LookupForm(RE::FormID(0x0B6F30), updatePluginName)->As<RE::TESGlobal>();
+        hungerSystem->SMI_WerewolfHungerMult   = dataHandler->LookupForm(RE::FormID(0xF32), smiPluginName)->As<RE::TESGlobal>();
 
         hungerSystem->NeedSpell0 = dataHandler->LookupForm(RE::FormID(0x876), smEslPluginName)->As<RE::SpellItem>();
         hungerSystem->NeedSpell1 = dataHandler->LookupForm(RE::FormID(0x87E), smEslPluginName)->As<RE::SpellItem>();
@@ -549,16 +549,24 @@ public:
         if (utility->LookupLoadedModByName(starfrostPluginName) || utility->LookupLoadedLightModByName(starfrostPluginName)) {
             logger::info("Starfrost Installed");
             utility->starfrostInstalled = true;
+            auto sfVerForm = dataHandler->LookupForm(RE::FormID(0xD82), starfrostPluginName);
+            float sfFloatVer            = 0.0f;
+            if (sfVerForm) {
+                auto sfVer = sfVerForm->As<RE::TESGlobal>();
+                sfFloatVer = sfVer->value;
+                logger::info("Current starfrost version from global {}", sfVer->value);
+            }
+
+            std::string sfStr           = std::to_string(sfFloatVer);
+            logger::info("Parsing starfrost version {}",sfStr);
+            auto        currentVersions = Utility::ParseVersionString(sfStr);
+            utility->starfrostVer       = ModVersion(currentVersions);
+
+            logger::info("Parsed starfrost version {}", utility->starfrostVer.getVersionAsString());
+
             utility->StarfrostHunger1   = dataHandler->LookupForm(RE::FormID(0x84E), starfrostPluginName)->As<RE::SpellItem>();
             utility->StarfrostHunger2   = dataHandler->LookupForm(RE::FormID(0x856), starfrostPluginName)->As<RE::SpellItem>();
             utility->StarfrostHunger3   = dataHandler->LookupForm(RE::FormID(0x857), starfrostPluginName)->As<RE::SpellItem>();
-        }
-
-        auto newBnBForm = dataHandler->LookupForm(RE::FormID(0x020), bnbPluginName);
-        if (newBnBForm)
-        {
-            logger::info("BnB 4 Detected");
-            utility->BladeAndBlunt4 = true;
         }
 
         auto bnbInjury1 = dataHandler->LookupForm(RE::FormID(0x84A), bnbPluginName);
@@ -721,15 +729,6 @@ public:
                 utility->Survival_OblivionLocations->AddForm(deadLandsLoc);
             }
         }
-
-        utility->SMI_SimonrimHealthRegenDetected = dataHandler->LookupForm(RE::FormID(0xD25), smiPluginName)->As<RE::TESGlobal>();
-        if (utility->LookupLoadedModByName(simonrimHealthRegenPluginName) || utility->LookupLoadedLightModByName(simonrimHealthRegenPluginName)) {
-            utility->SMI_SimonrimHealthRegenDetected->value = 1.0f;
-        }
-        else {
-            utility->SMI_SimonrimHealthRegenDetected->value = 0.0f;
-        }
-
     }
 
     // Cache commonly called addresses to avoid address lib overhead

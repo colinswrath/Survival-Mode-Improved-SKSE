@@ -1,5 +1,6 @@
 #pragma once
 
+//TODO - This file needs a major rework/split
 enum class AREA_TYPE
 {
 	kAreaTypeChillyInterior = -1,
@@ -42,7 +43,11 @@ public:
     ModVersion(const std::vector<std::string>& versionVec)
     {
         if (versionVec.size() != 3) {
-            throw std::invalid_argument("Version vector must contain exactly three elements.");
+            logger::info("Invalid vector version size (needs to be 3). Defaulting to 0.0.0");
+            Major = 0;
+            Minor = 0;
+            Patch = 0;
+            return;
         }
         Major = std::stoi(versionVec[0]);
         Minor = std::stoi(versionVec[1]);
@@ -122,7 +127,6 @@ public:
 	RE::TESGlobal* SMI_HungerShouldBeEnabled;
 	RE::TESGlobal* SMI_ColdShouldBeEnabled;
 	RE::TESGlobal* SMI_ExhaustionShouldBeEnabled;
-	RE::TESGlobal* SMI_SimonrimHealthRegenDetected;
 
 	RE::SpellItem* Survival_abLowerCarryWeightSpell;
 	RE::SpellItem* Survival_abLowerRegenSpell;
@@ -262,7 +266,8 @@ public:
 	bool vampireHunger = true;
 	bool vampireCold = true;
 	bool vampireExhaustion = true;
-    bool BladeAndBlunt4   = false;
+
+    bool  handleInjuries      = false;
 
 	float MaxAvPenaltyPercent = 1.0f;
 
@@ -539,7 +544,7 @@ public:
         return false;
     }
 
-	static bool PlayerIsLich()
+	static bool PlayerIsNoNeedsRace()
 	{
 		bool lich = false;
 		auto util = Utility::GetSingleton();
@@ -675,12 +680,14 @@ public:
 
 		bool nearWellRested = false;
 		RE::TES::GetSingleton()->ForEachReferenceInRange(player, 300.0f, [&](RE::TESObjectREFR* b_ref) {
-			if (!b_ref->IsDisabled()) {
+			if (b_ref && !b_ref->IsDisabled() && b_ref->Is3DLoaded()) {
 				if (const auto base = b_ref->GetBaseObject(); base) {
-					if (util->SMI_WellRestedObjectsList->HasForm(base)) {
-						nearWellRested = true;
-						return RE::BSContainer::ForEachResult::kStop;
-					}
+                    if (base) {
+					    if (util->SMI_WellRestedObjectsList->HasForm(base)) {
+						    nearWellRested = true;
+						    return RE::BSContainer::ForEachResult::kStop;
+					    }
+                    }
 				}
 			}
 			return RE::BSContainer::ForEachResult::kContinue;
@@ -819,14 +826,29 @@ public:
         return tokens;
     }
 
+    static std::vector<std::string> TokenizeString(const std::string& s)
+    {
+        std::vector<std::string> tokens;
+        tokens.reserve(s.size());
+
+        for (char c : s) {
+            tokens.emplace_back(1, c);
+        }
+
+        return tokens;
+    }
+
     static std::vector<std::string> ParseVersionString(const std::string& str)
     {
         std::vector<std::string> version;
-        auto                     versions = split(str, '.');
+        version = split(str, '.');
 
-        if (versions.size() < 3) {
+        if (version.size() == 2) {
+            return TokenizeString(version[0]);
+        }
+        else if (version.size() != 3) {
             logger::error("Unable to parse MAJOR.MINOR.PATCH from {}", str);
         }
-        return versions;
+        return version;
     }
 };

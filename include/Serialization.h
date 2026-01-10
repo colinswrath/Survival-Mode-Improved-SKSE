@@ -53,12 +53,8 @@ namespace Serialization
 			}
 		}
 
-		if (util->SMI_SimonrimHealthRegenDetected->value == 1.0) {
-			player->RemoveSpell(util->Survival_abLowerRegenSpell);
-		} else {
-			if (!player->HasSpell(util->Survival_abLowerRegenSpell)) {
-				player->AddSpell(util->Survival_abLowerRegenSpell);
-			}
+		if (!player->HasSpell(util->Survival_abLowerRegenSpell)) {
+			player->AddSpell(util->Survival_abLowerRegenSpell);
 		}
 
 		hunger->SetHungerFoodItemDesc();

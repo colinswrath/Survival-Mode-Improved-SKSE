@@ -4,7 +4,7 @@
 
 struct AvPenaltyHandler
 {
-    std::optional <std::function<float()>> calculatePenalty;
+    std::optional<std::function<std::optional<float>()>> calculatePenalty;
     RE::ActorValue         trackedAV;
     RE::ActorValue         affectedAV;
     RE::TESGlobal*         uiGlobal;
@@ -31,31 +31,50 @@ public:
         //If old starfrost, hunger does not effect AVs
         // if new starfrost, exhaustion/hunger effect stamina and magicka
 
-        bool hasBnB4 = util->BladeAndBlunt4;
-        
         //If starfrost
         if (util->starfrostInstalled)
         {
             if (util->starfrostVer >= ModVersion(2,0,0))
             {
-                staminaHandler = { [this] { return CalculateExhaustionPenPercent() + CalculateHungerPenPercent(); }, RE::ActorValue::kVariable02, RE::ActorValue::kStamina, StaminaUIGlobal, nullptr };
-                healthHandler  = {
-                        [this, hasBnB4] {
-                            float pen = CalculateColdPenPercent();
-                            if (hasBnB4)
-                                pen += CalculateHealthPenaltyPercentBladeAndBlunt();
-                            return pen;
-                    },
-                    RE::ActorValue::kVariable04, RE::ActorValue::kHealth, HealthUIGlobal, nullptr };
-                magickaHandler = { [this] { return CalculateExhaustionPenPercent() + CalculateHungerPenPercent(); }, RE::ActorValue::kVariable03, RE::ActorValue::kMagicka, MagickaUIGlobal, nullptr };
+                staminaHandler = { [this] { return CalculateStarfrostExhaustionPenPercent() + CalculateStarfrostHungerPenPercent(); }, RE::ActorValue::kVariable02, RE::ActorValue::kStamina,
+                                   StaminaUIGlobal, nullptr };
+
+                healthHandler  = { [this] {
+                                auto  util = Utility::GetSingleton();
+                                bool  injuries = util->handleInjuries;
+
+                                float pen = CalculateStarfrostColdPenPercent();
+                                if (injuries)
+                                    pen += CalculateHealthPenaltyPercentBladeAndBlunt();
+                                return pen;
+                            },
+                            RE::ActorValue::kVariable04, RE::ActorValue::kHealth, HealthUIGlobal, NeedCold::GetSingleton() };
+
+                magickaHandler = { [this] { return CalculateStarfrostExhaustionPenPercent() + CalculateStarfrostHungerPenPercent(); }, RE::ActorValue::kVariable03, RE::ActorValue::kMagicka, MagickaUIGlobal, nullptr };
             }
             else
             {
-                staminaHandler = { [this] { return CalculateExhaustionPenPercent(); }, RE::ActorValue::kVariable02, RE::ActorValue::kStamina, StaminaUIGlobal, nullptr };
-                healthHandler  = { hasBnB4 ?
-                    std::optional{ std::function<float()>{ [this] { return CalculateHealthPenaltyPercentBladeAndBlunt();}}} : std::nullopt,
+                staminaHandler = { [this] { return CalculateStarfrostExhaustionPenPercent(); }, RE::ActorValue::kVariable02, RE::ActorValue::kStamina, StaminaUIGlobal, nullptr };
+
+                //Optional return for pre 2.0.0 startfrost. This maintains compatibility with old versions of BnB (pre calling SMI's API).
+                // Since starfrost doesnt touch the health bar in pre 2.0.0 versions we can leave it alone when we arent handling injury AV pens here
+                healthHandler = { [this]() -> std::optional<float> {
+                                     auto util = Utility::GetSingleton();
+                                     bool injuries = util->handleInjuries;
+                                     float pen = 0.0f;
+                                     if (injuries)
+                                     {
+                                         pen = CalculateHealthPenaltyPercentBladeAndBlunt();
+                                     }
+                                     else
+                                     {
+                                         return std::nullopt;
+                                     }
+                                     return pen;
+                                 },
                                   RE::ActorValue::kVariable04, RE::ActorValue::kHealth, HealthUIGlobal, nullptr };
-                magickaHandler = { [this] { return CalculateExhaustionPenPercent(); }, RE::ActorValue::kVariable03, RE::ActorValue::kMagicka, MagickaUIGlobal, nullptr };
+
+                magickaHandler = { [this] { return CalculateStarfrostExhaustionPenPercent(); }, RE::ActorValue::kVariable03, RE::ActorValue::kMagicka, MagickaUIGlobal, nullptr };
             }
         }
         else
@@ -65,10 +84,13 @@ public:
 
             auto cold = NeedCold::GetSingleton();
             healthHandler = {
-                [this, cold, hasBnB4] {
+                [this, cold] {
                     float pen = GetPenaltyPercentAmount(cold);
-                    if (hasBnB4)
+
+                    auto  util = Utility::GetSingleton();
+                    if (util->handleInjuries) {
                         pen += CalculateHealthPenaltyPercentBladeAndBlunt();
+                    }
                     return pen;
                 },
                 cold->NeedPenaltyAV, cold->ActorValPenaltyAttribute, cold->NeedPenaltyUIGlobal, cold };
@@ -88,6 +110,7 @@ public:
 
     void RemoveAllAvPenalties()
     {
+        //TODO - Swap to be based AVs instead of needs?
         RemoveNeedAttributePenalty(NeedCold::GetSingleton());
         RemoveNeedAttributePenalty(NeedHunger::GetSingleton());
         RemoveNeedAttributePenalty(NeedExhaustion::GetSingleton());
@@ -98,7 +121,7 @@ private:
 #pragma region Starfrost
 
 
-    float CalculateHungerPenPercent()
+    float CalculateStarfrostHungerPenPercent()
     {
         auto hunger = NeedHunger::GetSingleton();
 
@@ -120,7 +143,7 @@ private:
         return penPerc;
     }
 
-    float CalculateExhaustionPenPercent()
+    float CalculateStarfrostExhaustionPenPercent()
     {
         auto exhaustion = NeedExhaustion::GetSingleton();
         float exhaustionStage = exhaustion->CurrentNeedStage->value;
@@ -141,7 +164,7 @@ private:
         return penPerc;
     }
 
-    float CalculateColdPenPercent()
+    float CalculateStarfrostColdPenPercent()
     {
         auto cold = NeedCold::GetSingleton();
 
@@ -174,7 +197,7 @@ private:
         auto util    = Utility::GetSingleton();
         auto penPerc = 0.0f;
 
-        if (util->BladeAndBlunt4 && util->BnBInjury1) {
+        if (util->handleInjuries && util->BnBInjury1) {
             if ((util->MAG_InjuriesAndRest->value && util->MAG_InjuriesSMOnly->value == 0)
                 || ((util->MAG_InjuriesSMOnly->value == 0) && (util->MAG_InjuriesAndRest->value > 0) && util->IsSurvivalEnabled()))
             {
@@ -235,7 +258,11 @@ private:
 
         float penPerc = 0.0f;
         if (handler.calculatePenalty) {
-            penPerc = std::clamp((*handler.calculatePenalty)(), 0.0f, 1.0f);
+            auto result = (*handler.calculatePenalty)();
+            if (!result) {
+                return;
+            }
+            penPerc = std::clamp(*result, 0.0f, 1.0f);
         }
         else {
             return;

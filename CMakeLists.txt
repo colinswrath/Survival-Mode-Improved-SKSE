@@ -3,7 +3,7 @@ message("Using toolchain file ${CMAKE_TOOLCHAIN_FILE}.")
 
 project(
   SurvivalModeImproved
-  VERSION 1.5.2
+  VERSION 1.6.0
   LANGUAGES CXX
 )
 
