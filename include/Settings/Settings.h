@@ -38,11 +38,15 @@ public:
 		util->vampireHunger = ini.GetBoolValue("General", "bVampireHungerEnabled", true);
 		util->vampireExhaustion = ini.GetBoolValue("General", "bVampireExhaustionEnabled", true);
 
+        util->injury1AVPercent = static_cast<float>(ini.GetDoubleValue("", "fInjury1AVPercent", 0.10));
+        util->injury2AVPercent = static_cast<float>(ini.GetDoubleValue("", "fInjury2AVPercent", 0.25));
+        util->injury3AVPercent = static_cast<float>(ini.GetDoubleValue("", "fInjury3AVPercent", 0.50));
+
 		logger::info("Loading season mults");
 
-		const char* currentHeader = settings->SosSeasonMultHeader;
+		const char* currentHeader = settings->DefaultSeasonMultHeader;
 		if (dataHandler->LookupLoadedModByName("SnowOverSkyrim.esp") || dataHandler->LookupLoadedLightModByName("SnowOverSkyrim.esp")) {
-			currentHeader = settings->DefaultSeasonMultHeader;
+		currentHeader = settings->SosSeasonMultHeader;
 		}
 		
 		auto cold = NeedCold::GetSingleton();

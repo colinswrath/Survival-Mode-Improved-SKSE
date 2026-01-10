@@ -4,6 +4,9 @@
 #include "Serialization.h"
 #include "Settings/Settings.h"
 #include "PapyrusAPI/PapyrusAPI.h"
+#include "AvPenaltyManager.h"
+#include "SMI_API.h"
+#include "SMI_ModAPI.h"
 
 void InitLogger()
 {
@@ -38,8 +41,10 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 		break;
 	case SKSE::MessagingInterface::kDataLoaded:
 		FormLoader::GetSingleton()->LoadAllForms();
-        Events::Register();
+        Utility::GetSingleton()->ClearSurvivalModeQuestScripts();
 		Settings::LoadSettings();
+        Events::Register();
+        AvPenaltyManager::GetSingleton()->InitializeHandlers();
 		break;
 	}
 }
@@ -96,4 +101,20 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
 
     logger::info("SMI loaded successfully");
     return true;
+}
+
+extern "C" DLLEXPORT void* SKSEAPI RequestPluginAPI(const SMI_API::InterfaceVersion a_interfaceVersion)
+{
+    auto api = Messaging::SmiInterface::GetSingleton();
+
+    logger::info("SMI_API::RequestPluginAPI called, InterfaceVersion {}", static_cast<uint8_t>(a_interfaceVersion));
+
+    switch (a_interfaceVersion) {
+    case SMI_API::InterfaceVersion::V1:
+        logger::info("SMI_API::RequestPluginAPI returned the API singleton");
+        return static_cast<void*>(api);
+    }
+
+    logger::info("SMI_API::RequestPluginAPI requested the wrong interface version");
+    return nullptr;
 }

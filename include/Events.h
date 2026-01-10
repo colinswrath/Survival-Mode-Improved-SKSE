@@ -4,6 +4,8 @@
 #include "Needs/NeedCold.h"
 #include "Utility.h"
 
+#undef GetObject
+
 namespace Events
 {
 	static inline float Hours;
@@ -66,7 +68,7 @@ namespace Events
 		auto hunger = NeedHunger::GetSingleton();
 		auto util = Utility::GetSingleton();
 		auto player = Utility::GetPlayer();
-
+        
 		if (!hunger->CurrentlyStopped || util->forceEnableFoodPoisoning) {
 			if (hunger->Survival_FoodRawMeat->HasForm(food) || food->HasKeyword(hunger->VendorItemFoodRaw)) {
 				float diseaseResistMult = player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kResistDisease);
@@ -118,6 +120,17 @@ namespace Events
 		auto cold = NeedCold::GetSingleton();
 		auto hunger = NeedHunger::GetSingleton();
 		auto util = Utility::GetSingleton();
+
+        using DefaultObject       = RE::BGSDefaultObjectManager::DefaultObject;
+        auto dom = RE::BGSDefaultObjectManager::GetSingleton();
+
+        bool isVampire = false;
+        if (dom) {
+            auto vampGlobal = dom->GetObject<RE::TESGlobal>(DefaultObject::kPlayerIsVampireVariable);
+            if (vampGlobal) {
+                isVampire = vampGlobal->value != 0.0f;
+            }
+        }
 		
 		if (!cold->CurrentlyStopped) {
 			if (cold->Survival_FoodRestoreCold == effect) {
@@ -132,9 +145,56 @@ namespace Events
 			} else if (effect == util->DA11AbFortifyHealth) {
 				//Cannibal feed
 				hunger->DecreaseNeed(hunger->Survival_HungerRestoreMediumAmount->value);
-			}
+            }
+            else if (effect == util->Survival_FoodRestoreHungerLargeVampire && util->PlayerIsVampire())
+            {
+                //Vampire Feed
+                hunger->DecreaseNeed(hunger->Survival_HungerRestoreLargeAmount->value);
+            }
 		}
 	}
+
+    static void ProcessQuestStartStopHandler(RE::TESQuest* quest)
+    {
+        auto utility = Utility::GetSingleton();
+
+        if (std::find(utility->smQuestsToHandle.begin(), utility->smQuestsToHandle.end(), quest) != utility->smQuestsToHandle.end())
+        {
+            quest->Stop();
+        }
+    }
+
+    class OnQuestStartStopHandler : public RE::BSTEventSink<RE::TESQuestStartStopEvent>
+    {
+    public:
+        static OnQuestStartStopHandler* GetSingleton()
+        {
+            static OnQuestStartStopHandler singleton;
+            return &singleton;
+        }
+
+        RE::BSEventNotifyControl ProcessEvent(const RE::TESQuestStartStopEvent* a_event, RE::BSTEventSource<RE::TESQuestStartStopEvent>*) override
+        {
+            if (!a_event) {
+                return RE::BSEventNotifyControl::kContinue;
+            }
+
+            if (const auto quest = RE::TESForm::LookupByID<RE::TESQuest>(a_event->formID); quest) {
+                if (a_event->started)
+                {
+                    ProcessQuestStartStopHandler(quest);
+                }
+            }
+
+            return RE::BSEventNotifyControl::kContinue;
+        }
+
+        static void Register()
+        {
+            RE::ScriptEventSourceHolder* eventHolder = RE::ScriptEventSourceHolder::GetSingleton();
+            eventHolder->AddEventSink(OnQuestStartStopHandler::GetSingleton());
+        }
+    };
 
 	class OnFastTravelEndEventHandler : public RE::BSTEventSink<RE::TESFastTravelEndEvent>
 	{
@@ -329,12 +389,13 @@ namespace Events
 			if (!a_event || !a_eventSource) {
 				return RE::BSEventNotifyControl::kContinue;
 			}
+            auto util = Utility::GetSingleton();
 
-			if(a_event->menuName == RE::MapMenu::MENU_NAME && Utility::GetSingleton()->DisableFastTravel) {
-				if (a_event->opening && Utility::IsFastTravelEnabled() && Utility::DisableFTCheck()) {
-					Utility::EnableFastTravel(false);
+			if (a_event->menuName == RE::MapMenu::MENU_NAME && util->DisableFastTravel) {
+                if (a_event->opening && Utility::IsSurvivalEnabled() && Utility::IsFastTravelEnabled() && Utility::DisableFTCheck()) {
+                    Utility::EnableFastTravel(nullptr, nullptr, nullptr, false);
 				} else if (!a_event->opening) {
-					Utility::EnableFastTravel(true);	
+                    Utility::EnableFastTravel(nullptr, nullptr, nullptr, true);	
 				}
 			}
 			
@@ -358,5 +419,6 @@ namespace Events
 		OnEffectApplyEventHandler::Register();
 		OnMenuOpenCloseEventHandler::Register();
 		OnFastTravelEndEventHandler::Register();
+        OnQuestStartStopHandler::Register();
 	}
 }

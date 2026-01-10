@@ -3,6 +3,7 @@
 #include "Needs/NeedCold.h"
 #include "Needs/NeedExhaustion.h"
 #include "Needs/NeedHunger.h"
+#include "AvPenaltyManager.h"
 #include "Utility.h"
 
 #undef AddForm
@@ -10,23 +11,23 @@
 class FormLoader
 {
 public:
-    const std::string_view smiPluginName                 = "SurvivalModeImproved.esp";
-    const std::string_view smEslPluginName               = "ccqdrsse001-survivalmode.esl";
-    const std::string_view campingEslPluginName          = "ccqdrsse002 - firewood.esl";
-    const std::string_view causePluginName               = "ccbgssse067-daedinv.esm";
-    const std::string_view updatePluginName              = "Update.esm";
-    const std::string_view skyrimPluginName              = "Skyrim.esm";
-    const std::string_view dgPluginName                  = "Dawnguard.esm";
-    const std::string_view hfPluginName                  = "HearthFires.esm";
-    const std::string_view campfirePluginName            = "Campfire.esm";
-    const std::string_view campsitePluginName            = "Campsite.esp";
-    const std::string_view obsidianPluginName            = "ObsidianWeathers.esp";
-    const std::string_view undeathPluginName             = "Undeath.esp";
-    const std::string_view transcendenceName             = "The Path of Transcendence.esp";
-    const std::string_view brumaPluginName               = "BSHeartland.esm";
-    const std::string_view wyrmstoothPluginName          = "Wyrmstooth.esp";
-    const std::string_view simonrimHealthRegenPluginName = "BladeAndBluntHealth.esp";
-    const std::string_view starfrostPluginName           = "Starfrost.esp";
+    const std::string smiPluginName                 = "SurvivalModeImproved.esp";
+    const std::string smEslPluginName               = "ccqdrsse001-survivalmode.esl";
+    const std::string campingEslPluginName          = "ccqdrsse002-firewood.esl";
+    const std::string causePluginName               = "ccbgssse067-daedinv.esm";
+    const std::string updatePluginName              = "Update.esm";
+    const std::string skyrimPluginName              = "Skyrim.esm";
+    const std::string dgPluginName                  = "Dawnguard.esm";
+    const std::string hfPluginName                  = "HearthFires.esm";
+    const std::string campfirePluginName            = "Campfire.esm";
+    const std::string campsitePluginName            = "Campsite.esp";
+    const std::string obsidianPluginName            = "ObsidianWeathers.esp";
+    const std::string undeathPluginName             = "Undeath.esp";
+    const std::string transcendenceName             = "The Path of Transcendence.esp";
+    const std::string brumaPluginName               = "BSHeartland.esm";
+    const std::string wyrmstoothPluginName          = "Wyrmstooth.esp";
+    const std::string starfrostPluginName           = "Starfrost.esp";
+    const std::string bnbPluginName                 = "BladeAndBlunt.esp";
 
     static FormLoader* GetSingleton()
     {
@@ -65,6 +66,8 @@ public:
         hungerSystem->ActorValPenaltyAttribute = RE::ActorValue::kStamina;
         hungerSystem->NeedPenaltyUIGlobal      = dataHandler->LookupForm(RE::FormID(0x2EDF), updatePluginName)->As<RE::TESGlobal>();
         hungerSystem->NeedAvPenDisabled        = dataHandler->LookupForm(RE::FormID(0xF2C), smiPluginName)->As<RE::TESGlobal>();
+        hungerSystem->SMI_HungerRateMult       = dataHandler->LookupForm(RE::FormID(0x0B6F30), updatePluginName)->As<RE::TESGlobal>();
+        hungerSystem->SMI_WerewolfHungerMult   = dataHandler->LookupForm(RE::FormID(0xF32), smiPluginName)->As<RE::TESGlobal>();
 
         hungerSystem->NeedSpell0 = dataHandler->LookupForm(RE::FormID(0x876), smEslPluginName)->As<RE::SpellItem>();
         hungerSystem->NeedSpell1 = dataHandler->LookupForm(RE::FormID(0x87E), smEslPluginName)->As<RE::SpellItem>();
@@ -138,6 +141,7 @@ public:
         fatigueSystem->ActorValPenaltyAttribute = RE::ActorValue::kMagicka;
         fatigueSystem->NeedPenaltyUIGlobal      = dataHandler->LookupForm(RE::FormID(0x2EE0), updatePluginName)->As<RE::TESGlobal>();
         fatigueSystem->NeedAvPenDisabled        = dataHandler->LookupForm(RE::FormID(0xF2B), smiPluginName)->As<RE::TESGlobal>();
+        fatigueSystem->SMI_ExhaustionRateMult   = dataHandler->LookupForm(RE::FormID(0x0B6F31), updatePluginName)->As<RE::TESGlobal>();
 
         fatigueSystem->WellRested = RE::TESForm::LookupByID(RE::FormID(0x000FB984))->As<RE::SpellItem>();
         fatigueSystem->Rested     = RE::TESForm::LookupByID(RE::FormID(0x000FB981))->As<RE::SpellItem>();
@@ -283,6 +287,22 @@ public:
     void LoadMiscForms(RE::TESDataHandler* dataHandler)
     {
         auto utility                  = Utility::GetSingleton();
+        auto avPenManager             = AvPenaltyManager::GetSingleton();
+
+        avPenManager->HealthUIGlobal = dataHandler->LookupForm(RE::FormID(0x2EDE), updatePluginName)->As<RE::TESGlobal>();
+        avPenManager->StaminaUIGlobal = dataHandler->LookupForm(RE::FormID(0x2EDF), updatePluginName)->As<RE::TESGlobal>();
+        avPenManager->MagickaUIGlobal = dataHandler->LookupForm(RE::FormID(0x2EE0), updatePluginName)->As<RE::TESGlobal>();
+
+        utility->smQuestsToHandle.push_back(dataHandler->LookupForm(RE::FormID(0x894), smEslPluginName)->As<RE::TESQuest>()); //Hunger
+        utility->smQuestsToHandle.push_back(dataHandler->LookupForm(RE::FormID(0x896), smEslPluginName)->As<RE::TESQuest>()); //Cold
+        utility->smQuestsToHandle.push_back(dataHandler->LookupForm(RE::FormID(0x899), smEslPluginName)->As<RE::TESQuest>()); // Exhaustion
+        utility->smQuestsToHandle.push_back(dataHandler->LookupForm(RE::FormID(0x899), smEslPluginName)->As<RE::TESQuest>()); // Exhaustion
+        utility->smQuestsToHandle.push_back(dataHandler->LookupForm(RE::FormID(0x898), smEslPluginName)->As<RE::TESQuest>()); // Main
+        utility->smQuestsToHandle.push_back(dataHandler->LookupForm(RE::FormID(0x8C5), smEslPluginName)->As<RE::TESQuest>()); // Movement Update
+        utility->smQuestsToHandle.push_back(dataHandler->LookupForm(RE::FormID(0x895), smEslPluginName)->As<RE::TESQuest>()); // Heat Check
+        utility->smQuestsToHandle.push_back(dataHandler->LookupForm(RE::FormID(0x855), smEslPluginName)->As<RE::TESQuest>()); // Heat Source Locator
+        utility->smQuestsToHandle.push_back(dataHandler->LookupForm(RE::FormID(0x897), smEslPluginName)->As<RE::TESQuest>()); // player Info
+
         utility->Survival_ModeToggle  = dataHandler->LookupForm(RE::FormID(0x828), smEslPluginName)->As<RE::TESGlobal>();
         utility->Survival_ModeEnabled = dataHandler->LookupForm(RE::FormID(0x826), smEslPluginName)->As<RE::TESGlobal>();
 
@@ -328,6 +348,7 @@ public:
         utility->WerewolfFeedRestoreHealth           = dataHandler->LookupForm(RE::FormID(0xEC356), skyrimPluginName)->As<RE::EffectSetting>();
         utility->DA11AbFortifyHealth                 = dataHandler->LookupForm(RE::FormID(0x10F814), skyrimPluginName)->As<RE::EffectSetting>();
         utility->Survival_FireCloakFreezingWaterDesc = dataHandler->LookupForm(RE::FormID(0x2EE9), updatePluginName)->As<RE::EffectSetting>();
+        utility->Survival_FoodRestoreHungerLargeVampire = dataHandler->LookupForm(RE::FormID(0x831), smEslPluginName)->As<RE::EffectSetting>();
         utility->RelationshipMarriageFIN             = dataHandler->LookupForm(RE::FormID(0x21382), skyrimPluginName)->As<RE::TESQuest>();
         utility->BYOHRelationshipAdoption            = dataHandler->LookupForm(RE::FormID(0x42B4), hfPluginName)->As<RE::TESQuest>();
         RE::SpellItem* regionInfoSpell               = dataHandler->LookupForm(RE::FormID(0x87F), smEslPluginName)->As<RE::SpellItem>();
@@ -524,9 +545,37 @@ public:
             }
         }
 
+        //BnB/Starfrost
         if (utility->LookupLoadedModByName(starfrostPluginName) || utility->LookupLoadedLightModByName(starfrostPluginName)) {
             logger::info("Starfrost Installed");
             utility->starfrostInstalled = true;
+            auto sfVerForm = dataHandler->LookupForm(RE::FormID(0xD82), starfrostPluginName);
+            float sfFloatVer            = 0.0f;
+            if (sfVerForm) {
+                auto sfVer = sfVerForm->As<RE::TESGlobal>();
+                sfFloatVer = sfVer->value;
+                logger::info("Current starfrost version from global {}", sfVer->value);
+            }
+
+            std::string sfStr           = std::to_string(sfFloatVer);
+            logger::info("Parsing starfrost version {}",sfStr);
+            auto        currentVersions = Utility::ParseVersionString(sfStr);
+            utility->starfrostVer       = ModVersion(currentVersions);
+
+            logger::info("Parsed starfrost version {}", utility->starfrostVer.getVersionAsString());
+
+            utility->StarfrostHunger1   = dataHandler->LookupForm(RE::FormID(0x84E), starfrostPluginName)->As<RE::SpellItem>();
+            utility->StarfrostHunger2   = dataHandler->LookupForm(RE::FormID(0x856), starfrostPluginName)->As<RE::SpellItem>();
+            utility->StarfrostHunger3   = dataHandler->LookupForm(RE::FormID(0x857), starfrostPluginName)->As<RE::SpellItem>();
+        }
+
+        auto bnbInjury1 = dataHandler->LookupForm(RE::FormID(0x84A), bnbPluginName);
+        if (bnbInjury1) {
+            utility->BnBInjury1 = bnbInjury1->As<RE::SpellItem>();
+            utility->BnBInjury2 = dataHandler->LookupForm(RE::FormID(0x84B), bnbPluginName)->As<RE::SpellItem>();
+            utility->BnBInjury3 = dataHandler->LookupForm(RE::FormID(0x84D), bnbPluginName)->As<RE::SpellItem>();
+            utility->MAG_InjuriesSMOnly = dataHandler->LookupForm(RE::FormID(0x88E), bnbPluginName)->As<RE::TESGlobal>();
+            utility->MAG_InjuriesAndRest  = dataHandler->LookupForm(RE::FormID(0x83F), bnbPluginName)->As<RE::TESGlobal>();
         }
 
         if (utility->LookupLoadedLightModByName(campingEslPluginName)) {
@@ -679,14 +728,6 @@ public:
             if (deadLandsLoc && !utility->Survival_OblivionAreas->HasForm(deadLandsLoc)) {
                 utility->Survival_OblivionLocations->AddForm(deadLandsLoc);
             }
-        }
-
-        utility->SMI_SimonrimHealthRegenDetected = dataHandler->LookupForm(RE::FormID(0xD25), smiPluginName)->As<RE::TESGlobal>();
-        if (utility->LookupLoadedModByName(simonrimHealthRegenPluginName) || utility->LookupLoadedLightModByName(simonrimHealthRegenPluginName)) {
-            utility->SMI_SimonrimHealthRegenDetected->value = 1.0f;
-        }
-        else {
-            utility->SMI_SimonrimHealthRegenDetected->value = 0.0f;
         }
     }
 

@@ -4,17 +4,26 @@
 #include "Needs/NeedExhaustion.h"
 #include "Needs/NeedCold.h"
 #include "Utility.h"
+#include "AvPenaltyManager.h"
 
 std::int32_t SurvivalMode::OnUpdate()
 { 
 	if (!Utility::GetUI()->GameIsPaused()) {
 		
 		if (g_deltaTime > 0) {
-			lastTime += g_deltaTime;
-			if (lastTime >= 1.0f) {
+			lastMainTime += g_deltaTime;
+            lastAvTime += g_deltaTime;
+
+			if (lastMainTime >= 1.0f) {
 				SurvivalModeLoopUpdate();
-				lastTime = 0;
+				lastMainTime = 0.0f;
 			}
+
+            if (lastAvTime >= 0.5f) {
+                AvPenaltyCheckUpdate();
+                MiscStatusChecks();
+                lastAvTime = 0.0f;
+            }
 		}
 	}
 
@@ -37,9 +46,35 @@ void SurvivalMode::SurvivalModeLoopUpdate()
 	}
 }
 
+void SurvivalMode::AvPenaltyCheckUpdate()
+{
+    auto avMan = AvPenaltyManager::GetSingleton();
+    auto utility = Utility::GetSingleton();
+
+    if (!utility->IsSurvivalEnabled() || !utility->SurvivalToggle()) {
+        avMan->RemoveAllAvPenalties();
+    }
+    else {
+        avMan->UpdateActorValuePenalties();
+    }
+}
+
+void SurvivalMode::MiscStatusChecks()
+{
+    bool isFeeding = Utility::VampireFeedCheck();
+    if (!isFeeding && wasFeeding) {
+        // Restore hunger when done feeding
+        auto* hunger = NeedHunger::GetSingleton();
+        if (!hunger->CurrentlyStopped) {
+            hunger->DecreaseNeed(hunger->Survival_HungerRestoreLargeAmount->value);
+        }
+    }
+    wasFeeding = isFeeding;
+}
+
 void SurvivalMode::StartSurvivalMode()
 {
-	if (Utility::GetSingleton()->MQ101->IsCompleted() || (RE::ControlMap::GetSingleton()->IsMainFourControlsEnabled()))
+    if (Utility::GetSingleton()->MQ101->IsCompleted() || (RE::ControlMap::GetSingleton()->IsMainFourControlsEnabled()))
 	{
 		logger::info("Starting SM");
 		auto utility = Utility::GetSingleton();
@@ -87,7 +122,7 @@ void SurvivalMode::SendAllNeedsUpdate()
 			NeedHunger::GetSingleton()->StopNeed();
 		}
 		
-	} else if (Utility::PlayerIsLich()) {
+	} else if (Utility::PlayerIsNoNeedsRace()) {
 		NeedHunger::GetSingleton()->StopNeed();
 		NeedExhaustion::GetSingleton()->StopNeed();
 		NeedCold::GetSingleton()->StopNeed();
@@ -132,7 +167,6 @@ void SurvivalMode::SendExhaustionUpdate()
 void SurvivalMode::StopAllNeeds()
 {
 	logger::info("Stopping all needs");
-
 	NeedHunger::GetSingleton()->StopNeed();
 	NeedExhaustion::GetSingleton()->StopNeed();
 	NeedCold::GetSingleton()->StopNeed();
@@ -166,7 +200,11 @@ void SurvivalMode::OverwriteFastTravelMessage(const char* a_notification, const 
 {
 	if (!Utility::GetUI()->IsMenuOpen(RE::MapMenu::MENU_NAME) || !Utility::DisableFTCheck() || !Utility::GetSingleton()->DisableFastTravel) {
 		_OverwriteFastTravelMessage(a_notification, a_soundToPlay, a_cancelIfAlreadyQueued);
-	}
+    }
+    else if (Utility::DisableFTCheck() && Utility::GetSingleton()->DisableFastTravel)
+    {
+        _OverwriteFastTravelMessage("Fast travel is disabled in survival mode!", a_soundToPlay, a_cancelIfAlreadyQueued);
+    }
 }
 
 void SurvivalMode::AddPlayerSpellPerks() 
@@ -179,9 +217,7 @@ void SurvivalMode::AddPlayerSpellPerks()
 	if (!Utility::GetSingleton()->DisableCarryWeightPenalty) {
 		player->AddSpell(utility->Survival_abLowerCarryWeightSpell);
 	}
-	if (utility->SMI_SimonrimHealthRegenDetected->value == 0.0) {
-		player->AddSpell(utility->Survival_abLowerRegenSpell);
-	}
+	player->AddSpell(utility->Survival_abLowerRegenSpell);
 	player->AddSpell(utility->Survival_abRacialNord);
 	player->AddSpell(utility->Survival_abRacialAltmer);
 	player->AddSpell(utility->Survival_abRacialOrc);

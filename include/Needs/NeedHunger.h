@@ -21,6 +21,9 @@ public:
 	RE::TESGlobal* Survival_HungerRestoreSmallAmount;
 	RE::TESGlobal* Survival_HungerRestoreVerySmallAmount;
 	RE::TESGlobal* Survival_HelpShown_Hunger;
+
+	RE::TESGlobal* SMI_HungerRateMult;
+    RE::TESGlobal* SMI_WerewolfHungerMult;
 	
 	RE::TESGlobal* Survival_AfflictionHungerChance;
 	RE::SpellItem* Survival_AfflictionWeakened;
@@ -71,7 +74,6 @@ public:
 			RemoveNeedEffects();
 			SetHungerFoodItemDesc();
 			RemoveAfflictions();
-			RemoveAttributePenalty();
 			CurrentNeedStage->value = -1;
 		}
 	}
@@ -113,6 +115,12 @@ public:
 			amount = amount * (1.0f - Survival_RacialBonusMinor->value);
 		}
 
+        if (Utility::PlayerIsWerewolf()) {
+            amount = amount * SMI_WerewolfHungerMult->value;
+        }
+
+        amount *= SMI_HungerRateMult->value;
+
 		return amount;
 	}
 
@@ -121,23 +129,23 @@ public:
 		RemoveNeedEffects();
 		float stage = CurrentNeedStage->value;
 
-		if (stage == 0) {
-			NotifyAddEffect(NeedMessage0, NeedMessage0, NeedSpell0);
-		} else if (stage == 1) {
-			NotifyAddEffect(NeedMessage1, NeedMessage1Decreasing, NeedSpell1, increasing);
-		} else if (stage == 2) {
-			NotifyAddEffect(NeedMessage2, NeedMessage2Decreasing, NeedSpell2, increasing);
-			PlaySFX(Survival_HungerASD, Survival_HungerASD);
-		} else if (stage == 3) {
-			NotifyAddEffect(NeedMessage3, NeedMessage3Decreasing, NeedSpell3, increasing);
-			PlaySFX(Survival_HungerBSD, Survival_HungerBSD);
-		} else if (stage == 4) {
-			NotifyAddEffect(NeedMessage4, NeedMessage4Decreasing, NeedSpell4, increasing);
-			PlaySFX(Survival_HungerCSD, Survival_HungerCSD);
-		} else if (stage == 5) {
-			NotifyAddEffect(NeedMessage5, NeedMessage5, NeedSpell5);
-			PlaySFX(Survival_HungerDSD, Survival_HungerDSD);
-		}
+		    if (stage == 0) {
+			    NotifyAddEffect(NeedMessage0, NeedMessage0, NeedSpell0);
+		    } else if (stage == 1) {
+			    NotifyAddEffect(NeedMessage1, NeedMessage1Decreasing, NeedSpell1, increasing);
+		    } else if (stage == 2) {
+			    NotifyAddEffect(NeedMessage2, NeedMessage2Decreasing, NeedSpell2, increasing);
+			    PlaySFX(Survival_HungerASD, Survival_HungerASD);
+		    } else if (stage == 3) {
+			    NotifyAddEffect(NeedMessage3, NeedMessage3Decreasing, NeedSpell3, increasing);
+			    PlaySFX(Survival_HungerBSD, Survival_HungerBSD);
+		    } else if (stage == 4) {
+			    NotifyAddEffect(NeedMessage4, NeedMessage4Decreasing, NeedSpell4, increasing);
+			    PlaySFX(Survival_HungerCSD, Survival_HungerCSD);
+		    } else if (stage == 5) {
+			    NotifyAddEffect(NeedMessage5, NeedMessage5, NeedSpell5);
+			    PlaySFX(Survival_HungerDSD, Survival_HungerDSD);
+		    }
 
 		if (stage >= 2 && Survival_HelpShown_Hunger->value == 0.0f) {
 			Utility::ShowNotification(Survival_HelpHungerHigh, true);
@@ -154,7 +162,6 @@ public:
 		float newNeedLevel = std::clamp(CurrentNeedValue->value - amount, minValue, NeedMaxValue->value);
 		CurrentNeedValue->value = newNeedLevel * GetGutwormMult();
 		SetNeedStage(false);
-		ApplyAttributePenalty();
 	}
 
 	void RemoveAfflictions() override

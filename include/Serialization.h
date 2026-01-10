@@ -22,6 +22,12 @@ namespace Serialization
 		auto player = Utility::GetPlayer();
 		auto util = Utility::GetSingleton();
 
+        //Stop SM quests
+        for(auto* quest: util->smQuestsToHandle)
+        {
+            quest->Stop();
+        }
+
 		if (util->AutoStart) {
 			if (util->Survival_ModeCanBeEnabled->value == 0.0f) {  //This will only be 0 in the event you havent started SMI yet
 				util->Survival_ModeToggle->value = 1.0f;
@@ -47,12 +53,8 @@ namespace Serialization
 			}
 		}
 
-		if (util->SMI_SimonrimHealthRegenDetected->value == 1.0) {
-			player->RemoveSpell(util->Survival_abLowerRegenSpell);
-		} else {
-			if (!player->HasSpell(util->Survival_abLowerRegenSpell)) {
-				player->AddSpell(util->Survival_abLowerRegenSpell);
-			}
+		if (!player->HasSpell(util->Survival_abLowerRegenSpell)) {
+			player->AddSpell(util->Survival_abLowerRegenSpell);
 		}
 
 		hunger->SetHungerFoodItemDesc();
@@ -112,10 +114,6 @@ namespace Serialization
 		std::uint32_t version;
 		std::uint32_t length;
 		a_skse->GetNextRecordInfo(type, version, length);
-
-		if (type != SerializationType) {
-			return;
-		}
 			
 		if(version != SerializationVersion)
 		{

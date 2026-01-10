@@ -1,5 +1,6 @@
 #pragma once
 
+//TODO - This file needs a major rework/split
 enum class AREA_TYPE
 {
 	kAreaTypeChillyInterior = -1,
@@ -8,6 +9,111 @@ enum class AREA_TYPE
 	kAreaTypeCool = 2,
 	kAreaTypeFreezing = 3,
 	kAreaTypeReach = 4
+};
+
+namespace HashUtility
+{
+    static constexpr uint32_t hash(const char* data, const size_t size) noexcept
+    {
+        uint32_t hash = 5381;
+
+        for (const char* c = data; c < data + size; ++c) {
+            hash = ((hash << 5) + hash) + (unsigned char)*c;
+        }
+
+        return hash;
+    }
+
+    constexpr uint32_t operator"" _h(const char* str, size_t size) noexcept
+    {
+        return hash(str, size);
+    }
+
+}
+
+class ModVersion
+{
+public:
+    int Major;
+    int Minor;
+    int Patch;
+
+    ModVersion(int major = 0, int minor = 0, int patch = 0) : Major(major), Minor(minor), Patch(patch) {}
+
+    ModVersion(const std::vector<std::string>& versionVec)
+    {
+        if (versionVec.size() != 3) {
+            logger::info("Invalid vector version size (needs to be 3). Defaulting to 0.0.0");
+            Major = 0;
+            Minor = 0;
+            Patch = 0;
+            return;
+        }
+        Major = std::stoi(versionVec[0]);
+        Minor = std::stoi(versionVec[1]);
+        Patch = std::stoi(versionVec[2]);
+    }
+
+    ModVersion& operator=(const ModVersion& other)
+    {
+        if (this != &other) {
+            Major = other.Major;
+            Minor = other.Minor;
+            Patch = other.Patch;
+        }
+        return *this;
+    }
+
+    bool operator>(const ModVersion& other) const
+    {
+        if (Major > other.Major)
+            return true;
+        if (Major < other.Major)
+            return false;
+        if (Minor > other.Minor)
+            return true;
+        if (Minor < other.Minor)
+            return false;
+        return Patch > other.Patch;
+    }
+
+    bool operator<(const ModVersion& other) const
+    {
+        if (Major < other.Major)
+            return true;
+        if (Major > other.Major)
+            return false;
+        if (Minor < other.Minor)
+            return true;
+        if (Minor > other.Minor)
+            return false;
+        return Patch < other.Patch;
+    }
+
+    bool operator>=(const ModVersion& other) const { return (*this > other) || (*this == other); }
+
+    bool operator<=(const ModVersion& other) const { return (*this < other) || (*this == other); }
+
+    bool operator==(const ModVersion& other) const { return Major == other.Major && Minor == other.Minor && Patch == other.Patch; }
+
+    std::string getVersionAsString() const
+    {
+        std::ostringstream oss;
+        oss << Major << '.' << Minor << '.' << Patch;
+        return oss.str();
+    }
+
+    std::vector<int> getVersionAsVector() const { return { Major, Minor, Patch }; }
+
+    bool IsEmptyVersion() const
+    {
+        if (Major == 0 && Minor == 0 && Patch == 0) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 };
 
 class Utility
@@ -21,7 +127,6 @@ public:
 	RE::TESGlobal* SMI_HungerShouldBeEnabled;
 	RE::TESGlobal* SMI_ColdShouldBeEnabled;
 	RE::TESGlobal* SMI_ExhaustionShouldBeEnabled;
-	RE::TESGlobal* SMI_SimonrimHealthRegenDetected;
 
 	RE::SpellItem* Survival_abLowerCarryWeightSpell;
 	RE::SpellItem* Survival_abLowerRegenSpell;
@@ -35,6 +140,17 @@ public:
 	RE::SpellItem* Survival_abRacialKhajiitRawMeat;
 	RE::SpellItem* Survival_abWarmthTorch;
 	RE::SpellItem* Survival_OverencumberedSpell;
+
+	RE::SpellItem* BnBInjury1;
+    RE::SpellItem* BnBInjury2;
+    RE::SpellItem* BnBInjury3;
+
+    RE::TESGlobal* MAG_InjuriesSMOnly;
+    RE::TESGlobal* MAG_InjuriesAndRest;
+
+    RE::SpellItem* StarfrostHunger1;
+    RE::SpellItem* StarfrostHunger2;
+    RE::SpellItem* StarfrostHunger3;
 
 	RE::SpellItem* Survival_DiseaseBrownRot;
 	RE::SpellItem* Survival_DiseaseGreenspore;
@@ -81,7 +197,8 @@ public:
 
 	RE::EffectSetting* WerewolfFeedRestoreHealth;
 	RE::EffectSetting* DA11AbFortifyHealth;
-	RE::EffectSetting* Survival_FireCloakFreezingWaterDesc;
+    RE::EffectSetting* Survival_FireCloakFreezingWaterDesc;
+    RE::EffectSetting* Survival_FoodRestoreHungerLargeVampire;
 
 	RE::TESCondition* IsVampireConditions;
 	RE::TESCondition* IsWerewolfConditions;
@@ -101,6 +218,8 @@ public:
 	RE::TESQuest* RelationshipMarriageFIN;
 	RE::TESQuest* UnboundQuest;
 	RE::TESQuest* BYOHRelationshipAdoption;
+
+    std::vector<RE::TESQuest*> smQuestsToHandle;
 
     RE::TESRegion* WeatherMountains;
     RE::TESRegion* WeatherSnow;
@@ -133,6 +252,8 @@ public:
 	uintptr_t EnableFtAddress;
 	uintptr_t IsFtEnabledAddress;
 
+    ModVersion starfrostVer;
+
 	bool WasInOblivion = false;
 	bool DisableFastTravel = true;
 	bool AutoStart = true;
@@ -146,7 +267,12 @@ public:
 	bool vampireCold = true;
 	bool vampireExhaustion = true;
 
+    bool  handleInjuries      = false;
+
 	float MaxAvPenaltyPercent = 1.0f;
+
+    float MainUpdateInterval = 1.0f;
+    float AvUpdateInterval   = 0.5f;
 
 	//Global Load overwrite variables
 	float LoadColdStage1Val = 0.0f;
@@ -184,6 +310,10 @@ public:
 	float coldAfflictionChance = 0.0f;
 	float hungerAfflictionChance = 0.0f;
 	float exhaustionAfflictionChance = 0.0f;
+
+    float injury1AVPercent = 0.0f;
+    float injury2AVPercent = 0.0f;
+    float injury3AVPercent = 0.0f;
 
 	float exhaustionRestorePerHour = 0.0f;
 
@@ -292,6 +422,36 @@ public:
 		}
 	}
 
+    void ClearSurvivalModeQuestScripts()
+    {
+        logger::info("Searching for attached sm quest scripts");
+
+        for(auto* quest: smQuestsToHandle)
+        {
+            DetachQuestScripts(quest);
+        }
+    }
+
+    static void DetachQuestScripts(RE::TESQuest* quest)
+    {
+        auto       vm     = RE::BSScript::Internal::VirtualMachine::GetSingleton();
+        const auto policy = vm ? vm->GetObjectHandlePolicy() : nullptr;
+
+        const auto          handle = policy->GetHandleForObject(quest->GetFormType(), quest);
+
+        RE::BSSpinLockGuard locker(vm->attachedScriptsLock);
+        if (const auto it = vm->attachedScripts.find(handle); it != vm->attachedScripts.end()) {
+            for (auto& script : it->second) {
+                if (auto typeInfo = script ? script->GetTypeInfo() : nullptr) {
+                    logger::info("Attached script found. Clearing {}", typeInfo->name.c_str());
+                }
+            }
+        }
+
+        vm->ResetAllBoundObjects(handle);
+        vm->GetObjectBindPolicy()->bindInterface->RemoveAllBoundObjects(handle);
+    }
+
 	bool SurvivalToggle()
 	{
 		return Survival_ModeToggle->value;
@@ -342,8 +502,8 @@ public:
 	static void RemoveSurvivalDiseases()
 	{
 		auto util = Utility::GetSingleton();
-		util->Survival_SurvivalDiseases->ForEachForm([&](RE::TESForm& a_form) {
-			if (auto disease = a_form.As<RE::SpellItem>()) {
+		util->Survival_SurvivalDiseases->ForEachForm([&](RE::TESForm* a_form) {
+			if (auto disease = a_form->As<RE::SpellItem>()) {
 				Utility::GetPlayer()->RemoveSpell(disease);
 			}
 			return RE::BSContainer::ForEachResult::kContinue;
@@ -374,7 +534,17 @@ public:
 		return util->IsVampireConditions->IsTrue(GetPlayer(), nullptr);
 	}
 
-	static bool PlayerIsLich()
+    static bool VampireFeedCheck()
+    {
+        auto* package = Utility::GetPlayer()->GetCurrentPackage();
+
+        if (package && package->packData.packType == RE::PACKAGE_PROCEDURE_TYPE::kVampireFeed) {
+            return true;
+        }
+        return false;
+    }
+
+	static bool PlayerIsNoNeedsRace()
 	{
 		bool lich = false;
 		auto util = Utility::GetSingleton();
@@ -401,7 +571,7 @@ public:
 		auto relMarriageQuest = Utility::GetSingleton()->RelationshipMarriageFIN;
 		auto interestString = RE::BSFixedString("LoveInterest");
 
-		auto aliases = relMarriageQuest->aliases;
+		auto& aliases = relMarriageQuest->aliases;
 		RE::BGSBaseAlias* loveInterestBase = nullptr;
 
 		for (auto alias : aliases) {
@@ -443,7 +613,7 @@ public:
 		auto child1String = RE::BSFixedString("Child1");
 		auto child2String = RE::BSFixedString("Child2");
 
-		auto aliases = adoptionQuest->aliases;
+		auto& aliases = adoptionQuest->aliases;
 
 		RE::BGSBaseAlias* child1Base = nullptr;
 		RE::BGSBaseAlias* child2Base = nullptr;
@@ -509,13 +679,15 @@ public:
 		auto util = Utility::GetSingleton();
 
 		bool nearWellRested = false;
-		RE::TES::GetSingleton()->ForEachReferenceInRange(player, 300.0f, [&](RE::TESObjectREFR& b_ref) {
-			if (!b_ref.IsDisabled()) {
-				if (const auto base = b_ref.GetBaseObject(); base) {
-					if (util->SMI_WellRestedObjectsList->HasForm(base)) {
-						nearWellRested = true;
-						return RE::BSContainer::ForEachResult::kStop;
-					}
+		RE::TES::GetSingleton()->ForEachReferenceInRange(player, 300.0f, [&](RE::TESObjectREFR* b_ref) {
+			if (b_ref && !b_ref->IsDisabled() && b_ref->Is3DLoaded()) {
+				if (const auto base = b_ref->GetBaseObject(); base) {
+                    if (base) {
+					    if (util->SMI_WellRestedObjectsList->HasForm(base)) {
+						    nearWellRested = true;
+						    return RE::BSContainer::ForEachResult::kStop;
+					    }
+                    }
 				}
 			}
 			return RE::BSContainer::ForEachResult::kContinue;
@@ -609,11 +781,11 @@ public:
 		return func(actor, spell, target);
 	}
 
-	static void EnableFastTravel(bool a_enable)
+	static void EnableFastTravel(void* a1, void* a2, void* a3, bool a_enable)
 	{
 		using func_t = decltype(&Utility::EnableFastTravel);
 		REL::Relocation<func_t> func{ Utility::GetSingleton()->EnableFtAddress };
-		return func(a_enable);
+        return func(a1, a2, a3, a_enable);
 	}
 
 	static bool IsFastTravelEnabled()
@@ -641,5 +813,42 @@ public:
             }
         }
         return nullptr;
+    }
+
+    static std::vector<std::string> split(const std::string& s, char delimiter)
+    {
+        std::vector<std::string> tokens;
+        std::string              token;
+        std::istringstream       tokenStream(s);
+        while (std::getline(tokenStream, token, delimiter)) {
+            tokens.push_back(token);
+        }
+        return tokens;
+    }
+
+    static std::vector<std::string> TokenizeString(const std::string& s)
+    {
+        std::vector<std::string> tokens;
+        tokens.reserve(s.size());
+
+        for (char c : s) {
+            tokens.emplace_back(1, c);
+        }
+
+        return tokens;
+    }
+
+    static std::vector<std::string> ParseVersionString(const std::string& str)
+    {
+        std::vector<std::string> version;
+        version = split(str, '.');
+
+        if (version.size() == 2) {
+            return TokenizeString(version[0]);
+        }
+        else if (version.size() != 3) {
+            logger::error("Unable to parse MAJOR.MINOR.PATCH from {}", str);
+        }
+        return version;
     }
 };

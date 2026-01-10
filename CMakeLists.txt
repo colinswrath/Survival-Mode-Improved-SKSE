@@ -3,12 +3,12 @@ message("Using toolchain file ${CMAKE_TOOLCHAIN_FILE}.")
 
 project(
   SurvivalModeImproved
-  VERSION 1.5.2
+  VERSION 1.6.0
   LANGUAGES CXX
 )
 
 #Enable for 1130 changes
-set(ENABLE_SKYRIMAE1130 OFF)
+set(SKYRIM_SUPPORT_AE ON)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -116,7 +116,7 @@ else()
   set(BUILD_NAME Release)
 endif()
 
-if(ENABLE_SKYRIMAE1130)
+if(SKYRIM_SUPPORT_AE)
 	message("\tBuilding 1130")
   set(BUILD_NAME ${BUILD_NAME}1130)
 endif()
