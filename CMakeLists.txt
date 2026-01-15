@@ -8,7 +8,7 @@ project(
 )
 
 #Enable for 1130 changes
-set(SKYRIM_SUPPORT_AE ON)
+set(SKYRIM_SUPPORT_AE OFF)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

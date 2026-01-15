@@ -148,10 +148,6 @@ public:
     RE::TESGlobal* MAG_InjuriesSMOnly;
     RE::TESGlobal* MAG_InjuriesAndRest;
 
-    RE::SpellItem* StarfrostHunger1;
-    RE::SpellItem* StarfrostHunger2;
-    RE::SpellItem* StarfrostHunger3;
-
 	RE::SpellItem* Survival_DiseaseBrownRot;
 	RE::SpellItem* Survival_DiseaseGreenspore;
 	
