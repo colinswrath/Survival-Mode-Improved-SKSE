@@ -24,6 +24,7 @@ public:
 
 	RE::TESGlobal* SMI_HungerRateMult;
     RE::TESGlobal* SMI_WerewolfHungerMult;
+    RE::TESGlobal* SMI_VampireHungerMult;
 	
 	RE::TESGlobal* Survival_AfflictionHungerChance;
 	RE::SpellItem* Survival_AfflictionWeakened;
@@ -116,7 +117,10 @@ public:
 		}
 
         if (Utility::PlayerIsWerewolf()) {
-            amount = amount * SMI_WerewolfHungerMult->value;
+            amount *= SMI_WerewolfHungerMult->value;
+        }
+        else if (Utility::PlayerIsVampire()) {
+            amount *= SMI_VampireHungerMult->value;
         }
 
         amount *= SMI_HungerRateMult->value;

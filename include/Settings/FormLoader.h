@@ -68,6 +68,7 @@ public:
         hungerSystem->NeedAvPenDisabled        = dataHandler->LookupForm(RE::FormID(0xF2C), smiPluginName)->As<RE::TESGlobal>();
         hungerSystem->SMI_HungerRateMult       = dataHandler->LookupForm(RE::FormID(0x0B6F30), updatePluginName)->As<RE::TESGlobal>();
         hungerSystem->SMI_WerewolfHungerMult   = dataHandler->LookupForm(RE::FormID(0xF32), smiPluginName)->As<RE::TESGlobal>();
+        hungerSystem->SMI_VampireHungerMult   = dataHandler->LookupForm(RE::FormID(0xF33), smiPluginName)->As<RE::TESGlobal>();
 
         hungerSystem->NeedSpell0 = dataHandler->LookupForm(RE::FormID(0x876), smEslPluginName)->As<RE::SpellItem>();
         hungerSystem->NeedSpell1 = dataHandler->LookupForm(RE::FormID(0x87E), smEslPluginName)->As<RE::SpellItem>();
@@ -196,7 +197,8 @@ public:
 
         fatigueSystem->Survival_HelpExhaustionHigh   = dataHandler->LookupForm(RE::FormID(0x943), smEslPluginName)->As<RE::BGSMessage>();
         fatigueSystem->Survival_HelpShown_Exhaustion = dataHandler->LookupForm(RE::FormID(0x8E1), smEslPluginName)->As<RE::TESGlobal>();
-        fatigueSystem->SMI_WerewolfExhaustionBonus   = dataHandler->LookupForm(RE::FormID(0xF2F), smiPluginName)->As<RE::TESGlobal>();
+        fatigueSystem->SMI_WerewolfExhaustionMult    = dataHandler->LookupForm(RE::FormID(0xF2F), smiPluginName)->As<RE::TESGlobal>();
+        fatigueSystem->SMI_VampireExhaustionMult    = dataHandler->LookupForm(RE::FormID(0x900), smiPluginName)->As<RE::TESGlobal>();
 
         fatigueSystem->BYOHAdoptionRestedMessageMale   = dataHandler->LookupForm(RE::FormID(0x2F55), hfPluginName)->As<RE::BGSMessage>();
         fatigueSystem->BYOHAdoptionRestedMessageFemale = dataHandler->LookupForm(RE::FormID(0x4293), hfPluginName)->As<RE::BGSMessage>();
@@ -563,10 +565,6 @@ public:
             utility->starfrostVer       = ModVersion(currentVersions);
 
             logger::info("Parsed starfrost version {}", utility->starfrostVer.getVersionAsString());
-
-            utility->StarfrostHunger1   = dataHandler->LookupForm(RE::FormID(0x84E), starfrostPluginName)->As<RE::SpellItem>();
-            utility->StarfrostHunger2   = dataHandler->LookupForm(RE::FormID(0x856), starfrostPluginName)->As<RE::SpellItem>();
-            utility->StarfrostHunger3   = dataHandler->LookupForm(RE::FormID(0x857), starfrostPluginName)->As<RE::SpellItem>();
         }
 
         auto bnbInjury1 = dataHandler->LookupForm(RE::FormID(0x84A), bnbPluginName);

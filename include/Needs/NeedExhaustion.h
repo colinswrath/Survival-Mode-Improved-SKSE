@@ -20,7 +20,8 @@ public:
 	RE::TESGlobal* Survival_ExhaustionOverEncumberedMult;
 	RE::TESGlobal* Survival_AfflictionExhaustionChance;
 	RE::TESGlobal* Survival_HelpShown_Exhaustion;
-	RE::TESGlobal* SMI_WerewolfExhaustionBonus;
+    RE::TESGlobal* SMI_WerewolfExhaustionMult;
+    RE::TESGlobal* SMI_VampireExhaustionMult;
 
 	RE::TESGlobal* SMI_ExhaustionRateMult;
 
@@ -91,10 +92,15 @@ public:
 		}
 
 		if (Utility::PlayerIsWerewolf()) {
-			amount = amount * (1.0f - SMI_WerewolfExhaustionBonus->value);
-		} else if (Survival_ExhaustionResistRacesMinor->HasForm(player->GetRace())) {
+			amount *= SMI_WerewolfExhaustionMult->value;
+		}
+        else if (Utility::PlayerIsVampire()) {
+            amount *= SMI_VampireExhaustionMult->value;
+        }
+        else if (Survival_ExhaustionResistRacesMinor->HasForm(player->GetRace())) {
 			amount = amount * (1.0f - Survival_RacialBonusMinor->value);
-		} else if (Survival_ExhaustionResistRacesMajor->HasForm(player->GetRace())) {
+		}
+        else if (Survival_ExhaustionResistRacesMajor->HasForm(player->GetRace())) {
 			amount = amount * (1.0f - Survival_RacialBonusMajor->value);
 		}
 
