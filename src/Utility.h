@@ -530,7 +530,7 @@ public:
 
     static bool IsItemQuestItem(RE::AlchemyItem* eatenItem)
     {
-        auto inv = Utility::GetPlayer()->GetInventory();
+        auto inv = RE::PlayerCharacter::GetSingleton()->GetInventory(RE::TESObjectREFR::DEFAULT_INVENTORY_FILTER, true);
 
         for (const auto& [item, data] : inv) {
             auto& entryData = data.second;
