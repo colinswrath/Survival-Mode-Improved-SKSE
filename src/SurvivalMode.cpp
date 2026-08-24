@@ -183,7 +183,15 @@ void SurvivalMode::ShowNotification(RE::BGSMessage* msg)
 bool SurvivalMode::InstallUpdateHook()
 {
 	auto& trampoline = SKSE::GetTrampoline();
-	_OnUpdate = trampoline.write_call<5>(Hooks::On_Update_Hook.address(), OnUpdate);
+    if (REL::Module::IsAtLeast(SKSE::RUNTIME_SSE_1_7_99))
+    {
+	    _OnUpdate = trampoline.write_call<5>(Hooks::On_Update_Hook.address(), OnUpdate);
+    }
+    else
+    {
+        _OnUpdate = trampoline.write_call<5>(Hooks::On_Update_Hook_Pre17.address(), OnUpdate);
+    }
+
 	logger::info("Installed update hook");
 	return true;
 }
