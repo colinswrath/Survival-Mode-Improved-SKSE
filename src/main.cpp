@@ -12,6 +12,11 @@
 void InitListener(SKSE::MessagingInterface::Message* a_msg)
 {
 	switch (a_msg->type) {
+	case SKSE::MessagingInterface::kPostLoad:
+		if (REL::Module::IsVR()) {
+			Utility::GetSingleton()->InitVRAPI();
+		}
+		break;
 	case SKSE::MessagingInterface::kNewGame:
 		Serialization::LoadChecks();
         Utility::GetSingleton()->ClearSurvivalModeQuestScripts();

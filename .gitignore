@@ -1,3 +1,4 @@
 build
 *ReSharper*
 .vs
+/.idea

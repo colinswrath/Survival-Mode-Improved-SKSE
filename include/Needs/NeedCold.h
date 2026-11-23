@@ -242,7 +242,7 @@ public:
 			bool rainParticle = false;
 
 			if (precipData) {
-				auto particleType = precipData->data[static_cast<size_t>(RE::BGSShaderParticleGeometryData::DataID::kParticleType)].i;
+				auto particleType = precipData->GetSettingValue(RE::BGSShaderParticleGeometryData::DataID::kParticleType).i;
 
 				switch (particleType) {
 				case 0:

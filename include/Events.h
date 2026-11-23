@@ -124,14 +124,13 @@ namespace Events
 		auto hunger = NeedHunger::GetSingleton();
 		auto util = Utility::GetSingleton();
 
-        using DefaultObject       = RE::BGSDefaultObjectManager::DefaultObject;
         auto dom = RE::BGSDefaultObjectManager::GetSingleton();
 
         bool isVampire = false;
         if (dom) {
-            auto vampGlobal = dom->GetObject<RE::TESGlobal>(DefaultObject::kPlayerIsVampireVariable);
+            auto vampGlobal = dom->GetObject<RE::TESGlobal>(RE::DefaultObjectID::kPlayerIsVampireVariable);
             if (vampGlobal) {
-                isVampire = vampGlobal->value != 0.0f;
+                isVampire = (*vampGlobal)->value != 0.0f;
             }
         }
 		
@@ -221,8 +220,15 @@ namespace Events
 
 		static void Register()
 		{
-			RE::ScriptEventSourceHolder* eventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-			eventHolder->AddEventSink(OnFastTravelEndEventHandler::GetSingleton());
+			if (REL::Module::IsVR()) {
+				auto vrAPI = Utility::GetSingleton()->vrAPI;
+				if (!vrAPI) return;
+				RE::BSTEventSource<RE::TESFastTravelEndEvent> *eventSource = vrAPI->GetFastTravelEndEventSource();
+				eventSource->AddEventSink(OnFastTravelEndEventHandler::GetSingleton());
+			} else {
+				RE::ScriptEventSourceHolder* eventHolder = RE::ScriptEventSourceHolder::GetSingleton();
+				eventHolder->AddEventSink(OnFastTravelEndEventHandler::GetSingleton());
+			}
 		}
 	};
 
