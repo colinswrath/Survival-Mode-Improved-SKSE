@@ -742,7 +742,7 @@ public:
         utility->UISingletonAddress           = RELOCATION_ID(514178, 400327).address();
         utility->CalendarSingletonAddress     = RELOCATION_ID(514287, 400447).address();
         utility->MenuControlsSingletonAddress = RELOCATION_ID(515124, 401263).address();
-        utility->GetWarmthRatingAddress       = RELOCATION_ID(25834, 26394).address();
+        if (!REL::Module::IsVR()) utility->GetWarmthRatingAddress = RELOCATION_ID(25834, 26394).address();
         utility->DoCombatSpellApplyAddress    = RELOCATION_ID(37666, 38620).address();
         utility->EnableFtAddress              = RELOCATION_ID(54946, 55563).address();
         utility->IsFtEnabledAddress           = RELOCATION_ID(54848, 55481).address();

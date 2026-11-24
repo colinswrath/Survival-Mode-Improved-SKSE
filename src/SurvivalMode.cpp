@@ -199,7 +199,11 @@ bool SurvivalMode::InstallUpdateHook()
 bool SurvivalMode::InstallFtMessageHook()
 {
 	auto& trampoline = SKSE::GetTrampoline();
-	_OverwriteFastTravelMessage = trampoline.write_call<5>(Hooks::Fast_Travel_Message_Hook.address(), OverwriteFastTravelMessage);
+	if (REL::Module::IsVR()) {
+		_OverwriteFastTravelMessage_VR = trampoline.write_call<5>(Hooks::Fast_Travel_Message_Hook_VR.address(), OverwriteFastTravelMessage_VR);
+	} else {
+		_OverwriteFastTravelMessage = trampoline.write_call<5>(Hooks::Fast_Travel_Message_Hook.address(), OverwriteFastTravelMessage);
+	}
 	logger::info("Installed ft message hook");
 	return true;
 }
@@ -213,6 +217,20 @@ void SurvivalMode::OverwriteFastTravelMessage(const char* a_notification, const 
     {
         _OverwriteFastTravelMessage("Fast travel is disabled in survival mode!", a_soundToPlay, a_cancelIfAlreadyQueued);
     }
+}
+
+bool SurvivalMode::OverwriteFastTravelMessage_VR(RE::PlayerCharacter* player, const char** message)
+{
+    bool result = _OverwriteFastTravelMessage_VR(player, message);
+    if (result || !*message || !Utility::DisableFTCheck() || !Utility::GetSingleton()->DisableFastTravel) {
+        return result;
+    }
+
+    static auto noFastTravelSetting = RE::GameSettingCollection::GetSingleton()->GetSetting("sNoFastTravelScriptBlock");
+    if (noFastTravelSetting && *message == noFastTravelSetting->GetString()) {
+        *message = "Fast travel is disabled in survival mode!";
+    }
+    return result;
 }
 
 void SurvivalMode::AddPlayerSpellPerks() 

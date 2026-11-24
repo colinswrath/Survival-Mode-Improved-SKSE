@@ -164,6 +164,7 @@
 //Xbyak
 #include <xbyak/xbyak.h>
 
+#include "survivalmodevr_api.h"
 
 #define DLLEXPORT __declspec(dllexport)
 

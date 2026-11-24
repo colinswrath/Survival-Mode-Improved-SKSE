@@ -20,6 +20,9 @@ protected:
 	inline static void OverwriteFastTravelMessage(const char* a_notification, const char* a_soundToPlay = 0, bool a_cancelIfAlreadyQueued = true);
 	inline static REL::Relocation<decltype(OverwriteFastTravelMessage)> _OverwriteFastTravelMessage;
 
+	inline static bool OverwriteFastTravelMessage_VR(RE::PlayerCharacter* player, const char** message);
+	inline static REL::Relocation<decltype(OverwriteFastTravelMessage_VR)> _OverwriteFastTravelMessage_VR;
+
 	inline static void SurvivalModeLoopUpdate();
     inline static void AvPenaltyCheckUpdate();
     inline static void MiscStatusChecks();
